@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>lht-cmn Component Catalog</title>
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="./catalog.css">
+  <script src="../vendor/material-web-outlined-text-field.bundle.js"></script>
+  <script src="../js/components.js" defer></script>
+  <script src="./catalog.js" defer></script>
+</head>
+<body>
+  <svg width="0" height="0" aria-hidden="true" focusable="false" class="catalog-icons">
+    <symbol id="md-icon-copy" viewBox="0 0 24 24">
+      <rect x="9" y="9" width="11" height="11" rx="2"></rect>
+      <rect x="4" y="4" width="11" height="11" rx="2"></rect>
+    </symbol>
+  </svg>
+
+  <div class="catalog-shell">
+    <aside class="catalog-sidebar">
+      <div class="catalog-sidebar__inner">
+        <p class="catalog-sidebar__eyebrow">lht-cmn</p>
+        <h1 class="catalog-sidebar__title">Component Catalog</h1>
+        <p class="catalog-sidebar__lead">
+          A catalog for checking shared Web Components with live previews and copyable HTML examples.
+        </p>
+        <nav class="catalog-nav" aria-label="Component list">
+          <a href="#overview">Overview</a>
+          <a href="#lht-page-hero">lht-page-hero</a>
+          <a href="#lht-help-tooltip">lht-help-tooltip</a>
+          <a href="#lht-text-field-help">lht-text-field-help</a>
+          <a href="#lht-select-help">lht-select-help</a>
+          <a href="#lht-switch-help">lht-switch-help</a>
+          <a href="#lht-command-block">lht-command-block</a>
+          <a href="#lht-file-select">lht-file-select</a>
+          <a href="#lht-preview-output">lht-preview-output</a>
+          <a href="#lht-input-mode-toggle">lht-input-mode-toggle</a>
+          <a href="#lht-loading-overlay">lht-loading-overlay</a>
+          <a href="#lht-toast">lht-toast</a>
+          <a href="#lht-error-alert">lht-error-alert</a>
+          <a href="#lht-index-card-link">lht-index-card-link</a>
+          <a href="#lht-page-menu">lht-page-menu</a>
+        </nav>
+      </div>
+    </aside>
+
+    <main class="catalog-main">
+      <section id="overview" class="catalog-intro">
+        <p class="catalog-kicker">Reference Page</p>
+        <h2>Live previews and copy-ready examples in one place</h2>
+        <p>
+          This page is not a build artifact. It loads `lht-cmn` as regular multi-file assets so you can inspect each component directly.
+          Every section pairs a live preview with the corresponding code.
+        </p>
+        <div class="catalog-meta">
+          <div>
+            <strong>Components</strong>
+            <span>14</span>
+          </div>
+          <div>
+            <strong>CSS</strong>
+            <span>`../css/components.css`</span>
+          </div>
+          <div>
+            <strong>JS</strong>
+            <span>`../js/components.js`</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="lht-page-hero" class="catalog-section">
+        <header class="catalog-section__header">
+          <div>
+            <p class="catalog-section__tag">page head</p>
+            <h2>lht-page-hero</h2>
+          </div>
+          <p>A component for grouping a page title, subtitle, help tooltip, and menu at the top of the page.</p>
+        </header>
+        <div class="catalog-card" data-demo="hero-basic">
+          <div class="catalog-preview"></div>
+          <pre class="catalog-code"><code></code></pre>
+        </div>
+      </section>
+
+      <section id="lht-help-tooltip" class="catalog-section">
+        <header class="catalog-section__header">
+          <div>
+            <p class="catalog-section__tag">inline help</p>
+            <h2>lht-help-tooltip</h2>
+          </div>
+          <p>A basic example using `placement` and `wide`. The help content appears on hover or focus.</p>
+        </header>
+        <div class="catalog-card" data-demo="tooltip-basic">
+          <div class="catalog-preview"></div>
+          <pre class="catalog-code"><code></code></pre>
+        </div>
+      </section>
+
+      <section id="lht-text-field-help" class="catalog-section">
+        <header class="catalog-section__header">
+          <div>
+            <p class="catalog-section__tag">form input</p>
+            <h2>lht-text-field-help</h2>
+          </div>
+          <p>Examples for single-line and multi-line input. `help-text` also works as a `title` in fallback mode.</p>
+        </header>
+        <div class="catalog-card" data-demo="text-field-basic">
+          <div class="catalog-preview"></div>
+          <pre class="catalog-code"><code></code></pre>
+        </div>
+      </section>
+
+      <section id="lht-select-help" class="catalog-section">
+        <header class="catalog-section__header">
+          <div>
+            <p class="catalog-section__tag">select input</p>
+            <h2>lht-select-help</h2>
+          </div>
+          <p>The standard declarative pattern using `script[slot="options"]`.</p>
+        </header>
+        <div class="catalog-card" data-demo="select-basic">
+          <div class="catalog-preview"></div>
+          <pre class="catalog-code"><code></code></pre>
+        </div>
+      </section>
+
+      <section id="lht-switch-help" class="catalog-section">
+        <header class="catalog-section__header">
+          <div>
+            <p class="catalog-section__tag">toggle</p>
+            <h2>lht-switch-help</h2>
+          </div>
+          <p>A minimal setup using `checked` and `on-change`.</p>
+        </header>
+        <div class="catalog-card" data-demo="switch-basic">
+          <div class="catalog-preview"></div>
+          <pre class="catalog-code"><code></code></pre>
+        </div>
+        <p class="catalog-note" id="switch-status">Switch status: on</p>
+      </section>
+
+      <section id="lht-command-block" class="catalog-section">
+        <header class="catalog-section__header">
+          <div>
+            <p class="catalog-section__tag">copy ui</p>
+            <h2>lht-command-block</h2>
+          </div>
+          <p>A block that combines command display and copy actions. The example below uses dual copy buttons.</p>
+        </header>
+        <div class="catalog-card" data-demo="command-basic">
+          <div class="catalog-preview"></div>
+          <pre class="catalog-code"><code></code></pre>
+        </div>
+      </section>
+
+      <section id="lht-file-select" class="catalog-section">
+        <header class="catalog-section__header">
+          <div>
+            <p class="catalog-section__tag">file input</p>
+            <h2>lht-file-select</h2>
+          </div>
+          <p>A file picker button with selected file feedback. Event output is shown below.</p>
+        </header>
+        <div class="catalog-card" data-demo="file-select-basic">
+          <div class="catalog-preview"></div>
+          <pre class="catalog-code"><code></code></pre>
+        </div>
+        <pre class="catalog-eventlog" id="file-select-log">No file selected.</pre>
+      </section>
+
+      <section id="lht-preview-output" class="catalog-section">
+        <header class="catalog-section__header">
+          <div>
+            <p class="catalog-section__tag">preview + copy</p>
+            <h2>lht-preview-output</h2>
+          </div>
+          <p>An example that bundles preview and copy UI into a single tag. Use the buttons to replace the content.</p>
+        </header>
+        <div class="catalog-card" data-demo="preview-basic">
+          <div class="catalog-preview"></div>
+          <pre class="catalog-code"><code></code></pre>
+        </div>
+      </section>
+
+      <section id="lht-input-mode-toggle" class="catalog-section">
+        <header class="catalog-section__header">
+          <div>
+            <p class="catalog-section__tag">mode switch</p>
+            <h2>lht-input-mode-toggle</h2>
+          </div>
+          <p>A representative example with UI switching between `file` and `source` modes.</p>
+        </header>
+        <div class="catalog-card" data-demo="input-mode-basic">
+          <div class="catalog-preview"></div>
+          <pre class="catalog-code"><code></code></pre>
+        </div>
+      </section>
+
+      <section id="lht-loading-overlay" class="catalog-section">
+        <header class="catalog-section__header">
+          <div>
+            <p class="catalog-section__tag">busy state</p>
+            <h2>lht-loading-overlay</h2>
+          </div>
+          <p>Shows the overlay temporarily when the button is pressed. It also demonstrates `busy-target-id` and `disable-target-ids`.</p>
+        </header>
+        <div class="catalog-card" data-demo="loading-basic">
+          <div class="catalog-preview"></div>
+          <pre class="catalog-code"><code></code></pre>
+        </div>
+      </section>
+
+      <section id="lht-toast" class="catalog-section">
+        <header class="catalog-section__header">
+          <div>
+            <p class="catalog-section__tag">toast</p>
+            <h2>lht-toast</h2>
+          </div>
+          <p>Lets you check the behavior of `show(message, durationMs)` in place.</p>
+        </header>
+        <div class="catalog-card" data-demo="toast-basic">
+          <div class="catalog-preview"></div>
+          <pre class="catalog-code"><code></code></pre>
+        </div>
+      </section>
+
+      <section id="lht-error-alert" class="catalog-section">
+        <header class="catalog-section__header">
+          <div>
+            <p class="catalog-section__tag">alert</p>
+            <h2>lht-error-alert</h2>
+          </div>
+          <p>An example that switches among the `error`, `warning`, and `info` variants.</p>
+        </header>
+        <div class="catalog-card" data-demo="alert-basic">
+          <div class="catalog-preview"></div>
+          <pre class="catalog-code"><code></code></pre>
+        </div>
+      </section>
+
+      <section id="lht-index-card-link" class="catalog-section">
+        <header class="catalog-section__header">
+          <div>
+            <p class="catalog-section__tag">index card</p>
+            <h2>lht-index-card-link</h2>
+          </div>
+          <p>A link card for top-level index pages. It generates the internal card DOM for you.</p>
+        </header>
+        <div class="catalog-card" data-demo="index-card-basic">
+          <div class="catalog-preview"></div>
+          <pre class="catalog-code"><code></code></pre>
+        </div>
+      </section>
+
+      <section id="lht-page-menu" class="catalog-section">
+        <header class="catalog-section__header">
+          <div>
+            <p class="catalog-section__tag">page menu</p>
+            <h2>lht-page-menu</h2>
+          </div>
+          <p>A standalone example of the top-right page menu. Press the menu button to open the panel.</p>
+        </header>
+        <div class="catalog-card" data-demo="page-menu-basic">
+          <div class="catalog-preview"></div>
+          <pre class="catalog-code"><code></code></pre>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <template data-demo-template="hero-basic">
+        <div class="catalog-hero-surface">
+      <lht-page-hero
+        title="Git Branch Diff"
+        subtitle="A page concept for building branch diff commands"
+        icon="🧰"
+        help-label="Page help"
+        help-wide
+        menu-home-href="../../docs/index.html"
+        menu-home-label="Back to docs index">
+        <p>This hero bundles a title, supporting text, a help tooltip, and the top-right menu.</p>
+      </lht-page-hero>
+    </div>
+  </template>
+
+  <template data-demo-template="tooltip-basic">
+    <div class="catalog-inline-row">
+      <span class="catalog-inline-label">Label with help</span>
+      <lht-help-tooltip label="Additional details" placement="right" wide>
+        <p>This tooltip uses <code>placement="right"</code> together with <code>wide</code>.</p>
+      </lht-help-tooltip>
+    </div>
+  </template>
+
+  <template data-demo-template="text-field-basic">
+    <div class="catalog-stack">
+      <lht-text-field-help
+        field-id="catalogNameField"
+        label="Name"
+        placeholder="Your tool name"
+        help-text="Enter the display name shown to the user."
+        value="local-html-tools">
+      </lht-text-field-help>
+      <lht-text-field-help
+        field-id="catalogMemoField"
+        label="Memo"
+        rows="4"
+        help-text="The same component can also handle multi-line notes."
+        placeholder="Notes">
+      </lht-text-field-help>
+    </div>
+  </template>
+
+  <template data-demo-template="select-basic">
+    <lht-select-help
+      field-id="catalogSelectField"
+      label="Output format"
+      help-text="Choose the format you want to generate.">
+      <script type="application/json" slot="options">[
+        {"value":"html","label":"HTML","selected":true},
+        {"value":"svg","label":"SVG"},
+        {"value":"pdf","label":"PDF","disabled":true}
+      ]</script>
+    </lht-select-help>
+  </template>
+
+  <template data-demo-template="switch-basic">
+    <lht-switch-help
+      switch-id="catalogDemoSwitch"
+      label="Advanced mode"
+      help-label="Advanced mode help"
+      on-change="catalogHandleSwitchChange"
+      checked>
+      Use this toggle when you want to reveal additional inputs or advanced options.
+    </lht-switch-help>
+  </template>
+
+  <template data-demo-template="command-basic">
+    <lht-command-block command-id="catalogCommand" copy-buttons="dual"></lht-command-block>
+  </template>
+
+  <template data-demo-template="file-select-basic">
+    <lht-file-select
+      input-id="catalogFileInput"
+      button-id="catalogFileButton"
+      file-name-id="catalogFileName"
+      button-label="Choose MusicXML"
+      file-label="Selected file"
+      placeholder="No file selected yet"
+      accept=".xml,.musicxml"
+      show-file-name>
+    </lht-file-select>
+  </template>
+
+  <template data-demo-template="preview-basic">
+    <div class="catalog-stack">
+      <div class="catalog-action-row">
+        <button type="button" class="catalog-button" data-action="preview-fill">Set text</button>
+        <button type="button" class="catalog-button catalog-button--ghost" data-action="preview-clear">Clear</button>
+      </div>
+      <lht-preview-output
+        id="catalogPreviewOutput"
+        preview-id="catalogPreviewText"
+        copy-button-id="catalogPreviewCopy"
+        placeholder="Preview result will appear here."
+        preview-tag="pre">
+      </lht-preview-output>
+    </div>
+  </template>
+
+  <template data-demo-template="input-mode-basic">
+    <div class="catalog-stack">
+      <lht-input-mode-toggle
+        name="catalogInputMode"
+        group-label="Input mode"
+        file-id="catalogModeFile"
+        source-id="catalogModeSource"
+        file-label="File upload"
+        source-label="Paste source"
+        source-target-id="catalogSourcePanel"
+        file-target-id="catalogFilePanel"
+        on-change="catalogHandleModeChange">
+      </lht-input-mode-toggle>
+      <div id="catalogFilePanel" class="catalog-panel">
+        <strong>File panel</strong>
+        <p>Place your file selection UI here.</p>
+      </div>
+      <div id="catalogSourcePanel" class="catalog-panel md-hidden">
+        <strong>Source panel</strong>
+        <p>Place your source input area here.</p>
+      </div>
+      <p class="catalog-note" id="input-mode-status">Current mode: file</p>
+    </div>
+  </template>
+
+  <template data-demo-template="loading-basic">
+    <div id="catalogBusySurface" class="catalog-busy-surface">
+      <div class="catalog-action-row">
+        <button type="button" id="catalogRunLoadingDemo" class="catalog-button" data-action="loading-run">Run async demo</button>
+        <button type="button" id="catalogSecondaryAction" class="catalog-button catalog-button--ghost">Secondary action</button>
+      </div>
+      <p>Show the overlay before starting heavy work, then close it after the operation completes.</p>
+      <lht-loading-overlay
+        id="catalogLoadingOverlay"
+        text="Generating preview..."
+        busy-target-id="catalogBusySurface"
+        disable-target-ids="catalogRunLoadingDemo,catalogSecondaryAction">
+      </lht-loading-overlay>
+    </div>
+  </template>
+
+  <template data-demo-template="toast-basic">
+    <div class="catalog-stack">
+      <div class="catalog-action-row">
+        <button type="button" class="catalog-button" data-action="toast-show">Show toast</button>
+      </div>
+      <lht-toast id="catalogToast" text="Saved." duration-ms="1800"></lht-toast>
+    </div>
+  </template>
+
+  <template data-demo-template="alert-basic">
+    <div class="catalog-stack">
+      <div class="catalog-action-row">
+        <button type="button" class="catalog-button" data-action="alert-error">Error</button>
+        <button type="button" class="catalog-button catalog-button--ghost" data-action="alert-warning">Warning</button>
+        <button type="button" class="catalog-button catalog-button--ghost" data-action="alert-info">Info</button>
+        <button type="button" class="catalog-button catalog-button--ghost" data-action="alert-clear">Clear</button>
+      </div>
+      <lht-error-alert id="catalogAlert" text="Initial error message" active></lht-error-alert>
+    </div>
+  </template>
+
+  <template data-demo-template="index-card-basic">
+    <div class="catalog-card-grid">
+      <lht-index-card-link
+        href="../../docs/git/git-branch-diff-src.html"
+        icon="🧰"
+        title="Git Branch Diff"
+        desc="An example link card for a page that generates commands to compare two branches."
+        badge="git"
+        desc-lines="3">
+      </lht-index-card-link>
+      <lht-index-card-link
+        href="https://github.com/"
+        title="External Link"
+        desc="Adding the external variant shifts the presentation toward an external link style."
+        variant="external"
+        badge="ext">
+      </lht-index-card-link>
+    </div>
+  </template>
+
+  <template data-demo-template="page-menu-basic">
+    <div class="catalog-menu-surface">
+      <p class="catalog-note">Press the menu button in the top-right corner.</p>
+      <lht-page-menu home-href="../../docs/index.html" home-label="Back to docs index"></lht-page-menu>
+    </div>
+  </template>
+</body>
+</html>
