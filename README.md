@@ -8,11 +8,11 @@
 
 - `README.md`
   - 入口説明と全体像
-- `xlsx2md-spec.md`
+- `docs/xlsx2md-spec.md`
   - 人間が意図と設計方針を理解するための上位仕様
-- `xlsx2md-impl-spec.md`
+- `docs/xlsx2md-impl-spec.md`
   - 現行実装の詳細仕様と再実装・保守のための文書
-- `xlsx-formula-subset.md`
+- `docs/xlsx-formula-subset.md`
   - 数式対応範囲の補助文書
 
 ## 現在の状態
@@ -43,7 +43,7 @@
 
 ## 方針
 
-- 配置は `docs/xlsx2md/` とし、既存の `docs/text/` には入れない
+- 文書は `docs/` 配下に配置し、既存の `docs/text/` には入れない
 - 入出力はブラウザ内で完結し、サーバ送信を前提にしない
 - 最初の用途は「Excel 設計書を Markdown へ変換する」に置く
 - 配布形態は Single-file Web App とする
@@ -185,11 +185,13 @@ both: 2024/3/17 [raw=45368]
 ## 現在の構成イメージ
 
 ```text
-docs/xlsx2md/
+.
 ├── README.md
-├── xlsx2md-spec.md
-├── xlsx2md-impl-spec.md
-├── xlsx-formula-subset.md
+├── docs/
+│   ├── local-data-review.md
+│   ├── xlsx2md-spec.md
+│   ├── xlsx2md-impl-spec.md
+│   └── xlsx-formula-subset.md
 ├── xlsx2md-src.html
 ├── xlsx2md.html
 ├── references/
@@ -228,17 +230,19 @@ docs/xlsx2md/
     └── ...
 ```
 
-上位仕様と設計方針は [xlsx2md-spec.md](./xlsx2md-spec.md) を参照してください。
+上位仕様と設計方針は [docs/xlsx2md-spec.md](./docs/xlsx2md-spec.md) を参照してください。
 
-現行実装に即した詳細仕様は [xlsx2md-impl-spec.md](./xlsx2md-impl-spec.md) を参照してください。
+現行実装に即した詳細仕様は [docs/xlsx2md-impl-spec.md](./docs/xlsx2md-impl-spec.md) を参照してください。
 
-Excel 数式サブセットの設計メモは [xlsx-formula-subset.md](./xlsx-formula-subset.md) を参照してください。
+Excel 数式サブセットの設計メモは [docs/xlsx-formula-subset.md](./docs/xlsx-formula-subset.md) を参照してください。
+
+実データ観点の確認メモは [docs/local-data-review.md](./docs/local-data-review.md) を参照してください。
 
 fixture 用 Excel ブックの作成メモは [tests/fixtures/README.md](./tests/fixtures/README.md) を参照してください。
 
-git に入れない実データや一時検証用の `.xlsx` は `docs/xlsx2md/local-data/` に配置します。このディレクトリは `.gitignore` 対象です。
+git に入れない実データや一時検証用の `.xlsx` は `local-data/` に配置します。このディレクトリは `.gitignore` 対象です。
 
-`docs/xlsx2md/local-data/` で使う一部サンプルの取得元メモ:
+`local-data/` で使う一部サンプルの取得元メモ:
 
 - Microsoft Create planner / tracker templates: <https://excel.cloud.microsoft/create/ja/planner-tracker-templates/>
 
