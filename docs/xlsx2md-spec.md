@@ -738,22 +738,24 @@ ImageAsset
 ## 18. 技術方針
 
 - 単一 HTML で配布する
-- 実装は `docs/xlsx2md/` 配下に閉じる
+- 文書は `docs/` 配下に配置する
 - ビルド方式は既存の `*-src.html` + 単一 HTML 生成パターンを踏襲する
 - 可能な限り依存を増やさず、必要なら最小限の同梱を検討する
 - ローカルブラウザ内で完結し、サーバ送信を前提にしない
 - UI 共通部品は `lht-cmn/` を利用する
 - アプリ本体ロジックの正本ソースは `src/xlsx2md/ts/*.ts` とする
 - 配布用 JavaScript は TypeScript から生成する
-- テストは自動実行可能な形で `docs/xlsx2md/tests/` に配置する
+- テストは自動実行可能な形で `tests/` に配置する
 
 ### 18.1 想定ディレクトリ構成
 
 ```text
-docs/xlsx2md/
+.
 ├── README.md
-├── xlsx2md-spec.md
-├── xlsx2md-impl-spec.md
+├── docs/
+│   ├── xlsx2md-spec.md
+│   ├── xlsx2md-impl-spec.md
+│   └── xlsx-formula-subset.md
 ├── xlsx2md-src.html
 ├── xlsx2md.html
 ├── src/

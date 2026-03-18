@@ -6,7 +6,7 @@
 
 主な目的は次の通りである。
 
-- `docs/xlsx2md/src/xlsx2md/ts/*.ts` の現行実装に基づく挙動を整理する
+- `src/xlsx2md/ts/*.ts` の現行実装に基づく挙動を整理する
 - `README.md`、`xlsx2md-spec.md`、`xlsx-formula-subset.md` に分散している実装前提の情報を、実装準拠の観点で補助する
 - 将来の仕様検討や実装差分確認の際に、どこが「現行挙動」で、どこが「将来構想」かを切り分けやすくする
 
@@ -18,7 +18,7 @@
 
 `xlsx2md` 関連文書の役割分担は概ね次の通りである。
 
-- [README.md](./README.md)
+- [README.md](../README.md)
   - 概要、使い方、現在の状態、既知の制約を把握するための入口文書
 - [xlsx2md-spec.md](./xlsx2md-spec.md)
   - 上位仕様、設計方針、将来構想を整理する文書
@@ -51,7 +51,7 @@
 
 本書の記述基準は次の通りである。
 
-- 現行コードの正本は `docs/xlsx2md/src/xlsx2md/ts/` 配下の TypeScript 実装とする
+- 現行コードの正本は `src/xlsx2md/ts/` 配下の TypeScript 実装とする
 - `js/` 配下および `xlsx2md.html` はビルド生成物として扱う
 - 実装と既存文書に差分がある場合、本書では現行実装を基準に記述する
 - 未対応事項や将来検討事項は、実装済み仕様と分けて記述する
@@ -413,7 +413,7 @@ Markdown 生成時のセル出力は、`outputMode` により切り替わる。
 
 ### 7.4 AST evaluator
 
-AST evaluator は、`docs/xlsx2md/src/xlsx2md/ts/formula/` 配下の tokenizer / parser / evaluator を用いた解決系である。
+AST evaluator は、`src/xlsx2md/ts/formula/` 配下の tokenizer / parser / evaluator を用いた解決系である。
 
 現行実装では、数式文字列を AST 化し、必要に応じて次のような参照解決コンテキストを与えて評価する。
 
@@ -1263,7 +1263,7 @@ ZIP の保存名には Workbook 名と、必要に応じて outputMode サフィ
 
 ### 解析本体
 
-- `docs/xlsx2md/src/xlsx2md/ts/core.ts`
+- `src/xlsx2md/ts/core.ts`
   - ZIP 展開
   - workbook / worksheet 解析
   - sharedStrings / styles / definedNames
@@ -1276,16 +1276,16 @@ ZIP の保存名には Workbook 名と、必要に応じて outputMode サフィ
 
 ### 数式サブシステム
 
-- `docs/xlsx2md/src/xlsx2md/ts/formula/tokenizer.ts`
+- `src/xlsx2md/ts/formula/tokenizer.ts`
   - 数式トークナイズ
-- `docs/xlsx2md/src/xlsx2md/ts/formula/parser.ts`
+- `src/xlsx2md/ts/formula/parser.ts`
   - AST 構築
-- `docs/xlsx2md/src/xlsx2md/ts/formula/evaluator.ts`
+- `src/xlsx2md/ts/formula/evaluator.ts`
   - AST 評価
 
 ### UI
 
-- `docs/xlsx2md/src/xlsx2md/ts/main.ts`
+- `src/xlsx2md/ts/main.ts`
   - 画面操作
   - オプション取得
   - 解析サマリー表示
@@ -1293,23 +1293,23 @@ ZIP の保存名には Workbook 名と、必要に応じて outputMode サフィ
   - 数式診断表示
   - ダウンロード / ZIP 保存
 
-- `docs/xlsx2md/src/xlsx2md/css/app.css`
+- `src/xlsx2md/css/app.css`
   - `xlsx2md` 画面固有の見た目
 
 ### テスト
 
-- `docs/xlsx2md/tests/xlsx2md-main.test.js`
+- `tests/xlsx2md-main.test.js`
   - 実ファイルベース回帰テスト
   - Workbook 解析、Markdown 生成、画像・グラフ・図形・数式まわりの確認
 
-- `docs/xlsx2md/tests/xlsx2md-formula-parser.test.js`
+- `tests/xlsx2md-formula-parser.test.js`
   - tokenizer / parser / evaluator の単体寄り確認
 
 ### 生成物
 
-- `docs/xlsx2md/src/xlsx2md/js/*.js`
+- `src/xlsx2md/js/*.js`
   - TypeScript からの生成物
-- `docs/xlsx2md/xlsx2md.html`
+- `xlsx2md.html`
   - single-file Web App の生成物
 
 本書の記述基準は TypeScript 実装であり、生成物はその反映結果として扱う。
@@ -1318,7 +1318,7 @@ ZIP の保存名には Workbook 名と、必要に応じて outputMode サフィ
 
 本章は、`impl-spec` だけで再実装可能性を上げるための補助資料である。
 
-- 正本は `docs/xlsx2md/src/xlsx2md/ts/core.ts` とする
+- 正本は `src/xlsx2md/ts/core.ts` とする
 - ここでは、再実装時に骨格となる代表的な型定義と関数断片を掲載する
 - 全量転載ではなく、章ごとの理解と再実装の足場になる範囲へ絞る
 

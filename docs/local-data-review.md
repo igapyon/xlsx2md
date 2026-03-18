@@ -1,10 +1,10 @@
 # xlsx2md local-data review
 
-`docs/xlsx2md/local-data/` に置いた実データについて、`xlsx2md` の重点確認対象を整理するメモ。
+`local-data/` に置いた実データについて、`xlsx2md` の重点確認対象を整理するメモ。
 
 関連文書:
 
-- 概要と使い方: [README.md](./README.md)
+- 概要と使い方: [README.md](../README.md)
 - 上位仕様と設計方針: [xlsx2md-spec.md](./xlsx2md-spec.md)
 - 現行実装の詳細仕様: [xlsx2md-impl-spec.md](./xlsx2md-impl-spec.md)
 - 数式サブセットの検討メモ: [xlsx-formula-subset.md](./xlsx-formula-subset.md)
