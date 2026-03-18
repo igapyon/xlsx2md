@@ -119,9 +119,14 @@
     }
     .gallery {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: 1fr;
       gap: 16px;
       margin-top: 18px;
+    }
+    @media (min-width: 720px) {
+      .gallery {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
     }
     .shot-card {
       margin: 0;
@@ -161,9 +166,8 @@
         xlsx2md is a Single-file Web App that reads Excel (`.xlsx`) files locally and extracts narrative text, tables, and images as Markdown.
       </p>
       <ul>
-        <li>Runs in the browser.</li>
-        <li>Converts all sheets automatically.</li>
-        <li>Supports display / raw / both output modes.</li>
+        <li>Runs locally in the browser, with no server communication.</li>
+        <li>Converts all sheets automatically without manual per-sheet steps.</li>
         <li>Extracts narrative text, tables, and images as Markdown.</li>
       </ul>
       <div class="link-row">
@@ -174,21 +178,32 @@
 
     <hr class="divider" />
 
-    <section class="lang-block" aria-label="日本語">
-      <h2>日本語</h2>
-      <p>
-        xlsx2md は、Excel (`.xlsx`) をローカルで読み込み、地の文と表と画像を Markdown として抽出する Single-file Web App です。
-      </p>
+    <section class="lang-block" aria-label="Purpose">
+      <h2>Purpose</h2>
       <ul>
-        <li>ブラウザ内で動作します。</li>
-        <li>全シートを自動で変換します。</li>
-        <li>`display` / `raw` / `both` の出力モードを持ちます。</li>
-        <li>地の文と表と画像を Markdown として抽出できます。</li>
+        <li>Convert Excel workbook content into Markdown that is easier to pass to generative AI.</li>
+        <li>Extract narrative text, tables, and images in a form that generative AI can use more easily.</li>
+        <li>Process an entire workbook in one pass without manual sheet-by-sheet work.</li>
+        <li>Process locally without server communication.</li>
+        <li>Run in a web browser without installing an additional app.</li>
       </ul>
-      <div class="link-row">
-        <a class="link-btn" href="./xlsx2md.html?v=202603190000">xlsx2md を開く</a>
-        <a class="link-btn-secondary" href="https://github.com/igapyon/xlsx2md" target="_blank" rel="noopener noreferrer">GitHub</a>
-      </div>
+    </section>
+
+    <hr class="divider" />
+
+    <section class="lang-block" aria-label="How It Works">
+      <h2>How It Works</h2>
+      <ul>
+        <li>Read `.xlsx` files in the browser.</li>
+        <li>Open the file contents and read internal data.</li>
+        <li>Analyze sheet, image, and related workbook information.</li>
+        <li>Prefer cached formula values and parse formulas when needed.</li>
+        <li>Extract narrative text, tables, and images.</li>
+        <li>Detect tables and convert them into Markdown tables.</li>
+        <li>Extract chart configuration information only.</li>
+        <li>Extract shape source data as text, and output SVG when supported.</li>
+        <li>Assemble the workbook into Markdown output.</li>
+      </ul>
     </section>
 
     <hr class="divider" />
@@ -196,6 +211,10 @@
     <section aria-label="Screenshots">
       <h2>Screenshots</h2>
       <div class="gallery">
+        <figure class="shot-card">
+          <img src="./docs/screenshots/xlsx2md_0.png" alt="xlsx2md application screenshot" loading="lazy" />
+          <figcaption>xlsx2md application</figcaption>
+        </figure>
         <figure class="shot-card">
           <img src="./docs/screenshots/xlsx2md_1.png" alt="Input Excel workbook screenshot" loading="lazy" />
           <figcaption>Input Excel workbook</figcaption>
@@ -210,6 +229,55 @@
         </figure>
       </div>
     </section>
+
+    <hr class="divider" />
+
+    <section class="lang-block" aria-label="日本語">
+      <h2>日本語</h2>
+      <p>
+        xlsx2md は、Excel (`.xlsx`) をローカルで読み込み、地の文と表と画像を Markdown として抽出する Single-file Web App です。
+      </p>
+      <ul>
+        <li>ブラウザ内でローカルに動作し、サーバ通信を行いません。</li>
+        <li>全シートをシートごとの手作業なしで自動変換します。</li>
+        <li>地の文と表と画像を Markdown として抽出できます。</li>
+      </ul>
+      <div class="link-row">
+        <a class="link-btn" href="./xlsx2md.html?v=202603190000">xlsx2md を開く</a>
+        <a class="link-btn-secondary" href="https://github.com/igapyon/xlsx2md" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </div>
+    </section>
+
+    <hr class="divider" />
+
+    <section class="lang-block" aria-label="目的">
+      <h2>目的</h2>
+      <ul>
+        <li>Excel ブックの情報を、生成AI に渡しやすい Markdown 形式に変換</li>
+        <li>地の文・表・画像を、生成AIが利用しやすい形として抽出</li>
+        <li>シートごとの手作業なしで、ブック全体を一括処理</li>
+        <li>サーバと通信不要で、ローカル環境だけで処理</li>
+        <li>Webブラウザだけで動作し、追加アプリのインストール不要</li>
+      </ul>
+    </section>
+
+    <hr class="divider" />
+
+    <section class="lang-block" aria-label="実現方法">
+      <h2>実現方法</h2>
+      <ul>
+        <li>`.xlsx` ファイルをブラウザ内で読み込み</li>
+        <li>ファイルの中身を展開して読み取り</li>
+        <li>シートや画像などの情報を解析</li>
+        <li>数式は保存済みの値を優先し、必要に応じて数式を解析</li>
+        <li>地の文・表・画像を抽出</li>
+        <li>表を検知して Markdown の表へ変換</li>
+        <li>グラフは設定情報のみを抽出</li>
+        <li>図形は元データをテキストとして抽出し、対応できるものは SVG も出力</li>
+        <li>ブック全体を Markdown 形式にまとめる</li>
+      </ul>
+    </section>
+
   </main>
 
   <script>
