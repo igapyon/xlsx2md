@@ -1,0 +1,11 @@
+Copyright 2026 Toshiki Iga
+
+This product includes software developed by Toshiki Iga.
+
+Design direction:
+- 本プロジェクトは Material Design 3 の設計原則を参照しています。
+
+Third-party component implementation:
+- `lht-cmn` の内部実装では、必要に応じて Material Web（`@material/web`）を優先利用します。
+- Material Web のライセンスは Apache License, Version 2.0 です。
+- Source: https://github.com/material-components/material-web
