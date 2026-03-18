@@ -1524,10 +1524,13 @@ class LhtPageHero extends HTMLElement {
       titleMain.appendChild(help);
     }
 
-    if (actionHref && actionLabel) {
+    if (actionHref && (actionLabel || actionIconId)) {
       const actionLink = document.createElement("a");
       actionLink.href = actionHref;
       actionLink.className = "ms-hero-link";
+      if (!actionLabel) {
+        actionLink.classList.add("ms-hero-link--icon-only");
+      }
       actionLink.target = "_blank";
       actionLink.rel = "noopener noreferrer";
       if (actionAriaLabel) {
@@ -1545,9 +1548,11 @@ class LhtPageHero extends HTMLElement {
         iconSvg.appendChild(useNode);
         actionLink.appendChild(iconSvg);
       }
-      const labelNode = document.createElement("span");
-      labelNode.textContent = actionLabel;
-      actionLink.appendChild(labelNode);
+      if (actionLabel) {
+        const labelNode = document.createElement("span");
+        labelNode.textContent = actionLabel;
+        actionLink.appendChild(labelNode);
+      }
       titleMain.appendChild(actionLink);
     }
 
