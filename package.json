@@ -6,7 +6,7 @@
     "test": "vitest run",
     "test:unit": "vitest run",
     "test:watch": "vitest",
-    "build": "npm test && node scripts/build-xlsx2md.mjs"
+    "build": "node scripts/build-xlsx2md.mjs && npm test"
   },
   "devDependencies": {
     "@material/web": "^2.4.1",
