@@ -117,6 +117,34 @@
       font-size: 0.9rem;
       color: var(--muted);
     }
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 18px;
+    }
+    .shot-card {
+      margin: 0;
+      padding: 12px;
+      background: #fff9f2;
+      border: 1px solid var(--outline);
+      border-radius: 18px;
+      box-shadow: 0 10px 28px rgba(55, 39, 24, 0.08);
+    }
+    .shot-card img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 12px;
+      border: 1px solid #eadfd2;
+      background: #f5efe7;
+    }
+    .shot-card figcaption {
+      margin-top: 10px;
+      font-size: 0.92rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
     .lang-block:last-child p:last-child {
       margin-bottom: 0;
     }
@@ -160,6 +188,26 @@
       <div class="link-row">
         <a class="link-btn" href="./xlsx2md.html?v=202603190000">xlsx2md を開く</a>
         <a class="link-btn-secondary" href="https://github.com/igapyon/xlsx2md" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </div>
+    </section>
+
+    <hr class="divider" />
+
+    <section aria-label="Screenshots">
+      <h2>Screenshots</h2>
+      <div class="gallery">
+        <figure class="shot-card">
+          <img src="./docs/screenshots/xlsx2md_1.png" alt="Input Excel workbook screenshot" loading="lazy" />
+          <figcaption>Input Excel workbook</figcaption>
+        </figure>
+        <figure class="shot-card">
+          <img src="./docs/screenshots/xlsx2md_2a.png" alt="Converted Markdown text screenshot" loading="lazy" />
+          <figcaption>Converted Markdown text</figcaption>
+        </figure>
+        <figure class="shot-card">
+          <img src="./docs/screenshots/xlsx2md_2b.png" alt="Markdown preview screenshot" loading="lazy" />
+          <figcaption>Markdown preview</figcaption>
+        </figure>
       </div>
     </section>
   </main>
