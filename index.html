@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>xlsx2md</title>
+  <style>
+    :root {
+      --bg: #f3efe6;
+      --surface: #fffdf8;
+      --text: #1f1d18;
+      --muted: #6b655b;
+      --primary: #8f3b1b;
+      --on-primary: #fffaf6;
+      --secondary-bg: #efe2d8;
+      --secondary-text: #4f4037;
+      --outline: #dfd2c4;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "BIZ UDPGothic", "Noto Sans JP", "Hiragino Sans", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(143, 59, 27, 0.10), transparent 28%),
+        linear-gradient(180deg, #f7f2ea 0%, var(--bg) 100%);
+      color: var(--text);
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+    .card {
+      width: min(760px, 100%);
+      background: var(--surface);
+      border: 1px solid var(--outline);
+      border-radius: 22px;
+      padding: 30px;
+      box-shadow: 0 16px 40px rgba(55, 39, 24, 0.10);
+    }
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(2rem, 5vw, 2.8rem);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+    h2 {
+      margin: 0 0 10px;
+      font-size: 1.2rem;
+      line-height: 1.25;
+    }
+    p {
+      margin: 0 0 14px;
+      color: var(--muted);
+      line-height: 1.75;
+    }
+    ul {
+      margin: 0 0 16px;
+      padding-left: 1.2rem;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+    .eyebrow {
+      display: inline-block;
+      margin-bottom: 12px;
+      padding: 0.3rem 0.65rem;
+      border-radius: 999px;
+      background: #f4e5d9;
+      color: #7b3d21;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .lead {
+      font-size: 1.02rem;
+      color: #4f4a40;
+    }
+    .link-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .link-btn,
+    .link-btn-secondary {
+      display: inline-block;
+      text-decoration: none;
+      padding: 0.72rem 1.2rem;
+      border-radius: 999px;
+      font-weight: 700;
+      transition: transform 120ms ease, box-shadow 120ms ease;
+    }
+    .link-btn {
+      background: var(--primary);
+      color: var(--on-primary);
+      box-shadow: 0 10px 24px rgba(143, 59, 27, 0.24);
+    }
+    .link-btn-secondary {
+      background: var(--secondary-bg);
+      color: var(--secondary-text);
+      border: 1px solid #d8c2b4;
+    }
+    .link-btn:hover,
+    .link-btn-secondary:hover {
+      transform: translateY(-1px);
+    }
+    .divider {
+      border: 0;
+      border-top: 1px solid var(--outline);
+      margin: 22px 0;
+    }
+    .sub {
+      margin-top: 14px;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+    .lang-block:last-child p:last-child {
+      margin-bottom: 0;
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="eyebrow">Local Browser Tool</div>
+    <h1>xlsx2md</h1>
+    <p class="lead">
+      Excel (`.xlsx`) をローカルで読み込み、Markdown へ変換するブラウザベースのツールです。
+    </p>
+
+    <section class="lang-block" aria-label="English">
+      <h2>English</h2>
+      <p>
+        xlsx2md is a browser-based converter that reads Excel (`.xlsx`) files locally and turns them into Markdown.
+      </p>
+      <ul>
+        <li>Runs in the browser.</li>
+        <li>Converts all sheets automatically.</li>
+        <li>Supports display / raw / both output modes.</li>
+        <li>Includes analysis-oriented output such as tables, formulas, charts, and shapes.</li>
+      </ul>
+      <div class="link-row">
+        <a class="link-btn" href="./xlsx2md.html?v=202603190000">Open xlsx2md</a>
+        <a class="link-btn-secondary" href="https://github.com/igapyon/xlsx2md" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </div>
+    </section>
+
+    <hr class="divider" />
+
+    <section class="lang-block" aria-label="日本語">
+      <h2>日本語</h2>
+      <p>
+        xlsx2md は、Excel (`.xlsx`) をローカルで読み込み、Markdown へ変換するブラウザベースのツールです。
+      </p>
+      <ul>
+        <li>ブラウザ内で動作します。</li>
+        <li>全シートを自動で変換します。</li>
+        <li>`display` / `raw` / `both` の出力モードを持ちます。</li>
+        <li>表、数式、グラフ、図形などの解析結果を Markdown に出力します。</li>
+      </ul>
+      <div class="link-row">
+        <a class="link-btn" href="./xlsx2md.html?v=202603190000">xlsx2md を開く</a>
+        <a class="link-btn-secondary" href="https://github.com/igapyon/xlsx2md" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      const selector = 'a[href^="./xlsx2md.html"]';
+      const buildVersionStamp = () => {
+        const d = new Date();
+        return (
+          d.getFullYear().toString() +
+          String(d.getMonth() + 1).padStart(2, "0") +
+          String(d.getDate()).padStart(2, "0") +
+          String(d.getHours()).padStart(2, "0") +
+          String(d.getMinutes()).padStart(2, "0")
+        );
+      };
+      const stampAndGo = (anchor) => {
+        const u = new URL(anchor.getAttribute("href"), location.href);
+        u.searchParams.set("v", buildVersionStamp());
+        anchor.setAttribute("href", u.pathname + u.search);
+      };
+      document.addEventListener("click", (ev) => {
+        const a = ev.target.closest(selector);
+        if (!a) return;
+        stampAndGo(a);
+      }, true);
+      document.addEventListener("auxclick", (ev) => {
+        if (ev.button !== 1) return;
+        const a = ev.target.closest(selector);
+        if (!a) return;
+        stampAndGo(a);
+      }, true);
+    })();
+  </script>
+</body>
+</html>
