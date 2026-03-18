@@ -4,6 +4,20 @@
 
 現時点では、仕様・実装・自動テストをこの配下で独立して進めています。
 
+## Screenshots
+
+入力の `.xlsx` ブック:
+
+![xlsx2md screenshot 1](docs/screenshots/xlsx2md_1.png)
+
+変換後の Markdown テキスト:
+
+![xlsx2md screenshot 2a](docs/screenshots/xlsx2md_2a.png)
+
+Markdown のプレビュー画面:
+
+![xlsx2md screenshot 2b](docs/screenshots/xlsx2md_2b.png)
+
 文書の役割は段階的に分かれています。
 
 - `README.md`
