@@ -4,6 +4,10 @@
 
 - fixture 用 Excel ブックを追加する
   - `tests/fixtures/formula/formula-spill-sample01.xlsx`
+  - `tests/fixtures/merge/merge-multiline-sample01.xlsx`
+    - 結合セル内の改行付きテキストを確認する fixture
+    - 追加時は fixture だけでなく Markdown 正規化ポリシー変更もセットで見直す
+    - 現状は `markdown-normalize.ts` と `sheet-markdown.ts` で改行を空白化し、`xlsx2md-sheet-markdown.test.js` もその前提
 - formula 次段タスク
   - `scripts/observe-xlsx2md-formulas.mjs` による観測を継続し、AST evaluator 側へ寄せる関数群を整理する
   - 優先順は `cached value -> AST evaluator -> 既存 resolver -> fallback_formula` で固定
@@ -19,6 +23,7 @@
   - 表セル、narrative、見出し、箇条書きで共通方針を持つ
   - 少なくとも `改行 / | / \`` を安全に扱う
   - 必要に応じて行頭の Markdown 記号 (`#`, `-`, `*`, `>`) も整理する
+  - 結合セル内の改行を `<br>` として許容するか、別の表現にするかを決める
 
 ## 未対応事項
 

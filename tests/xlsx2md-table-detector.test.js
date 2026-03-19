@@ -204,4 +204,55 @@ describe("xlsx2md table detector", () => {
       endCol: 3
     });
   });
+
+  it("does not keep a wide fallback candidate when multiple bordered tables fill most of the area", () => {
+    const api = bootTableDetector();
+    const sheet = {
+      cells: [
+        createCell(1, 1, "表1"),
+        createCell(1, 5, "表2"),
+        createCell(2, 1, "項番", { top: true, bottom: true, left: true }),
+        createCell(2, 2, "名称", { top: true, bottom: true }),
+        createCell(2, 3, "値", { top: true, bottom: true, right: true }),
+        createCell(2, 5, "項番", { top: true, bottom: true, left: true }),
+        createCell(2, 6, "名称", { top: true, bottom: true }),
+        createCell(2, 7, "値", { top: true, bottom: true, right: true }),
+        createCell(3, 1, "1", { bottom: true, left: true }),
+        createCell(3, 2, "A", { bottom: true }),
+        createCell(3, 3, "100", { bottom: true, right: true }),
+        createCell(3, 5, "1", { bottom: true, left: true }),
+        createCell(3, 6, "B", { bottom: true }),
+        createCell(3, 7, "200", { bottom: true, right: true }),
+        createCell(4, 1, "表3"),
+        createCell(4, 5, "表4"),
+        createCell(5, 1, "項番", { top: true, bottom: true, left: true }),
+        createCell(5, 2, "名称", { top: true, bottom: true }),
+        createCell(5, 3, "値", { top: true, bottom: true, right: true }),
+        createCell(5, 5, "項番", { top: true, bottom: true, left: true }),
+        createCell(5, 6, "名称", { top: true, bottom: true }),
+        createCell(5, 7, "値", { top: true, bottom: true, right: true }),
+        createCell(6, 1, "1", { bottom: true, left: true }),
+        createCell(6, 2, "C", { bottom: true }),
+        createCell(6, 3, "300", { bottom: true, right: true }),
+        createCell(6, 5, "1", { bottom: true, left: true }),
+        createCell(6, 6, "D", { bottom: true }),
+        createCell(6, 7, "400", { bottom: true, right: true })
+      ],
+      merges: []
+    };
+
+    const candidates = api.detectTableCandidates(sheet, buildCellMap);
+
+    expect(candidates.map((candidate) => ({
+      startRow: candidate.startRow,
+      startCol: candidate.startCol,
+      endRow: candidate.endRow,
+      endCol: candidate.endCol
+    }))).toEqual([
+      { startRow: 2, startCol: 1, endRow: 3, endCol: 3 },
+      { startRow: 2, startCol: 5, endRow: 3, endCol: 7 },
+      { startRow: 5, startCol: 1, endRow: 6, endCol: 3 },
+      { startRow: 5, startCol: 5, endRow: 6, endCol: 7 }
+    ]);
+  });
 });
