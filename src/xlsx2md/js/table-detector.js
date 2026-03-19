@@ -20,15 +20,16 @@
             return hasValue || hasBorder;
         });
     }
-    function detectTableCandidates(sheet, buildCellMap, scoreWeights = DEFAULT_TABLE_SCORE_WEIGHTS) {
-        const seedCells = collectTableSeedCells(sheet);
-        const cellMap = buildCellMap(sheet);
+    function collectBorderSeedCells(sheet) {
+        return sheet.cells.filter((cell) => (cell.borders.top || cell.borders.bottom || cell.borders.left || cell.borders.right));
+    }
+    function collectConnectedComponents(seedCells) {
         const positionMap = new Map();
         for (const cell of seedCells) {
             positionMap.set(`${cell.row}:${cell.col}`, cell);
         }
         const visited = new Set();
-        const candidates = [];
+        const components = [];
         for (const cell of seedCells) {
             const key = `${cell.row}:${cell.col}`;
             if (visited.has(key))
@@ -48,6 +49,41 @@
                     queue.push(nextCell);
                 }
             }
+            components.push(component);
+        }
+        return components;
+    }
+    function isWithinBounds(bounds, candidate) {
+        return candidate.startRow >= bounds.startRow
+            && candidate.startCol >= bounds.startCol
+            && candidate.endRow <= bounds.endRow
+            && candidate.endCol <= bounds.endCol;
+    }
+    function getBoundsArea(bounds) {
+        return Math.max(1, (bounds.endRow - bounds.startRow + 1) * (bounds.endCol - bounds.startCol + 1));
+    }
+    function pruneRedundantCandidates(candidates) {
+        return candidates.filter((candidate, candidateIndex) => {
+            const candidateArea = getBoundsArea(candidate);
+            return !candidates.some((other, otherIndex) => {
+                if (candidateIndex === otherIndex)
+                    return false;
+                if (!isWithinBounds(candidate, other))
+                    return false;
+                const otherArea = getBoundsArea(other);
+                if (otherArea < candidateArea * 0.4)
+                    return false;
+                return candidateArea > otherArea;
+            });
+        });
+    }
+    function detectTableCandidates(sheet, buildCellMap, scoreWeights = DEFAULT_TABLE_SCORE_WEIGHTS) {
+        const cellMap = buildCellMap(sheet);
+        const allSeedCells = collectTableSeedCells(sheet);
+        const borderSeedCells = collectBorderSeedCells(sheet);
+        const candidates = [];
+        const candidateKeys = new Set();
+        function maybePushCandidate(component) {
             const rows = component.map((entry) => entry.row);
             const cols = component.map((entry) => entry.col);
             const startRow = Math.min(...rows);
@@ -59,7 +95,7 @@
             const rowCount = endRow - startRow + 1;
             const colCount = endCol - startCol + 1;
             if (rowCount < 2 || colCount < 2) {
-                continue;
+                return;
             }
             let score = 0;
             const reasons = [];
@@ -97,7 +133,7 @@
                 reasons.push(`Many merged cells (${scoreWeights.mergeHeavyPenalty})`);
             }
             if (mergedArea >= 2 && rowCount <= 6 && colCount >= 10 && density < 0.25) {
-                continue;
+                return;
             }
             const nonEmptyCells = component.filter((entry) => entry.outputValue.trim());
             const avgTextLength = nonEmptyCells
@@ -113,6 +149,11 @@
                     endRow,
                     endCol
                 });
+                const key = `${normalizedBounds.startRow}:${normalizedBounds.startCol}:${normalizedBounds.endRow}:${normalizedBounds.endCol}`;
+                if (candidateKeys.has(key)) {
+                    return;
+                }
+                candidateKeys.add(key);
                 candidates.push({
                     startRow: normalizedBounds.startRow,
                     startCol: normalizedBounds.startCol,
@@ -123,7 +164,27 @@
                 });
             }
         }
-        return candidates.sort((left, right) => {
+        for (const component of collectConnectedComponents(borderSeedCells)) {
+            maybePushCandidate(component);
+        }
+        for (const component of collectConnectedComponents(allSeedCells)) {
+            const rows = component.map((entry) => entry.row);
+            const cols = component.map((entry) => entry.col);
+            const bounds = {
+                startRow: Math.min(...rows),
+                startCol: Math.min(...cols),
+                endRow: Math.max(...rows),
+                endCol: Math.max(...cols)
+            };
+            const containingBorderCandidates = candidates.filter((candidate) => isWithinBounds(candidate, bounds));
+            const fallbackArea = getBoundsArea(bounds);
+            const shadowedByBorderCandidate = containingBorderCandidates.some((candidate) => (getBoundsArea(candidate) >= fallbackArea * 0.4));
+            if (shadowedByBorderCandidate) {
+                continue;
+            }
+            maybePushCandidate(component);
+        }
+        return pruneRedundantCandidates(candidates).sort((left, right) => {
             if (left.startRow !== right.startRow)
                 return left.startRow - right.startRow;
             return left.startCol - right.startCol;
@@ -132,6 +193,18 @@
     function trimTableCandidateBounds(cellMap, bounds) {
         let { startRow, startCol, endRow, endCol } = bounds;
         const minBorderedCells = Math.max(2, Math.ceil((endCol - startCol + 1) * 0.5));
+        while (endRow - startRow + 1 >= 2) {
+            const topStats = borderGridHelper.collectTableEdgeStats(cellMap, startRow, startCol, endCol);
+            const nextStats = borderGridHelper.collectTableEdgeStats(cellMap, startRow + 1, startCol, endCol);
+            const shouldTrimTop = (topStats.nonEmptyCount <= 2
+                && topStats.rawBorderCount === 0
+                && nextStats.borderCount >= minBorderedCells
+                && nextStats.nonEmptyCount >= Math.max(2, Math.ceil((endCol - startCol + 1) * 0.5)));
+            if (!shouldTrimTop) {
+                break;
+            }
+            startRow += 1;
+        }
         for (let row = startRow + 1; row <= endRow; row += 1) {
             const currentStats = borderGridHelper.collectTableEdgeStats(cellMap, row, startCol, endCol);
             const previousStats = borderGridHelper.collectTableEdgeStats(cellMap, row - 1, startCol, endCol);
@@ -216,6 +289,8 @@
     }
     globalThis.__xlsx2mdTableDetector = {
         collectTableSeedCells,
+        collectBorderSeedCells,
+        pruneRedundantCandidates,
         detectTableCandidates,
         trimTableCandidateBounds,
         matrixFromCandidate,

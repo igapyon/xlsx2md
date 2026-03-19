@@ -363,8 +363,11 @@
 }
 
 .md-button {
-  border: none;
+  background: linear-gradient(180deg, #ffffff 0%, #f3f7fb 100%);
+  color: #102a43;
+  border: 1px solid rgba(148, 163, 184, 0.42);
   border-radius: 999px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
   padding: 0.7rem 1.4rem;
   font-size: 0.96rem;
   font-weight: 700;
@@ -380,6 +383,13 @@
 .md-button--secondary {
   background: #d9e2ec;
   color: #102a43;
+}
+
+.md-button--secondary-accent {
+  background: linear-gradient(135deg, #b8cce8, #9fb9dd);
+  color: #102a43;
+  border-color: rgba(96, 124, 166, 0.88);
+  box-shadow: 0 8px 18px rgba(84, 109, 150, 0.22);
 }
 
 lht-preview-output {

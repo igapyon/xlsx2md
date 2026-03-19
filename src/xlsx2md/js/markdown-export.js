@@ -4,8 +4,15 @@
     if (!zipIoHelper) {
         throw new Error("xlsx2md zip io module is not loaded");
     }
+    const markdownNormalizeHelper = globalThis.__xlsx2mdMarkdownNormalize;
+    if (!markdownNormalizeHelper) {
+        throw new Error("xlsx2md markdown normalize module is not loaded");
+    }
+    function normalizeMarkdownLineBreaks(text) {
+        return markdownNormalizeHelper.normalizeMarkdownText(text);
+    }
     function escapeMarkdownCell(text) {
-        return String(text || "").replace(/\|/g, "\\|").replace(/\n/g, "<br>");
+        return markdownNormalizeHelper.normalizeMarkdownTableCell(text);
     }
     function renderMarkdownTable(rows, treatFirstRowAsHeader) {
         if (rows.length === 0) {
@@ -111,6 +118,7 @@
         createCombinedMarkdownExportFile,
         createExportEntries,
         createWorkbookExportArchive,
+        normalizeMarkdownLineBreaks,
         textEncoder
     };
 })();

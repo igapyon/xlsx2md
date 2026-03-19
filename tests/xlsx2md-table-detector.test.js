@@ -65,6 +65,22 @@ describe("xlsx2md table detector", () => {
     expect(seeds.map((cell) => `${cell.row}:${cell.col}`)).toEqual(["1:2", "2:1"]);
   });
 
+  it("collects border seed cells separately from value-only cells", () => {
+    const api = bootTableDetector();
+    const sheet = {
+      cells: [
+        createCell(1, 1, "タイトル"),
+        createCell(2, 1, "項目", { bottom: true }),
+        createCell(2, 2, "値", { bottom: true })
+      ],
+      merges: []
+    };
+
+    const seeds = api.collectBorderSeedCells(sheet);
+
+    expect(seeds.map((cell) => `${cell.row}:${cell.col}`)).toEqual(["2:1", "2:2"]);
+  });
+
   it("breaks a bordered table before a following borderless note row", () => {
     const api = bootTableDetector();
     const cellMap = new Map([
@@ -146,5 +162,46 @@ describe("xlsx2md table detector", () => {
       endCol: 2
     });
     expect(candidates[0].score).toBeGreaterThanOrEqual(api.defaultTableScoreWeights.threshold);
+  });
+
+  it("prunes a wider candidate that redundantly contains a tighter table candidate", () => {
+    const api = bootTableDetector();
+
+    const pruned = api.pruneRedundantCandidates([
+      { startRow: 2, startCol: 1, endRow: 10, endCol: 12, score: 7, reasonSummary: [] },
+      { startRow: 2, startCol: 1, endRow: 10, endCol: 7, score: 8, reasonSummary: [] }
+    ]);
+
+    expect(pruned).toEqual([
+      { startRow: 2, startCol: 1, endRow: 10, endCol: 7, score: 8, reasonSummary: [] }
+    ]);
+  });
+
+  it("prefers bordered candidates and excludes a borderless title row above the table", () => {
+    const api = bootTableDetector();
+    const sheet = {
+      cells: [
+        createCell(1, 1, "商品別計算表"),
+        createCell(2, 1, "商CO", { top: true, bottom: true, left: true }),
+        createCell(2, 2, "商品名", { top: true, bottom: true }),
+        createCell(2, 3, "仕入数", { top: true, bottom: true, right: true }),
+        createCell(3, 1, "101", { bottom: true, left: true }),
+        createCell(3, 2, "商品A", { bottom: true }),
+        createCell(3, 3, "693", { bottom: true, right: true })
+      ],
+      merges: [
+        { startRow: 1, startCol: 1, endRow: 1, endCol: 3, ref: "A1:C1" }
+      ]
+    };
+
+    const candidates = api.detectTableCandidates(sheet, buildCellMap);
+
+    expect(candidates).toHaveLength(1);
+    expect(candidates[0]).toMatchObject({
+      startRow: 2,
+      startCol: 1,
+      endRow: 3,
+      endCol: 3
+    });
   });
 });

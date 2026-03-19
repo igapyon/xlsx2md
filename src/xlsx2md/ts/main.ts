@@ -4,6 +4,7 @@
     trimText: boolean;
     removeEmptyRows: boolean;
     removeEmptyColumns: boolean;
+    includeShapeDetails: boolean;
     outputMode: "display" | "raw" | "both";
   };
 
@@ -78,6 +79,7 @@
       trimText: getSwitchValue("trimTextEnabled"),
       removeEmptyRows: getSwitchValue("removeEmptyRowsEnabled"),
       removeEmptyColumns: getSwitchValue("removeEmptyColumnsEnabled"),
+      includeShapeDetails: getSwitchValue("includeShapeDetailsEnabled"),
       outputMode: outputMode === "raw" || outputMode === "both" ? outputMode : "display"
     };
   }

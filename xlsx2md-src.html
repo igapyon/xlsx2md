@@ -89,6 +89,9 @@ limitations under the License.
             <lht-switch-help switch-id="removeEmptyColumnsEnabled" label="Remove empty columns" help-label="About empty-column removal" checked>
               Remove empty columns from detected tables where possible.
             </lht-switch-help>
+            <lht-switch-help switch-id="includeShapeDetailsEnabled" label="Include shape details in Markdown" help-label="About shape details" checked>
+              Include Shape Blocks and Shapes sections in the generated Markdown output.
+            </lht-switch-help>
           </div>
           <div id="outputModeNotice" class="md-caption">`display` outputs values close to what Excel shows.</div>
         </div>
@@ -96,9 +99,9 @@ limitations under the License.
 
       <section class="md-section md-stack-md">
         <div class="md-actions">
-          <button id="convertBtn" class="md-button md-button--primary" type="button">Convert to Markdown</button>
+          <button id="convertBtn" class="md-button md-button--secondary" type="button">Convert to Markdown</button>
           <button id="downloadBtn" class="md-button md-button--secondary" type="button" disabled>Save Markdown</button>
-          <button id="exportZipBtn" class="md-button md-button--secondary" type="button" disabled>Save ZIP with Markdown and Assets</button>
+          <button id="exportZipBtn" class="md-button md-button--secondary-accent" type="button" disabled>Save ZIP with Markdown and Assets</button>
         </div>
         <lht-loading-overlay id="loadingOverlay" text="Analyzing xlsx"></lht-loading-overlay>
         <lht-error-alert id="errorAlert"></lht-error-alert>
@@ -161,12 +164,26 @@ limitations under the License.
   <script src="src/xlsx2md/js/office-drawing.js"></script>
   <script src="src/xlsx2md/js/zip-io.js"></script>
   <script src="src/xlsx2md/js/border-grid.js"></script>
+  <script src="src/xlsx2md/js/markdown-normalize.js"></script>
   <script src="src/xlsx2md/js/narrative-structure.js"></script>
   <script src="src/xlsx2md/js/table-detector.js"></script>
   <script src="src/xlsx2md/js/markdown-export.js"></script>
+  <script src="src/xlsx2md/js/sheet-markdown.js"></script>
   <script src="src/xlsx2md/js/styles-parser.js"></script>
   <script src="src/xlsx2md/js/shared-strings.js"></script>
+  <script src="src/xlsx2md/js/address-utils.js"></script>
+  <script src="src/xlsx2md/js/rels-parser.js"></script>
   <script src="src/xlsx2md/js/worksheet-tables.js"></script>
+  <script src="src/xlsx2md/js/cell-format.js"></script>
+  <script src="src/xlsx2md/js/xml-utils.js"></script>
+  <script src="src/xlsx2md/js/sheet-assets.js"></script>
+  <script src="src/xlsx2md/js/worksheet-parser.js"></script>
+  <script src="src/xlsx2md/js/workbook-loader.js"></script>
+  <script src="src/xlsx2md/js/formula-reference-utils.js"></script>
+  <script src="src/xlsx2md/js/formula-engine.js"></script>
+  <script src="src/xlsx2md/js/formula-legacy.js"></script>
+  <script src="src/xlsx2md/js/formula-ast.js"></script>
+  <script src="src/xlsx2md/js/formula-resolver.js"></script>
   <script src="src/xlsx2md/js/formula/tokenizer.js"></script>
   <script src="src/xlsx2md/js/formula/parser.js"></script>
   <script src="src/xlsx2md/js/formula/evaluator.js"></script>

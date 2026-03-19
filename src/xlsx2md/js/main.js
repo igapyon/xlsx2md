@@ -27,6 +27,7 @@
             trimText: getSwitchValue("trimTextEnabled"),
             removeEmptyRows: getSwitchValue("removeEmptyRowsEnabled"),
             removeEmptyColumns: getSwitchValue("removeEmptyColumnsEnabled"),
+            includeShapeDetails: getSwitchValue("includeShapeDetailsEnabled"),
             outputMode: outputMode === "raw" || outputMode === "both" ? outputMode : "display"
         };
     }

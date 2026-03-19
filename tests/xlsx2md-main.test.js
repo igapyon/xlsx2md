@@ -28,6 +28,10 @@ const borderGridCode = readFileSync(
   path.resolve(__dirname, "../src/xlsx2md/js/border-grid.js"),
   "utf8"
 );
+const markdownNormalizeCode = readFileSync(
+  path.resolve(__dirname, "../src/xlsx2md/js/markdown-normalize.js"),
+  "utf8"
+);
 const narrativeStructureCode = readFileSync(
   path.resolve(__dirname, "../src/xlsx2md/js/narrative-structure.js"),
   "utf8"
@@ -40,6 +44,10 @@ const markdownExportCode = readFileSync(
   path.resolve(__dirname, "../src/xlsx2md/js/markdown-export.js"),
   "utf8"
 );
+const sheetMarkdownCode = readFileSync(
+  path.resolve(__dirname, "../src/xlsx2md/js/sheet-markdown.js"),
+  "utf8"
+);
 const stylesParserCode = readFileSync(
   path.resolve(__dirname, "../src/xlsx2md/js/styles-parser.js"),
   "utf8"
@@ -48,8 +56,56 @@ const sharedStringsCode = readFileSync(
   path.resolve(__dirname, "../src/xlsx2md/js/shared-strings.js"),
   "utf8"
 );
+const addressUtilsCode = readFileSync(
+  path.resolve(__dirname, "../src/xlsx2md/js/address-utils.js"),
+  "utf8"
+);
+const relsParserCode = readFileSync(
+  path.resolve(__dirname, "../src/xlsx2md/js/rels-parser.js"),
+  "utf8"
+);
 const worksheetTablesCode = readFileSync(
   path.resolve(__dirname, "../src/xlsx2md/js/worksheet-tables.js"),
+  "utf8"
+);
+const cellFormatCode = readFileSync(
+  path.resolve(__dirname, "../src/xlsx2md/js/cell-format.js"),
+  "utf8"
+);
+const xmlUtilsCode = readFileSync(
+  path.resolve(__dirname, "../src/xlsx2md/js/xml-utils.js"),
+  "utf8"
+);
+const sheetAssetsCode = readFileSync(
+  path.resolve(__dirname, "../src/xlsx2md/js/sheet-assets.js"),
+  "utf8"
+);
+const worksheetParserCode = readFileSync(
+  path.resolve(__dirname, "../src/xlsx2md/js/worksheet-parser.js"),
+  "utf8"
+);
+const workbookLoaderCode = readFileSync(
+  path.resolve(__dirname, "../src/xlsx2md/js/workbook-loader.js"),
+  "utf8"
+);
+const formulaReferenceUtilsCode = readFileSync(
+  path.resolve(__dirname, "../src/xlsx2md/js/formula-reference-utils.js"),
+  "utf8"
+);
+const formulaEngineCode = readFileSync(
+  path.resolve(__dirname, "../src/xlsx2md/js/formula-engine.js"),
+  "utf8"
+);
+const formulaLegacyCode = readFileSync(
+  path.resolve(__dirname, "../src/xlsx2md/js/formula-legacy.js"),
+  "utf8"
+);
+const formulaAstCode = readFileSync(
+  path.resolve(__dirname, "../src/xlsx2md/js/formula-ast.js"),
+  "utf8"
+);
+const formulaResolverCode = readFileSync(
+  path.resolve(__dirname, "../src/xlsx2md/js/formula-resolver.js"),
   "utf8"
 );
 const coreCode = readFileSync(
@@ -62,12 +118,26 @@ function bootCore() {
   new Function(officeDrawingCode)();
   new Function(zipIoCode)();
   new Function(borderGridCode)();
+  new Function(markdownNormalizeCode)();
   new Function(narrativeStructureCode)();
   new Function(tableDetectorCode)();
   new Function(markdownExportCode)();
+  new Function(sheetMarkdownCode)();
   new Function(stylesParserCode)();
   new Function(sharedStringsCode)();
+  new Function(addressUtilsCode)();
+  new Function(relsParserCode)();
   new Function(worksheetTablesCode)();
+  new Function(cellFormatCode)();
+  new Function(xmlUtilsCode)();
+  new Function(sheetAssetsCode)();
+  new Function(worksheetParserCode)();
+  new Function(workbookLoaderCode)();
+  new Function(formulaReferenceUtilsCode)();
+  new Function(formulaEngineCode)();
+  new Function(formulaLegacyCode)();
+  new Function(formulaAstCode)();
+  new Function(formulaResolverCode)();
   new Function(coreCode)();
   return globalThis.__xlsx2md;
 }
