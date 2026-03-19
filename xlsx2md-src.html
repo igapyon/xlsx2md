@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -34,113 +34,116 @@ limitations under the License.
     <section class="md-card md-surface-card">
       <lht-page-hero
         title="xlsx2md"
-        subtitle="Excel 設計書 (.xlsx) を解析し、Markdown へ変換します。"
+        subtitle="Analyze an Excel workbook (.xlsx) and convert it to Markdown."
         icon="📘"
-        help-label="xlsx2md の説明"
+        help-label="About xlsx2md"
         help-wide
         action-href="https://github.com/igapyon/xlsx2md"
         action-aria-label="Open xlsx2md repository"
         action-icon-id="md-icon-github"
         menu-home-href="./index.html"
-        menu-home-label="トップへ戻る">
-        `.xlsx` ファイルをローカルで解析し、地の文抽出・表検出・結合セル補完を行ったうえで Markdown を生成します。
+        menu-home-label="Back to Home">
+        Analyze a local `.xlsx` file, extract narrative text, detect tables, fill merged cells, and generate Markdown.
       </lht-page-hero>
 
       <section class="md-section md-stack-md">
-        <h2 class="md-section-title">入力</h2>
+        <h2 class="md-section-title">Input</h2>
         <div class="md-panel md-stack-sm">
           <lht-file-select
             input-id="xlsxFileInput"
             button-id="xlsxFileSelectBtn"
             file-name-id="xlsxFileName"
             accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            button-label="xlsx ファイルを選択"
-            placeholder="未選択"
+            button-label="Select xlsx File"
+            placeholder="No file selected"
             show-file-name>
           </lht-file-select>
-          <div class="md-caption">ローカルで処理します。サーバ送信は行いません。変換は常に全シートを対象に行います。</div>
+          <div class="md-caption">Processing stays local in your browser. No data is sent to a server. Conversion always covers all sheets.</div>
         </div>
       </section>
 
       <details class="md-section md-accordion">
         <summary class="md-accordion-summary">
-          <span class="md-section-title">変換設定</span>
+          <span class="md-section-title">Conversion Settings</span>
         </summary>
         <div class="md-accordion-body md-stack-md">
           <div class="md-grid md-grid--options">
-            <lht-select-help field-id="outputModeSelect" label="出力モード" help-text="Markdown に表示値を出すか、raw 値を出すかを選択します。既定は Excel 表示寄りの `display` です。">
+            <lht-select-help field-id="outputModeSelect" label="Output Mode" help-text="Choose whether Markdown should use displayed values, raw values, or both. The default is `display`, which stays close to Excel's rendered view.">
               <script type="application/json" slot="options">
                 [
-                  { "value": "display", "label": "display: 表示値優先", "selected": true },
-                  { "value": "raw", "label": "raw: 内部値優先" },
-                  { "value": "both", "label": "both: 両方表示" }
+                  { "value": "display", "label": "display: prefer displayed values", "selected": true },
+                  { "value": "raw", "label": "raw: prefer internal values" },
+                  { "value": "both", "label": "both: include both" }
                 ]
               </script>
             </lht-select-help>
-            <lht-switch-help switch-id="headerRowEnabled" label="先頭行をヘッダーとして扱う" help-label="ヘッダー行の説明" checked>
-              表の1行目を Markdown テーブルのヘッダー行として扱います。
+            <lht-switch-help switch-id="headerRowEnabled" label="Treat the first row as a header" help-label="About header rows" checked>
+              Use the first row of each detected table as the Markdown table header.
             </lht-switch-help>
-            <lht-switch-help switch-id="trimTextEnabled" label="前後空白を trim する" help-label="trim の説明" checked>
-              文字列セルの前後空白を取り除きます。
+            <lht-switch-help switch-id="trimTextEnabled" label="Trim surrounding whitespace" help-label="About trimming" checked>
+              Remove leading and trailing whitespace from text cells.
             </lht-switch-help>
-            <lht-switch-help switch-id="removeEmptyRowsEnabled" label="空行を除外する" help-label="空行除外の説明" checked>
-              表や地の文の中で、値のない行を可能な限り除外します。
+            <lht-switch-help switch-id="removeEmptyRowsEnabled" label="Remove empty rows" help-label="About empty-row removal" checked>
+              Remove empty rows from detected tables and narrative blocks where possible.
             </lht-switch-help>
-            <lht-switch-help switch-id="removeEmptyColumnsEnabled" label="空列を除外する" help-label="空列除外の説明" checked>
-              表の中で、値のない列を可能な限り除外します。
+            <lht-switch-help switch-id="removeEmptyColumnsEnabled" label="Remove empty columns" help-label="About empty-column removal" checked>
+              Remove empty columns from detected tables where possible.
+            </lht-switch-help>
+            <lht-switch-help switch-id="includeShapeDetailsEnabled" label="Include shape details in Markdown" help-label="About shape details" checked>
+              Include Shape Blocks and Shapes sections in the generated Markdown output.
             </lht-switch-help>
           </div>
-          <div id="outputModeNotice" class="md-caption">`display` は Excel の表示値寄りで出力します。</div>
+          <div id="outputModeNotice" class="md-caption">`display` outputs values close to what Excel shows.</div>
         </div>
       </details>
 
       <section class="md-section md-stack-md">
         <div class="md-actions">
-          <button id="convertBtn" class="md-button md-button--primary" type="button">Markdown へ変換</button>
-          <button id="downloadBtn" class="md-button md-button--secondary" type="button" disabled>Markdown 保存</button>
-          <button id="exportZipBtn" class="md-button md-button--secondary" type="button" disabled>Markdown+assets ZIP保存</button>
+          <button id="convertBtn" class="md-button md-button--secondary" type="button">Convert to Markdown</button>
+          <button id="downloadBtn" class="md-button md-button--secondary" type="button" disabled>Save Markdown</button>
+          <button id="exportZipBtn" class="md-button md-button--secondary-accent" type="button" disabled>Save ZIP with Markdown and Assets</button>
         </div>
-        <lht-loading-overlay id="loadingOverlay" text="xlsx を解析しています"></lht-loading-overlay>
+        <lht-loading-overlay id="loadingOverlay" text="Analyzing xlsx"></lht-loading-overlay>
         <lht-error-alert id="errorAlert"></lht-error-alert>
       </section>
 
       <section class="md-section md-stack-md">
         <div class="md-panel md-stack-sm">
           <h2 class="md-section-title">Markdown</h2>
-          <div id="previewModeBanner" class="md-caption" hidden>`raw` / `both` モードでは、表示値以外の情報を含む場合があります。</div>
-          <lht-preview-output id="markdownPreview" preview-id="markdownOutput" preview-tag="pre" placeholder="ここに Markdown が表示されます"></lht-preview-output>
+          <div id="previewModeBanner" class="md-caption" hidden>`raw` and `both` modes may include information beyond Excel's displayed values.</div>
+          <lht-preview-output id="markdownPreview" preview-id="markdownOutput" preview-tag="pre" placeholder="Markdown will appear here"></lht-preview-output>
         </div>
       </section>
 
       <details class="md-section md-accordion">
         <summary class="md-accordion-summary">
-          <span class="md-section-title">解析サマリー</span>
+          <span class="md-section-title">Analysis Summary</span>
         </summary>
         <div class="md-accordion-body">
-          <div id="analysisSummary" class="md-summary-list">まだ変換していません。</div>
+          <div id="analysisSummary" class="md-summary-list">No conversion yet.</div>
         </div>
       </details>
 
       <details class="md-section md-accordion">
         <summary class="md-accordion-summary">
-          <span class="md-section-title">表候補スコア</span>
+          <span class="md-section-title">Table Candidate Scores</span>
         </summary>
         <div class="md-accordion-body">
           <div class="md-panel md-stack-sm">
             <div class="md-legend">
               <span class="md-summary-item-status md-summary-item-status--strong">strong</span>
-              <span class="md-caption">7点以上の強い表候補</span>
+              <span class="md-caption">Strong table candidates with a score of 7 or higher</span>
               <span class="md-summary-item-status md-summary-item-status--candidate">candidate</span>
-              <span class="md-caption">4-6点の表候補</span>
+              <span class="md-caption">Table candidates with a score of 4 to 6</span>
             </div>
-            <div id="scoreSummary" class="md-summary-list">まだ変換していません。</div>
+            <div id="scoreSummary" class="md-summary-list">No conversion yet.</div>
           </div>
         </div>
       </details>
 
       <details class="md-section md-accordion">
         <summary class="md-accordion-summary">
-          <span class="md-section-title">数式診断</span>
+          <span class="md-section-title">Formula Diagnostics</span>
         </summary>
         <div class="md-accordion-body">
           <div class="md-panel md-stack-sm">
@@ -148,9 +151,8 @@ limitations under the License.
               <span class="md-summary-item-status md-summary-item-status--resolved">resolved</span>
               <span class="md-summary-item-status md-summary-item-status--fallback">fallback</span>
               <span class="md-summary-item-status md-summary-item-status--unsupported">unsupported</span>
-              <span class="md-caption">解決済み / フォールバック / 未対応外部参照</span>
             </div>
-            <div id="formulaSummary" class="md-summary-list">まだ変換していません。</div>
+            <div id="formulaSummary" class="md-summary-list">No conversion yet.</div>
           </div>
         </div>
       </details>
@@ -160,6 +162,28 @@ limitations under the License.
   </main>
 
   <script src="src/xlsx2md/js/office-drawing.js"></script>
+  <script src="src/xlsx2md/js/zip-io.js"></script>
+  <script src="src/xlsx2md/js/border-grid.js"></script>
+  <script src="src/xlsx2md/js/markdown-normalize.js"></script>
+  <script src="src/xlsx2md/js/narrative-structure.js"></script>
+  <script src="src/xlsx2md/js/table-detector.js"></script>
+  <script src="src/xlsx2md/js/markdown-export.js"></script>
+  <script src="src/xlsx2md/js/sheet-markdown.js"></script>
+  <script src="src/xlsx2md/js/styles-parser.js"></script>
+  <script src="src/xlsx2md/js/shared-strings.js"></script>
+  <script src="src/xlsx2md/js/address-utils.js"></script>
+  <script src="src/xlsx2md/js/rels-parser.js"></script>
+  <script src="src/xlsx2md/js/worksheet-tables.js"></script>
+  <script src="src/xlsx2md/js/cell-format.js"></script>
+  <script src="src/xlsx2md/js/xml-utils.js"></script>
+  <script src="src/xlsx2md/js/sheet-assets.js"></script>
+  <script src="src/xlsx2md/js/worksheet-parser.js"></script>
+  <script src="src/xlsx2md/js/workbook-loader.js"></script>
+  <script src="src/xlsx2md/js/formula-reference-utils.js"></script>
+  <script src="src/xlsx2md/js/formula-engine.js"></script>
+  <script src="src/xlsx2md/js/formula-legacy.js"></script>
+  <script src="src/xlsx2md/js/formula-ast.js"></script>
+  <script src="src/xlsx2md/js/formula-resolver.js"></script>
   <script src="src/xlsx2md/js/formula/tokenizer.js"></script>
   <script src="src/xlsx2md/js/formula/parser.js"></script>
   <script src="src/xlsx2md/js/formula/evaluator.js"></script>
