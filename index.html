@@ -9,23 +9,29 @@
   <title>xlsx2md</title>
   <style>
     :root {
-      --bg: #f3efe6;
-      --surface: #fffdf8;
-      --text: #1f1d18;
-      --muted: #6b655b;
-      --primary: #8f3b1b;
-      --on-primary: #fffaf6;
-      --secondary-bg: #efe2d8;
-      --secondary-text: #4f4037;
-      --outline: #dfd2c4;
+      --bg: #fbf8ff;
+      --bg-accent: #f6f1ff;
+      --surface: #fffbfe;
+      --surface-2: #f8f4ff;
+      --text: #1d1b20;
+      --heading: #2f1f52;
+      --muted: #514a5f;
+      --primary: #6750a4;
+      --primary-strong: #6c3eea;
+      --on-primary: #ffffff;
+      --secondary-bg: #efe9fa;
+      --secondary-text: #3f3564;
+      --outline: #e7dff6;
+      --outline-2: #d8cfee;
+      --code-bg: #f3edf9;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: "BIZ UDPGothic", "Noto Sans JP", "Hiragino Sans", "Segoe UI", sans-serif;
       background:
-        radial-gradient(circle at top left, rgba(143, 59, 27, 0.10), transparent 28%),
-        linear-gradient(180deg, #f7f2ea 0%, var(--bg) 100%);
+        radial-gradient(circle at top left, rgba(108, 62, 234, 0.12), transparent 28%),
+        linear-gradient(180deg, var(--bg-accent) 0%, var(--bg) 100%);
       color: var(--text);
       min-height: 100vh;
       display: grid;
@@ -36,20 +42,24 @@
       width: min(760px, 100%);
       background: var(--surface);
       border: 1px solid var(--outline);
-      border-radius: 22px;
+      border-radius: 24px;
       padding: 30px;
-      box-shadow: 0 16px 40px rgba(55, 39, 24, 0.10);
+      box-shadow:
+        0 18px 44px rgba(53, 34, 92, 0.10),
+        inset 0 1px 0 rgba(255, 255, 255, 0.7);
     }
     h1 {
       margin: 0 0 12px;
       font-size: clamp(2rem, 5vw, 2.8rem);
       line-height: 1.1;
       letter-spacing: -0.02em;
+      color: var(--heading);
     }
     h2 {
       margin: 0 0 10px;
       font-size: 1.2rem;
       line-height: 1.25;
+      color: var(--heading);
     }
     p {
       margin: 0 0 14px;
@@ -62,13 +72,19 @@
       color: var(--muted);
       line-height: 1.65;
     }
+    ol {
+      margin: 0 0 16px;
+      padding-left: 1.35rem;
+      color: var(--muted);
+      line-height: 1.65;
+    }
     .eyebrow {
       display: inline-block;
       margin-bottom: 12px;
-      padding: 0.3rem 0.65rem;
+      padding: 0.34rem 0.72rem;
       border-radius: 999px;
-      background: #f4e5d9;
-      color: #7b3d21;
+      background: rgba(98, 0, 238, 0.14);
+      color: var(--heading);
       font-size: 0.82rem;
       font-weight: 700;
       letter-spacing: 0.04em;
@@ -88,29 +104,37 @@
     .link-btn-secondary {
       display: inline-block;
       text-decoration: none;
-      padding: 0.72rem 1.2rem;
+      padding: 0.82rem 1.35rem;
       border-radius: 999px;
       font-weight: 700;
-      transition: transform 120ms ease, box-shadow 120ms ease;
+      transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease, border-color 120ms ease;
     }
     .link-btn {
       background: var(--primary);
       color: var(--on-primary);
-      box-shadow: 0 10px 24px rgba(143, 59, 27, 0.24);
+      box-shadow: 0 10px 24px rgba(103, 80, 164, 0.24);
     }
     .link-btn-secondary {
       background: var(--secondary-bg);
       color: var(--secondary-text);
-      border: 1px solid #d8c2b4;
+      border: 1px solid var(--outline-2);
     }
     .link-btn:hover,
     .link-btn-secondary:hover {
       transform: translateY(-1px);
     }
+    .link-btn:hover {
+      background: var(--primary-strong);
+      box-shadow: 0 12px 26px rgba(108, 62, 234, 0.26);
+    }
+    .link-btn-secondary:hover {
+      background: #e7ddf8;
+      border-color: #cec1eb;
+    }
     .divider {
       border: 0;
       border-top: 1px solid var(--outline);
-      margin: 22px 0;
+      margin: 24px 0;
     }
     .sub {
       margin-top: 14px;
@@ -130,25 +154,33 @@
     }
     .shot-card {
       margin: 0;
-      padding: 12px;
-      background: #fff9f2;
+      padding: 14px;
+      background: var(--surface-2);
       border: 1px solid var(--outline);
-      border-radius: 18px;
-      box-shadow: 0 10px 28px rgba(55, 39, 24, 0.08);
+      border-radius: 20px;
+      box-shadow: 0 10px 28px rgba(53, 34, 92, 0.08);
     }
     .shot-card img {
       display: block;
       width: 100%;
       height: auto;
       border-radius: 12px;
-      border: 1px solid #eadfd2;
-      background: #f5efe7;
+      border: 1px solid var(--outline-2);
+      background: #f6f1ff;
     }
     .shot-card figcaption {
       margin-top: 10px;
       font-size: 0.92rem;
       color: var(--muted);
       line-height: 1.5;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      background: var(--code-bg);
+      color: var(--secondary-text);
+      padding: 0.12rem 0.38rem;
+      border-radius: 8px;
+      font-size: 0.92em;
     }
     .lang-block:last-child p:last-child {
       margin-bottom: 0;
@@ -160,16 +192,57 @@
     <div class="eyebrow">Local Browser Tool</div>
     <h1>xlsx2md</h1>
 
-    <section class="lang-block" aria-label="English">
-      <h2>English</h2>
+    <section class="lang-block" aria-label="English What is this">
+      <h2>What is this?</h2>
       <p>
-        xlsx2md is a Single-file Web App that reads Excel (`.xlsx`) files locally and extracts narrative text, tables, and images as Markdown.
+        <code>xlsx2md</code> is a single-file web app that reads Excel (<code>.xlsx</code>) files locally and extracts prose, tables, and images as Markdown.
       </p>
       <ul>
-        <li>Runs locally in the browser, with no server communication.</li>
-        <li>Converts all sheets automatically without manual per-sheet steps.</li>
-        <li>Extracts narrative text, tables, and images as Markdown.</li>
+        <li>Runs entirely in the browser with no server communication.</li>
+        <li>Converts the whole workbook automatically without sheet-by-sheet manual work.</li>
+        <li>Makes workbook content easier to reuse in generative AI workflows.</li>
       </ul>
+    </section>
+
+    <hr class="divider" />
+
+    <section class="lang-block" aria-label="English Features">
+      <h2>Features</h2>
+      <ul>
+        <li>Reads <code>.xlsx</code> files directly in the browser and processes them locally.</li>
+        <li>Converts all sheets in a workbook in one pass.</li>
+        <li>Extracts prose, tables, and images.</li>
+        <li>Detects tables and converts them into Markdown tables.</li>
+        <li>Prefers cached formula values and parses formulas when needed.</li>
+        <li>Extracts chart configuration data.</li>
+        <li>Extracts shape source data as text and outputs SVG when supported.</li>
+        <li>Saves output as Markdown or ZIP.</li>
+      </ul>
+    </section>
+
+    <hr class="divider" />
+
+    <section class="lang-block" aria-label="English Use Cases">
+      <h2>Use Cases</h2>
+      <ul>
+        <li>Convert Excel workbooks into Markdown for generative AI input.</li>
+        <li>Extract prose, tables, and images into a reusable text-based format.</li>
+        <li>Process an entire workbook without manual work on each sheet.</li>
+        <li>Handle sensitive files locally without uploading them to a server.</li>
+        <li>Use the tool in a browser without installing additional applications.</li>
+      </ul>
+    </section>
+
+    <hr class="divider" />
+
+    <section class="lang-block" aria-label="English How to use">
+      <h2>How to use</h2>
+      <ol>
+        <li>Open <code>xlsx2md.html</code> in a web browser.</li>
+        <li>Select an <code>.xlsx</code> file.</li>
+        <li>After loading, Markdown for all sheets is generated automatically.</li>
+        <li>Save the result as Markdown or ZIP.</li>
+      </ol>
       <div class="link-row">
         <a class="link-btn" href="./xlsx2md.html?v=202603190000">Open xlsx2md</a>
         <a class="link-btn-secondary" href="https://github.com/igapyon/xlsx2md" target="_blank" rel="noopener noreferrer">GitHub</a>
@@ -178,27 +251,14 @@
 
     <hr class="divider" />
 
-    <section class="lang-block" aria-label="Purpose">
-      <h2>Purpose</h2>
+    <section class="lang-block" aria-label="English How it works">
+      <h2>How it works</h2>
       <ul>
-        <li>Convert Excel workbook content into Markdown that is easier to pass to generative AI.</li>
-        <li>Extract narrative text, tables, and images in a form that generative AI can use more easily.</li>
-        <li>Process an entire workbook in one pass without manual sheet-by-sheet work.</li>
-        <li>Process locally without server communication.</li>
-        <li>Run in a web browser without installing an additional app.</li>
-      </ul>
-    </section>
-
-    <hr class="divider" />
-
-    <section class="lang-block" aria-label="How It Works">
-      <h2>How It Works</h2>
-      <ul>
-        <li>Read `.xlsx` files in the browser.</li>
+        <li>Read <code>.xlsx</code> files in the browser.</li>
         <li>Open the file contents and read internal data.</li>
         <li>Analyze sheet, image, and related workbook information.</li>
         <li>Prefer cached formula values and parse formulas when needed.</li>
-        <li>Extract narrative text, tables, and images.</li>
+        <li>Extract prose, tables, and images.</li>
         <li>Detect tables and convert them into Markdown tables.</li>
         <li>Extract chart configuration information only.</li>
         <li>Extract shape source data as text, and output SVG when supported.</li>
@@ -208,40 +268,93 @@
 
     <hr class="divider" />
 
-    <section aria-label="Screenshots">
-      <h2>Screenshots</h2>
+    <section aria-label="Example">
+      <h2>Example</h2>
       <div class="gallery">
         <figure class="shot-card">
           <img src="./docs/screenshots/xlsx2md_0.png" alt="xlsx2md application screenshot" loading="lazy" />
-          <figcaption>xlsx2md application</figcaption>
+          <figcaption>
+            English: This is the main <code>xlsx2md</code> screen where you load an Excel workbook and review the generated result.<br />
+            日本語: これは <code>xlsx2md</code> のメイン画面です。ここで Excel ブックを読み込み、生成された結果を確認します。
+          </figcaption>
         </figure>
         <figure class="shot-card">
           <img src="./docs/screenshots/xlsx2md_1.png" alt="Input Excel workbook screenshot" loading="lazy" />
-          <figcaption>Input Excel workbook</figcaption>
+          <figcaption>
+            English: The input workbook can contain prose, tables, images, and other spreadsheet content spread across multiple sheets.<br />
+            日本語: 入力となる Excel ブックには、地の文、表、画像などの情報が複数シートにまたがって含まれます。
+          </figcaption>
         </figure>
         <figure class="shot-card">
           <img src="./docs/screenshots/xlsx2md_2a.png" alt="Converted Markdown text screenshot" loading="lazy" />
-          <figcaption>Converted Markdown text</figcaption>
+          <figcaption>
+            English: After loading the workbook, <code>xlsx2md</code> extracts the content and generates Markdown text automatically.<br />
+            日本語: ブックを読み込むと、<code>xlsx2md</code> が内容を抽出し、Markdown テキストを自動生成します。
+          </figcaption>
         </figure>
         <figure class="shot-card">
           <img src="./docs/screenshots/xlsx2md_2b.png" alt="Markdown preview screenshot" loading="lazy" />
-          <figcaption>Markdown preview</figcaption>
+          <figcaption>
+            English: The generated Markdown can then be previewed as a readable document.<br />
+            日本語: 生成された Markdown は、文書として読みやすい形でプレビューできます。
+          </figcaption>
         </figure>
       </div>
     </section>
 
     <hr class="divider" />
 
-    <section class="lang-block" aria-label="日本語">
-      <h2>日本語</h2>
+    <section class="lang-block" aria-label="Japanese What is this">
+      <h2>What is this?</h2>
       <p>
-        xlsx2md は、Excel (`.xlsx`) をローカルで読み込み、地の文と表と画像を Markdown として抽出する Single-file Web App です。
+        <code>xlsx2md</code> は、Excel (<code>.xlsx</code>) をローカルで読み込み、地の文・表・画像を Markdown として抽出する Single-file Web App です。
       </p>
       <ul>
         <li>ブラウザ内でローカルに動作し、サーバ通信を行いません。</li>
-        <li>全シートをシートごとの手作業なしで自動変換します。</li>
-        <li>地の文と表と画像を Markdown として抽出できます。</li>
+        <li>Excel ブック全体を、シートごとの手作業なしで自動変換します。</li>
+        <li>生成AI に渡しやすい Markdown 形式で情報を取り出せます。</li>
       </ul>
+    </section>
+
+    <hr class="divider" />
+
+    <section class="lang-block" aria-label="Japanese Features">
+      <h2>Features</h2>
+      <ul>
+        <li><code>.xlsx</code> ファイルをブラウザ内で読み込み、ローカル環境だけで処理します。</li>
+        <li>全シートをまとめて一括変換します。</li>
+        <li>地の文・表・画像を抽出します。</li>
+        <li>表を検知して Markdown の表へ変換します。</li>
+        <li>数式は保存済みの値を優先し、必要に応じて数式も解析します。</li>
+        <li>グラフは設定情報を抽出します。</li>
+        <li>図形は元データをテキストとして抽出し、対応できるものは SVG も出力します。</li>
+        <li>Markdown または ZIP として保存できます。</li>
+      </ul>
+    </section>
+
+    <hr class="divider" />
+
+    <section class="lang-block" aria-label="Japanese Use Cases">
+      <h2>Use Cases</h2>
+      <ul>
+        <li>Excel ブックの内容を、生成AI に渡しやすい Markdown に変換したい。</li>
+        <li>地の文・表・画像をまとめて抽出し、再利用しやすい形にしたい。</li>
+        <li>シートごとの手作業なしで、ブック全体を一括処理したい。</li>
+        <li>サーバにアップロードせず、ローカル環境だけで安全に処理したい。</li>
+        <li>Webブラウザだけで動かし、追加アプリをインストールせずに使いたい。</li>
+      </ul>
+    </section>
+
+    <hr class="divider" />
+
+    <section class="lang-block" aria-label="Japanese How to use">
+      <h2>How to use</h2>
+      <ol>
+        <li>Webブラウザで <code>xlsx2md.html</code> を開きます。</li>
+        <li><code>.xlsx</code> ファイルを選択します。</li>
+        <li>読み込み後、自動で全シートの Markdown が生成されます。</li>
+        <li>Markdown または ZIP を保存します。</li>
+      </ol>
       <div class="link-row">
         <a class="link-btn" href="./xlsx2md.html?v=202603190000">xlsx2md を開く</a>
         <a class="link-btn-secondary" href="https://github.com/igapyon/xlsx2md" target="_blank" rel="noopener noreferrer">GitHub</a>
@@ -250,31 +363,18 @@
 
     <hr class="divider" />
 
-    <section class="lang-block" aria-label="目的">
-      <h2>目的</h2>
+    <section class="lang-block" aria-label="Japanese How it works">
+      <h2>How it works</h2>
       <ul>
-        <li>Excel ブックの情報を、生成AI に渡しやすい Markdown 形式に変換</li>
-        <li>地の文・表・画像を、生成AIが利用しやすい形として抽出</li>
-        <li>シートごとの手作業なしで、ブック全体を一括処理</li>
-        <li>サーバと通信不要で、ローカル環境だけで処理</li>
-        <li>Webブラウザだけで動作し、追加アプリのインストール不要</li>
-      </ul>
-    </section>
-
-    <hr class="divider" />
-
-    <section class="lang-block" aria-label="実現方法">
-      <h2>実現方法</h2>
-      <ul>
-        <li>`.xlsx` ファイルをブラウザ内で読み込み</li>
-        <li>ファイルの中身を展開して読み取り</li>
-        <li>シートや画像などの情報を解析</li>
-        <li>数式は保存済みの値を優先し、必要に応じて数式を解析</li>
-        <li>地の文・表・画像を抽出</li>
-        <li>表を検知して Markdown の表へ変換</li>
-        <li>グラフは設定情報のみを抽出</li>
-        <li>図形は元データをテキストとして抽出し、対応できるものは SVG も出力</li>
-        <li>ブック全体を Markdown 形式にまとめる</li>
+        <li>Webブラウザ内で <code>.xlsx</code> ファイルを読み込む。</li>
+        <li>ファイルの中身を展開して内部データを読み取る。</li>
+        <li>シート、画像、関連するブック情報を解析する。</li>
+        <li>数式は保存済みの値を優先し、必要に応じて数式を解析する。</li>
+        <li>地の文、表、画像を抽出する。</li>
+        <li>表を検知して Markdown の表へ変換する。</li>
+        <li>グラフは設定情報のみを抽出する。</li>
+        <li>図形は元データをテキストとして抽出し、対応できるものは SVG も出力する。</li>
+        <li>ブック全体を Markdown 出力としてまとめる。</li>
       </ul>
     </section>
 

@@ -1,71 +1,175 @@
 # xlsx2md
 
-`xlsx2md` は、Excel (`.xlsx`) をローカルで読み込み、地の文と表と画像を Markdown として抽出する Single-file Web App です。
+## What is this?
 
-- ブラウザ内でローカルに動作し、サーバ通信を行いません。
-- 全シートをシートごとの手作業なしで自動変換します。
-- 地の文と表と画像を Markdown として抽出できます。
+`xlsx2md` is a single-file web app that reads Excel (`.xlsx`) files locally and extracts prose, tables, and images as Markdown.
 
-## 目的
+- Runs entirely in the browser with no server communication
+- Converts the whole workbook automatically without sheet-by-sheet manual work
+- Makes workbook content easier to reuse in generative AI workflows
 
-- Excel ブックの情報を、生成AI に渡しやすい Markdown 形式に変換
-- 地の文・表・画像を、生成AIが利用しやすい形として抽出
-- シートごとの手作業なしで、ブック全体を一括処理
-- サーバと通信不要で、ローカル環境だけで処理
-- Webブラウザだけで動作し、追加アプリのインストール不要
+## Features
 
-## 実現方法
+- Reads `.xlsx` files directly in the browser and processes them locally
+- Converts all sheets in a workbook in one pass
+- Extracts prose, tables, and images
+- Detects tables and converts them into Markdown tables
+- Prefers cached formula values and parses formulas when needed
+- Extracts chart configuration data
+- Extracts shape source data as text and outputs SVG when supported
+- Saves output as Markdown or ZIP
 
-- `.xlsx` ファイルをブラウザ内で読み込み
-- ファイルの中身を展開して読み取り
-- シートや画像などの情報を解析
-- 数式は保存済みの値を優先し、必要に応じて数式を解析
-- 地の文・表・画像を抽出
-- 表を検知して Markdown の表へ変換
-- グラフは設定情報のみを抽出
-- 図形は元データをテキストとして抽出し、対応できるものは SVG も出力
-- ブック全体を Markdown 形式にまとめる
+## Use Cases
 
-## Screenshots
+- Convert Excel workbooks into Markdown for generative AI input
+- Extract prose, tables, and images into a reusable text-based format
+- Process an entire workbook without manual work on each sheet
+- Handle sensitive files locally without uploading them to a server
+- Use the tool in a browser without installing additional applications
 
-`xlsx2md` プログラム本体:
+## How to use
+
+1. Open `xlsx2md.html` in a web browser
+2. Select an `.xlsx` file
+3. After loading, Markdown for all sheets is generated automatically
+4. Save the result as Markdown or ZIP
+
+## Tech Stack
+
+- Runtime: Web Browser
+- App: HTML, CSS, and JavaScript
+- Source language: TypeScript
+- Build tooling: Node.js and esbuild
+- Testing: Vitest and jsdom
+- UI dependency: `@material/web`
+
+## How it works
+
+- Read `.xlsx` files in the browser
+- Open the file contents and read internal data
+- Analyze sheet, image, and related workbook information
+- Prefer cached formula values and parse formulas when needed
+- Extract prose, tables, and images
+- Detect tables and convert them into Markdown tables
+- Extract chart configuration information only
+- Extract shape source data as text, and output SVG when supported
+- Assemble the workbook into Markdown output
+
+For more details, see:
+
+- High-level specification and design policy: [docs/xlsx2md-spec.md](./docs/xlsx2md-spec.md)
+- Detailed implementation-oriented specification: [docs/xlsx2md-impl-spec.md](./docs/xlsx2md-impl-spec.md)
+
+## Example
+
+This is the main `xlsx2md` screen where you load an Excel workbook and review the generated result.
 
 ![xlsx2md screenshot 0](docs/screenshots/xlsx2md_0.png)
 
-入力の `.xlsx` ブック:
+The input workbook can contain prose, tables, images, and other spreadsheet content spread across multiple sheets.
 
 ![xlsx2md screenshot 1](docs/screenshots/xlsx2md_1.png)
 
-変換後の Markdown テキスト:
+After loading the workbook, `xlsx2md` extracts the content and generates Markdown text automatically.
 
 ![xlsx2md screenshot 2a](docs/screenshots/xlsx2md_2a.png)
 
-Markdown のプレビュー画面:
+The generated Markdown can then be previewed as a readable document.
 
 ![xlsx2md screenshot 2b](docs/screenshots/xlsx2md_2b.png)
 
-## Usage
+## License
+
+### xlsx2md
+
+- Released under the Apache License 2.0
+- See [LICENSE](./LICENSE) for the full license text
+- Third-party software and reference notices are listed in [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md)
+
+--------------------------------------------------------------------------------
+
+## What is this?
+
+`xlsx2md` は、Excel (`.xlsx`) をローカルで読み込み、地の文・表・画像を Markdown として抽出する Single-file Web App です。
+
+- ブラウザ内でローカルに動作し、サーバ通信を行いません
+- Excel ブック全体を、シートごとの手作業なしで自動変換します
+- 生成AI に渡しやすい Markdown 形式で情報を取り出せます
+
+## Features
+
+- `.xlsx` ファイルをブラウザ内で読み込み、ローカル環境だけで処理
+- 全シートをまとめて一括変換
+- 地の文・表・画像を抽出
+- 表を検知して Markdown の表へ変換
+- 数式は保存済みの値を優先し、必要に応じて数式も解析
+- グラフは設定情報を抽出
+- 図形は元データをテキストとして抽出し、対応できるものは SVG も出力
+- Markdown または ZIP として保存可能
+
+## Use Cases
+
+- Excel ブックの内容を、生成AI に渡しやすい Markdown に変換したい
+- 地の文・表・画像をまとめて抽出し、再利用しやすい形にしたい
+- シートごとの手作業なしで、ブック全体を一括処理したい
+- サーバにアップロードせず、ローカル環境だけで安全に処理したい
+- Webブラウザだけで動かし、追加アプリをインストールせずに使いたい
+
+## How to use
 
 1. Webブラウザで `xlsx2md.html` を開く
 2. `.xlsx` ファイルを選択する
 3. 読み込み後、自動で全シートの Markdown が生成される
 4. Markdown または ZIP を保存する
 
-## 関連文書
+## Tech Stack
+
+- 実行環境: Web Browser
+- アプリ: HTML / CSS / JavaScript
+- ソース言語: TypeScript
+- ビルドツール: Node.js / esbuild
+- テスト: Vitest / jsdom
+- UI 依存: `@material/web`
+
+## How it works
+
+- Webブラウザ内で `.xlsx` ファイルを読み込む
+- ファイルの中身を展開して内部データを読み取る
+- シート、画像、関連するブック情報を解析する
+- 数式は保存済みの値を優先し、必要に応じて数式を解析する
+- 地の文、表、画像を抽出する
+- 表を検知して Markdown の表へ変換する
+- グラフは設定情報のみを抽出する
+- 図形は元データをテキストとして抽出し、対応できるものは SVG も出力する
+- ブック全体を Markdown 出力としてまとめる
+
+詳細は以下の文書を参照してください。
 
 - 上位仕様と設計方針: [docs/xlsx2md-spec.md](./docs/xlsx2md-spec.md)
 - 現行実装に即した詳細仕様: [docs/xlsx2md-impl-spec.md](./docs/xlsx2md-impl-spec.md)
-- fixture 用 Excel ブックの作成メモ: [tests/fixtures/README.md](./tests/fixtures/README.md)
 
-## LICENSE
+## Example
+
+これは `xlsx2md` のメイン画面です。ここで Excel ブックを読み込み、生成された結果を確認します。
+
+![xlsx2md screenshot 0](docs/screenshots/xlsx2md_0.png)
+
+入力となる Excel ブックには、地の文、表、画像などの情報が複数シートにまたがって含まれます。
+
+![xlsx2md screenshot 1](docs/screenshots/xlsx2md_1.png)
+
+ブックを読み込むと、`xlsx2md` が内容を抽出し、Markdown テキストを自動生成します。
+
+![xlsx2md screenshot 2a](docs/screenshots/xlsx2md_2a.png)
+
+生成された Markdown は、文書として読みやすい形でプレビューできます。
+
+![xlsx2md screenshot 2b](docs/screenshots/xlsx2md_2b.png)
+
+## License
 
 ### xlsx2md
 
-- Apache License 2.0 のもとで公開しています。
-- ライセンス本文は [LICENSE](./LICENSE) を参照してください。
-
-### ClosedXML.Parser
-
-- `xlsx2md` で Excel 数式文法の参考資料として参照しているプロジェクトです。
-- `ClosedXML.Parser` は MIT License として公開されています。
-- Excel 数式文法の参照資料を公開している `ClosedXML.Parser` プロジェクトに感謝します。
+- Apache License 2.0 のもとで公開しています
+- ライセンス本文は [LICENSE](./LICENSE) を参照してください
+- 第三者ソフトウェアおよび参考資料に関する記載は [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md) を参照してください
