@@ -62,10 +62,13 @@
     function getBoundsArea(bounds) {
         return Math.max(1, (bounds.endRow - bounds.startRow + 1) * (bounds.endCol - bounds.startCol + 1));
     }
+    function getCombinedCandidateArea(candidates) {
+        return candidates.reduce((sum, candidate) => sum + getBoundsArea(candidate), 0);
+    }
     function pruneRedundantCandidates(candidates) {
         return candidates.filter((candidate, candidateIndex) => {
             const candidateArea = getBoundsArea(candidate);
-            return !candidates.some((other, otherIndex) => {
+            const hasSingleDominatingContainedCandidate = candidates.some((other, otherIndex) => {
                 if (candidateIndex === otherIndex)
                     return false;
                 if (!isWithinBounds(candidate, other))
@@ -75,6 +78,20 @@
                     return false;
                 return candidateArea > otherArea;
             });
+            if (hasSingleDominatingContainedCandidate) {
+                return false;
+            }
+            const containedCandidates = candidates.filter((other, otherIndex) => {
+                if (candidateIndex === otherIndex)
+                    return false;
+                if (!isWithinBounds(candidate, other))
+                    return false;
+                return getBoundsArea(other) < candidateArea;
+            });
+            if (containedCandidates.length >= 2 && getCombinedCandidateArea(containedCandidates) >= candidateArea * 0.6) {
+                return false;
+            }
+            return true;
         });
     }
     function detectTableCandidates(sheet, buildCellMap, scoreWeights = DEFAULT_TABLE_SCORE_WEIGHTS) {
@@ -179,7 +196,9 @@
             const containingBorderCandidates = candidates.filter((candidate) => isWithinBounds(candidate, bounds));
             const fallbackArea = getBoundsArea(bounds);
             const shadowedByBorderCandidate = containingBorderCandidates.some((candidate) => (getBoundsArea(candidate) >= fallbackArea * 0.4));
-            if (shadowedByBorderCandidate) {
+            const shadowedByMultipleBorderCandidates = containingBorderCandidates.length >= 2
+                && getCombinedCandidateArea(containingBorderCandidates) >= fallbackArea * 0.6;
+            if (shadowedByBorderCandidate || shadowedByMultipleBorderCandidates) {
                 continue;
             }
             maybePushCandidate(component);

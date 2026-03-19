@@ -19,6 +19,14 @@
 | `xlsx2md-basic-sample01.xlsx` | 総合サンプル | `xlsx2md-spec.md` 6, 7, 10, 13 | 表と地の文の崩れ、基本 Markdown 差分 |
 | `display/display-format-sample01.xlsx` | 表示形式 | `xlsx2md-spec.md` 12 | `display / raw / both` の見え方差分 |
 | `merge/merge-pattern-sample01.xlsx` | 結合セル | `xlsx2md-spec.md` 13 | `[MERGED←] / [MERGED↑]` の崩れ |
+| `table/table-basic-sample01.xlsx` | 隣接表(縦) | `xlsx2md-spec.md` 7, 8 | 縦に密接した独立表の誤結合 |
+| `table/table-basic-sample02.xlsx` | 隣接表(横) | `xlsx2md-spec.md` 7, 8 | 横に密接した独立表の誤結合 |
+| `table/table-basic-sample03.xlsx` | 隣接表(縦横) | `xlsx2md-spec.md` 7, 8 | 4表密集時の過剰な一体検出 |
+| `table/table-basic-sample11.xlsx` | 方眼紙表(単体) | `xlsx2md-spec.md` 7, 8, 13 | merge 多用の方眼紙風表の取りこぼし |
+| `table/table-basic-sample12.xlsx` | 方眼紙表(縦) | `xlsx2md-spec.md` 7, 8, 13 | merge 多用の方眼紙風 2 表の誤結合 |
+| `table/table-basic-sample13.xlsx` | 方眼紙表(縦横) | `xlsx2md-spec.md` 7, 8, 13 | merge 多用の方眼紙風 4 表の誤結合 |
+| `table/table-basic-sample14.xlsx` | 方眼紙表(結合漏れ) | `xlsx2md-spec.md` 7, 8, 13 | merge 多用表で一部だけ結合漏れがある場合の崩れ |
+| `table/table-basic-sample15.xlsx` | 方眼紙表(縦結合混在) | `xlsx2md-spec.md` 7, 8, 13 | merge 多用表で縦結合が混じる場合の崩れ |
 
 ### ルート直下
 
@@ -43,6 +51,49 @@
   - 横結合、縦結合、2x2 結合と `[MERGED←] / [MERGED↑]` を確認する
   - 対応章: `xlsx2md-spec.md` 13
   - 主に確認する症状: `[MERGED←] / [MERGED↑]` の崩れ
+
+### `table/`
+
+- `table-basic-sample01.xlsx`
+  - 独立した表が縦に密接しているケース
+  - 見出し行や注記行を挟まずに上下へ並ぶ 2 表を確認する
+  - 対応章: `xlsx2md-spec.md` 7, 8
+  - 主に確認する症状: 縦に密接した独立表の誤結合
+- `table-basic-sample02.xlsx`
+  - 独立した表が横に密接しているケース
+  - 表の間に補助列の文字セルがあっても別表として扱えるか確認する
+  - 対応章: `xlsx2md-spec.md` 7, 8
+  - 主に確認する症状: 横に密接した独立表の誤結合、補助列の narrative 混入
+- `table-basic-sample03.xlsx`
+  - 独立した表が縦横に密接して 4 表並ぶケース
+  - 2x2 配置の全体を 1 つの大きな表として誤検出しないか確認する
+  - 対応章: `xlsx2md-spec.md` 7, 8
+  - 主に確認する症状: 4表密集時の過剰な一体検出
+- `table-basic-sample11.xlsx`
+  - 方眼紙風に merge を多用した単表ケース
+  - 見た目上は広い方眼紙でも 1 つの表として抽出できるか確認する
+  - 対応章: `xlsx2md-spec.md` 7, 8, 13
+  - 主に確認する症状: merge 多用の方眼紙風表の取りこぼし
+- `table-basic-sample12.xlsx`
+  - 方眼紙風に merge を多用した表が縦に 2 つ並ぶケース
+  - 説明セルを挟んでも上下の表を別表として扱えるか確認する
+  - 対応章: `xlsx2md-spec.md` 7, 8, 13
+  - 主に確認する症状: merge 多用の方眼紙風 2 表の誤結合
+- `table-basic-sample13.xlsx`
+  - 方眼紙風に merge を多用した表が縦横に 4 つ並ぶケース
+  - 2x2 配置でも各表を独立して検出できるか確認する
+  - 対応章: `xlsx2md-spec.md` 7, 8, 13
+  - 主に確認する症状: merge 多用の方眼紙風 4 表の誤結合
+- `table-basic-sample14.xlsx`
+  - 方眼紙風に merge を多用した単表で、一部に結合漏れセルがあるケース
+  - 多少の merge 崩れがあっても表全体を 1 表として扱えるか確認する
+  - 対応章: `xlsx2md-spec.md` 7, 8, 13
+  - 主に確認する症状: merge 多用表で一部だけ結合漏れがある場合の崩れ
+- `table-basic-sample15.xlsx`
+  - 方眼紙風に merge を多用した単表で、備考列に縦結合が混ざるケース
+  - `MERGED↑` を含む表でも Markdown 表として壊れないか確認する
+  - 対応章: `xlsx2md-spec.md` 7, 8, 13
+  - 主に確認する症状: merge 多用表で縦結合が混じる場合の崩れ
 
 ## 作成予定 fixture
 
