@@ -9,6 +9,10 @@ import { describe, expect, it } from "vitest";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const markdownNormalizeCode = readFileSync(
+  path.resolve(__dirname, "../src/xlsx2md/js/markdown-normalize.js"),
+  "utf8"
+);
 const narrativeStructureCode = readFileSync(
   path.resolve(__dirname, "../src/xlsx2md/js/narrative-structure.js"),
   "utf8"
@@ -16,6 +20,7 @@ const narrativeStructureCode = readFileSync(
 
 function bootNarrativeStructure() {
   document.body.innerHTML = "";
+  new Function(markdownNormalizeCode)();
   new Function(narrativeStructureCode)();
   return globalThis.__xlsx2mdNarrativeStructure;
 }

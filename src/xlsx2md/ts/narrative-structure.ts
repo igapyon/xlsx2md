@@ -1,4 +1,15 @@
 (() => {
+  const markdownNormalizeHelper = (globalThis as typeof globalThis & {
+    __xlsx2mdMarkdownNormalize?: {
+      normalizeMarkdownText: (text: string) => string;
+      normalizeMarkdownHeadingText: (text: string) => string;
+      normalizeMarkdownListItemText: (text: string) => string;
+    };
+  }).__xlsx2mdMarkdownNormalize;
+  if (!markdownNormalizeHelper) {
+    throw new Error("xlsx2md markdown normalize module is not loaded");
+  }
+
   type NarrativeItem = {
     row: number;
     startCol: number;
@@ -16,7 +27,7 @@
 
   function renderNarrativeBlock(block: NarrativeBlock): string {
     if (!block.items || block.items.length === 0) {
-      return block.lines.join("\n");
+      return block.lines.map((line) => markdownNormalizeHelper.normalizeMarkdownText(line)).join("\n");
     }
     const parts: string[] = [];
     let index = 0;
@@ -30,15 +41,15 @@
         }
         const childLines = block.items
           .slice(index + 1, childEnd)
-          .map((item) => `- ${item.text}`);
-        parts.push(`### ${current.text}`);
+          .map((item) => `- ${markdownNormalizeHelper.normalizeMarkdownListItemText(item.text)}`);
+        parts.push(`### ${markdownNormalizeHelper.normalizeMarkdownHeadingText(current.text)}`);
         if (childLines.length > 0) {
           parts.push(childLines.join("\n"));
         }
         index = childEnd;
         continue;
       }
-      parts.push(current.text);
+      parts.push(markdownNormalizeHelper.normalizeMarkdownText(current.text));
       index += 1;
     }
     return parts.join("\n\n");

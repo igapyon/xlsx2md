@@ -58,9 +58,22 @@
   if (!zipIoHelper) {
     throw new Error("xlsx2md zip io module is not loaded");
   }
+  const markdownNormalizeHelper = (globalThis as typeof globalThis & {
+    __xlsx2mdMarkdownNormalize?: {
+      normalizeMarkdownText: (text: string) => string;
+      normalizeMarkdownTableCell: (text: string) => string;
+    };
+  }).__xlsx2mdMarkdownNormalize;
+  if (!markdownNormalizeHelper) {
+    throw new Error("xlsx2md markdown normalize module is not loaded");
+  }
+
+  function normalizeMarkdownLineBreaks(text: string): string {
+    return markdownNormalizeHelper.normalizeMarkdownText(text);
+  }
 
   function escapeMarkdownCell(text: string): string {
-    return String(text || "").replace(/\|/g, "\\|").replace(/\n/g, "<br>");
+    return markdownNormalizeHelper.normalizeMarkdownTableCell(text);
   }
 
   function renderMarkdownTable(rows: string[][], treatFirstRowAsHeader: boolean): string {
@@ -178,6 +191,7 @@
       createCombinedMarkdownExportFile: typeof createCombinedMarkdownExportFile;
       createExportEntries: typeof createExportEntries;
       createWorkbookExportArchive: typeof createWorkbookExportArchive;
+      normalizeMarkdownLineBreaks: typeof normalizeMarkdownLineBreaks;
       textEncoder: typeof textEncoder;
     };
   }).__xlsx2mdMarkdownExport = {
@@ -189,6 +203,7 @@
     createCombinedMarkdownExportFile,
     createExportEntries,
     createWorkbookExportArchive,
+    normalizeMarkdownLineBreaks,
     textEncoder
   };
 })();

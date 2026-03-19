@@ -13,6 +13,10 @@ const zipIoCode = readFileSync(
   path.resolve(__dirname, "../src/xlsx2md/js/zip-io.js"),
   "utf8"
 );
+const markdownNormalizeCode = readFileSync(
+  path.resolve(__dirname, "../src/xlsx2md/js/markdown-normalize.js"),
+  "utf8"
+);
 const markdownExportCode = readFileSync(
   path.resolve(__dirname, "../src/xlsx2md/js/markdown-export.js"),
   "utf8"
@@ -21,11 +25,18 @@ const markdownExportCode = readFileSync(
 function bootMarkdownExport() {
   document.body.innerHTML = "";
   new Function(zipIoCode)();
+  new Function(markdownNormalizeCode)();
   new Function(markdownExportCode)();
   return globalThis.__xlsx2mdMarkdownExport;
 }
 
 describe("xlsx2md markdown export", () => {
+  it("normalizes line breaks into spaces", () => {
+    const api = bootMarkdownExport();
+
+    expect(api.normalizeMarkdownLineBreaks("a\r\nb\nc\rd")).toBe("a b c d");
+  });
+
   it("renders markdown tables with escaped cell content", () => {
     const api = bootMarkdownExport();
 
@@ -35,7 +46,7 @@ describe("xlsx2md markdown export", () => {
     ], true);
 
     expect(markdown).toBe(
-      "| Name | Notes |\n| --- | --- |\n| A\\|B | line1<br>line2 |"
+      "| Name | Notes |\n| --- | --- |\n| A\\|B | line1 line2 |"
     );
   });
 
