@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -1498,113 +1498,113 @@ lht-preview-output {
     <section class="md-card md-surface-card">
       <lht-page-hero
         title="xlsx2md"
-        subtitle="Excel 設計書 (.xlsx) を解析し、Markdown へ変換します。"
+        subtitle="Analyze an Excel workbook (.xlsx) and convert it to Markdown."
         icon="📘"
-        help-label="xlsx2md の説明"
+        help-label="About xlsx2md"
         help-wide
         action-href="https://github.com/igapyon/xlsx2md"
         action-aria-label="Open xlsx2md repository"
         action-icon-id="md-icon-github"
         menu-home-href="./index.html"
-        menu-home-label="トップへ戻る">
-        `.xlsx` ファイルをローカルで解析し、地の文抽出・表検出・結合セル補完を行ったうえで Markdown を生成します。
+        menu-home-label="Back to Home">
+        Analyze a local `.xlsx` file, extract narrative text, detect tables, fill merged cells, and generate Markdown.
       </lht-page-hero>
 
       <section class="md-section md-stack-md">
-        <h2 class="md-section-title">入力</h2>
+        <h2 class="md-section-title">Input</h2>
         <div class="md-panel md-stack-sm">
           <lht-file-select
             input-id="xlsxFileInput"
             button-id="xlsxFileSelectBtn"
             file-name-id="xlsxFileName"
             accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            button-label="xlsx ファイルを選択"
-            placeholder="未選択"
+            button-label="Select xlsx File"
+            placeholder="No file selected"
             show-file-name>
           </lht-file-select>
-          <div class="md-caption">ローカルで処理します。サーバ送信は行いません。変換は常に全シートを対象に行います。</div>
+          <div class="md-caption">Processing stays local in your browser. No data is sent to a server. Conversion always covers all sheets.</div>
         </div>
       </section>
 
       <details class="md-section md-accordion">
         <summary class="md-accordion-summary">
-          <span class="md-section-title">変換設定</span>
+          <span class="md-section-title">Conversion Settings</span>
         </summary>
         <div class="md-accordion-body md-stack-md">
           <div class="md-grid md-grid--options">
-            <lht-select-help field-id="outputModeSelect" label="出力モード" help-text="Markdown に表示値を出すか、raw 値を出すかを選択します。既定は Excel 表示寄りの `display` です。">
+            <lht-select-help field-id="outputModeSelect" label="Output Mode" help-text="Choose whether Markdown should use displayed values, raw values, or both. The default is `display`, which stays close to Excel's rendered view.">
               <script type="application/json" slot="options">
                 [
-                  { "value": "display", "label": "display: 表示値優先", "selected": true },
-                  { "value": "raw", "label": "raw: 内部値優先" },
-                  { "value": "both", "label": "both: 両方表示" }
+                  { "value": "display", "label": "display: prefer displayed values", "selected": true },
+                  { "value": "raw", "label": "raw: prefer internal values" },
+                  { "value": "both", "label": "both: include both" }
                 ]
               </script>
             </lht-select-help>
-            <lht-switch-help switch-id="headerRowEnabled" label="先頭行をヘッダーとして扱う" help-label="ヘッダー行の説明" checked>
-              表の1行目を Markdown テーブルのヘッダー行として扱います。
+            <lht-switch-help switch-id="headerRowEnabled" label="Treat the first row as a header" help-label="About header rows" checked>
+              Use the first row of each detected table as the Markdown table header.
             </lht-switch-help>
-            <lht-switch-help switch-id="trimTextEnabled" label="前後空白を trim する" help-label="trim の説明" checked>
-              文字列セルの前後空白を取り除きます。
+            <lht-switch-help switch-id="trimTextEnabled" label="Trim surrounding whitespace" help-label="About trimming" checked>
+              Remove leading and trailing whitespace from text cells.
             </lht-switch-help>
-            <lht-switch-help switch-id="removeEmptyRowsEnabled" label="空行を除外する" help-label="空行除外の説明" checked>
-              表や地の文の中で、値のない行を可能な限り除外します。
+            <lht-switch-help switch-id="removeEmptyRowsEnabled" label="Remove empty rows" help-label="About empty-row removal" checked>
+              Remove empty rows from detected tables and narrative blocks where possible.
             </lht-switch-help>
-            <lht-switch-help switch-id="removeEmptyColumnsEnabled" label="空列を除外する" help-label="空列除外の説明" checked>
-              表の中で、値のない列を可能な限り除外します。
+            <lht-switch-help switch-id="removeEmptyColumnsEnabled" label="Remove empty columns" help-label="About empty-column removal" checked>
+              Remove empty columns from detected tables where possible.
             </lht-switch-help>
           </div>
-          <div id="outputModeNotice" class="md-caption">`display` は Excel の表示値寄りで出力します。</div>
+          <div id="outputModeNotice" class="md-caption">`display` outputs values close to what Excel shows.</div>
         </div>
       </details>
 
       <section class="md-section md-stack-md">
         <div class="md-actions">
-          <button id="convertBtn" class="md-button md-button--primary" type="button">Markdown へ変換</button>
-          <button id="downloadBtn" class="md-button md-button--secondary" type="button" disabled>Markdown 保存</button>
-          <button id="exportZipBtn" class="md-button md-button--secondary" type="button" disabled>Markdown+assets ZIP保存</button>
+          <button id="convertBtn" class="md-button md-button--primary" type="button">Convert to Markdown</button>
+          <button id="downloadBtn" class="md-button md-button--secondary" type="button" disabled>Save Markdown</button>
+          <button id="exportZipBtn" class="md-button md-button--secondary" type="button" disabled>Save ZIP with Markdown and Assets</button>
         </div>
-        <lht-loading-overlay id="loadingOverlay" text="xlsx を解析しています"></lht-loading-overlay>
+        <lht-loading-overlay id="loadingOverlay" text="Analyzing xlsx"></lht-loading-overlay>
         <lht-error-alert id="errorAlert"></lht-error-alert>
       </section>
 
       <section class="md-section md-stack-md">
         <div class="md-panel md-stack-sm">
           <h2 class="md-section-title">Markdown</h2>
-          <div id="previewModeBanner" class="md-caption" hidden>`raw` / `both` モードでは、表示値以外の情報を含む場合があります。</div>
-          <lht-preview-output id="markdownPreview" preview-id="markdownOutput" preview-tag="pre" placeholder="ここに Markdown が表示されます"></lht-preview-output>
+          <div id="previewModeBanner" class="md-caption" hidden>`raw` and `both` modes may include information beyond Excel's displayed values.</div>
+          <lht-preview-output id="markdownPreview" preview-id="markdownOutput" preview-tag="pre" placeholder="Markdown will appear here"></lht-preview-output>
         </div>
       </section>
 
       <details class="md-section md-accordion">
         <summary class="md-accordion-summary">
-          <span class="md-section-title">解析サマリー</span>
+          <span class="md-section-title">Analysis Summary</span>
         </summary>
         <div class="md-accordion-body">
-          <div id="analysisSummary" class="md-summary-list">まだ変換していません。</div>
+          <div id="analysisSummary" class="md-summary-list">No conversion yet.</div>
         </div>
       </details>
 
       <details class="md-section md-accordion">
         <summary class="md-accordion-summary">
-          <span class="md-section-title">表候補スコア</span>
+          <span class="md-section-title">Table Candidate Scores</span>
         </summary>
         <div class="md-accordion-body">
           <div class="md-panel md-stack-sm">
             <div class="md-legend">
               <span class="md-summary-item-status md-summary-item-status--strong">strong</span>
-              <span class="md-caption">7点以上の強い表候補</span>
+              <span class="md-caption">Strong table candidates with a score of 7 or higher</span>
               <span class="md-summary-item-status md-summary-item-status--candidate">candidate</span>
-              <span class="md-caption">4-6点の表候補</span>
+              <span class="md-caption">Table candidates with a score of 4 to 6</span>
             </div>
-            <div id="scoreSummary" class="md-summary-list">まだ変換していません。</div>
+            <div id="scoreSummary" class="md-summary-list">No conversion yet.</div>
           </div>
         </div>
       </details>
 
       <details class="md-section md-accordion">
         <summary class="md-accordion-summary">
-          <span class="md-section-title">数式診断</span>
+          <span class="md-section-title">Formula Diagnostics</span>
         </summary>
         <div class="md-accordion-body">
           <div class="md-panel md-stack-sm">
@@ -1612,9 +1612,8 @@ lht-preview-output {
               <span class="md-summary-item-status md-summary-item-status--resolved">resolved</span>
               <span class="md-summary-item-status md-summary-item-status--fallback">fallback</span>
               <span class="md-summary-item-status md-summary-item-status--unsupported">unsupported</span>
-              <span class="md-caption">解決済み / フォールバック / 未対応外部参照</span>
             </div>
-            <div id="formulaSummary" class="md-summary-list">まだ変換していません。</div>
+            <div id="formulaSummary" class="md-summary-list">No conversion yet.</div>
           </div>
         </div>
       </details>
@@ -1623,6 +1622,14 @@ lht-preview-output {
     </section>
   </main>
 
+  
+  
+  
+  
+  
+  
+  
+  
   
   
   
@@ -3918,6 +3925,929 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+(() => {
+    const textDecoder = new TextDecoder("utf-8");
+    const textEncoder = new TextEncoder();
+    const crcTable = buildCrc32Table();
+    function buildCrc32Table() {
+        const table = new Uint32Array(256);
+        for (let i = 0; i < 256; i += 1) {
+            let value = i;
+            for (let bit = 0; bit < 8; bit += 1) {
+                value = (value & 1) === 1 ? (0xedb88320 ^ (value >>> 1)) : (value >>> 1);
+            }
+            table[i] = value >>> 0;
+        }
+        return table;
+    }
+    function crc32(bytes) {
+        let crc = 0xffffffff;
+        for (const byte of bytes) {
+            crc = crcTable[(crc ^ byte) & 0xff] ^ (crc >>> 8);
+        }
+        return (crc ^ 0xffffffff) >>> 0;
+    }
+    function decodeXmlText(bytes) {
+        return textDecoder.decode(bytes);
+    }
+    function readUint16LE(view, offset) {
+        return view.getUint16(offset, true);
+    }
+    function readUint32LE(view, offset) {
+        return view.getUint32(offset, true);
+    }
+    async function inflateRaw(data) {
+        if (typeof DecompressionStream === "function") {
+            const stream = new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+            const buffer = await new Response(stream).arrayBuffer();
+            return new Uint8Array(buffer);
+        }
+        throw new Error("This environment does not support ZIP deflate decompression.");
+    }
+    async function unzipEntries(arrayBuffer) {
+        const view = new DataView(arrayBuffer);
+        let eocdOffset = -1;
+        for (let offset = view.byteLength - 22; offset >= Math.max(0, view.byteLength - 0x10000 - 22); offset -= 1) {
+            if (readUint32LE(view, offset) === 0x06054b50) {
+                eocdOffset = offset;
+                break;
+            }
+        }
+        if (eocdOffset < 0) {
+            throw new Error("ZIP end-of-central-directory record was not found.");
+        }
+        const centralDirectorySize = readUint32LE(view, eocdOffset + 12);
+        const centralDirectoryOffset = readUint32LE(view, eocdOffset + 16);
+        const endOffset = centralDirectoryOffset + centralDirectorySize;
+        const entries = [];
+        let cursor = centralDirectoryOffset;
+        while (cursor < endOffset) {
+            if (readUint32LE(view, cursor) !== 0x02014b50) {
+                throw new Error("ZIP central directory format is invalid.");
+            }
+            const compressionMethod = readUint16LE(view, cursor + 10);
+            const compressedSize = readUint32LE(view, cursor + 20);
+            const uncompressedSize = readUint32LE(view, cursor + 24);
+            const fileNameLength = readUint16LE(view, cursor + 28);
+            const extraFieldLength = readUint16LE(view, cursor + 30);
+            const fileCommentLength = readUint16LE(view, cursor + 32);
+            const localHeaderOffset = readUint32LE(view, cursor + 42);
+            const fileNameBytes = new Uint8Array(arrayBuffer, cursor + 46, fileNameLength);
+            const name = decodeXmlText(fileNameBytes);
+            entries.push({
+                name,
+                compressionMethod,
+                compressedSize,
+                uncompressedSize,
+                localHeaderOffset
+            });
+            cursor += 46 + fileNameLength + extraFieldLength + fileCommentLength;
+        }
+        const files = new Map();
+        for (const entry of entries) {
+            const localOffset = entry.localHeaderOffset;
+            if (readUint32LE(view, localOffset) !== 0x04034b50) {
+                throw new Error(`ZIP local header is invalid: ${entry.name}`);
+            }
+            const fileNameLength = readUint16LE(view, localOffset + 26);
+            const extraFieldLength = readUint16LE(view, localOffset + 28);
+            const dataOffset = localOffset + 30 + fileNameLength + extraFieldLength;
+            const compressedData = new Uint8Array(arrayBuffer, dataOffset, entry.compressedSize);
+            let fileData;
+            if (entry.compressionMethod === 0) {
+                fileData = new Uint8Array(compressedData);
+            }
+            else if (entry.compressionMethod === 8) {
+                fileData = await inflateRaw(compressedData);
+            }
+            else {
+                throw new Error(`Unsupported compression method: ${entry.name} (method=${entry.compressionMethod})`);
+            }
+            files.set(entry.name, fileData);
+        }
+        return files;
+    }
+    function createStoredZip(entries) {
+        const localChunks = [];
+        const centralChunks = [];
+        let offset = 0;
+        for (const entry of entries) {
+            const nameBytes = textEncoder.encode(entry.name);
+            const dataBytes = entry.data;
+            const entryCrc32 = crc32(dataBytes);
+            const localHeader = new Uint8Array(30 + nameBytes.length);
+            const localView = new DataView(localHeader.buffer);
+            localView.setUint32(0, 0x04034b50, true);
+            localView.setUint16(4, 20, true);
+            localView.setUint16(6, 0, true);
+            localView.setUint16(8, 0, true);
+            localView.setUint16(10, 0, true);
+            localView.setUint16(12, 0, true);
+            localView.setUint32(14, entryCrc32, true);
+            localView.setUint32(18, dataBytes.length, true);
+            localView.setUint32(22, dataBytes.length, true);
+            localView.setUint16(26, nameBytes.length, true);
+            localView.setUint16(28, 0, true);
+            localHeader.set(nameBytes, 30);
+            localChunks.push(localHeader, dataBytes);
+            const centralHeader = new Uint8Array(46 + nameBytes.length);
+            const centralView = new DataView(centralHeader.buffer);
+            centralView.setUint32(0, 0x02014b50, true);
+            centralView.setUint16(4, 20, true);
+            centralView.setUint16(6, 20, true);
+            centralView.setUint16(8, 0, true);
+            centralView.setUint16(10, 0, true);
+            centralView.setUint16(12, 0, true);
+            centralView.setUint16(14, 0, true);
+            centralView.setUint32(16, entryCrc32, true);
+            centralView.setUint32(20, dataBytes.length, true);
+            centralView.setUint32(24, dataBytes.length, true);
+            centralView.setUint16(28, nameBytes.length, true);
+            centralView.setUint16(30, 0, true);
+            centralView.setUint16(32, 0, true);
+            centralView.setUint16(34, 0, true);
+            centralView.setUint16(36, 0, true);
+            centralView.setUint32(38, 0, true);
+            centralView.setUint32(42, offset, true);
+            centralHeader.set(nameBytes, 46);
+            centralChunks.push(centralHeader);
+            offset += localHeader.length + dataBytes.length;
+        }
+        const centralDirectoryStart = offset;
+        const centralDirectorySize = centralChunks.reduce((sum, chunk) => sum + chunk.length, 0);
+        const eocd = new Uint8Array(22);
+        const eocdView = new DataView(eocd.buffer);
+        eocdView.setUint32(0, 0x06054b50, true);
+        eocdView.setUint16(4, 0, true);
+        eocdView.setUint16(6, 0, true);
+        eocdView.setUint16(8, entries.length, true);
+        eocdView.setUint16(10, entries.length, true);
+        eocdView.setUint32(12, centralDirectorySize, true);
+        eocdView.setUint32(16, centralDirectoryStart, true);
+        eocdView.setUint16(20, 0, true);
+        const totalLength = localChunks.reduce((sum, chunk) => sum + chunk.length, 0) + centralDirectorySize + eocd.length;
+        const output = new Uint8Array(totalLength);
+        let cursor = 0;
+        for (const chunk of localChunks) {
+            output.set(chunk, cursor);
+            cursor += chunk.length;
+        }
+        for (const chunk of centralChunks) {
+            output.set(chunk, cursor);
+            cursor += chunk.length;
+        }
+        output.set(eocd, cursor);
+        return output;
+    }
+    globalThis.__xlsx2mdZipIo = {
+        unzipEntries,
+        createStoredZip
+    };
+})();
+  </script>
+
+  <script>
+(() => {
+    function getCellAt(cellMap, row, col) {
+        return cellMap.get(`${row}:${col}`);
+    }
+    function hasNormalizedBorderOnSide(cellMap, row, col, side) {
+        const cell = getCellAt(cellMap, row, col);
+        if (side === "top") {
+            const above = getCellAt(cellMap, row - 1, col);
+            return !!(cell === null || cell === void 0 ? void 0 : cell.borders.top) || !!(above === null || above === void 0 ? void 0 : above.borders.bottom);
+        }
+        if (side === "bottom") {
+            const below = getCellAt(cellMap, row + 1, col);
+            return !!(cell === null || cell === void 0 ? void 0 : cell.borders.bottom) || !!(below === null || below === void 0 ? void 0 : below.borders.top);
+        }
+        if (side === "left") {
+            const left = getCellAt(cellMap, row, col - 1);
+            return !!(cell === null || cell === void 0 ? void 0 : cell.borders.left) || !!(left === null || left === void 0 ? void 0 : left.borders.right);
+        }
+        const right = getCellAt(cellMap, row, col + 1);
+        return !!(cell === null || cell === void 0 ? void 0 : cell.borders.right) || !!(right === null || right === void 0 ? void 0 : right.borders.left);
+    }
+    function hasAnyNormalizedBorder(cellMap, row, col) {
+        return hasNormalizedBorderOnSide(cellMap, row, col, "top")
+            || hasNormalizedBorderOnSide(cellMap, row, col, "bottom")
+            || hasNormalizedBorderOnSide(cellMap, row, col, "left")
+            || hasNormalizedBorderOnSide(cellMap, row, col, "right");
+    }
+    function collectTableEdgeStats(cellMap, row, startCol, endCol) {
+        let nonEmptyCount = 0;
+        let borderCount = 0;
+        let rawBorderCount = 0;
+        let topCount = 0;
+        let bottomCount = 0;
+        let maxTextLength = 0;
+        for (let col = startCol; col <= endCol; col += 1) {
+            const cell = getCellAt(cellMap, row, col);
+            const text = String((cell === null || cell === void 0 ? void 0 : cell.outputValue) || "").trim();
+            if (text) {
+                nonEmptyCount += 1;
+                maxTextLength = Math.max(maxTextLength, text.length);
+            }
+            if (hasAnyNormalizedBorder(cellMap, row, col)) {
+                borderCount += 1;
+            }
+            if (cell && (cell.borders.top || cell.borders.bottom || cell.borders.left || cell.borders.right)) {
+                rawBorderCount += 1;
+            }
+            if (hasNormalizedBorderOnSide(cellMap, row, col, "top")) {
+                topCount += 1;
+            }
+            if (hasNormalizedBorderOnSide(cellMap, row, col, "bottom")) {
+                bottomCount += 1;
+            }
+        }
+        return { nonEmptyCount, borderCount, rawBorderCount, topCount, bottomCount, maxTextLength };
+    }
+    function countNormalizedBorderedCells(cellMap, startRow, startCol, endRow, endCol) {
+        let count = 0;
+        for (let row = startRow; row <= endRow; row += 1) {
+            for (let col = startCol; col <= endCol; col += 1) {
+                if (hasAnyNormalizedBorder(cellMap, row, col)) {
+                    count += 1;
+                }
+            }
+        }
+        return count;
+    }
+    globalThis.__xlsx2mdBorderGrid = {
+        getCellAt,
+        hasNormalizedBorderOnSide,
+        hasAnyNormalizedBorder,
+        collectTableEdgeStats,
+        countNormalizedBorderedCells
+    };
+})();
+  </script>
+
+  <script>
+(() => {
+    function renderNarrativeBlock(block) {
+        if (!block.items || block.items.length === 0) {
+            return block.lines.join("\n");
+        }
+        const parts = [];
+        let index = 0;
+        while (index < block.items.length) {
+            const current = block.items[index];
+            const next = block.items[index + 1];
+            if (current && next && next.startCol > current.startCol) {
+                let childEnd = index + 1;
+                while (childEnd < block.items.length && block.items[childEnd].startCol > current.startCol) {
+                    childEnd += 1;
+                }
+                const childLines = block.items
+                    .slice(index + 1, childEnd)
+                    .map((item) => `- ${item.text}`);
+                parts.push(`### ${current.text}`);
+                if (childLines.length > 0) {
+                    parts.push(childLines.join("\n"));
+                }
+                index = childEnd;
+                continue;
+            }
+            parts.push(current.text);
+            index += 1;
+        }
+        return parts.join("\n\n");
+    }
+    function isSectionHeadingNarrativeBlock(block) {
+        if (!block || !block.items || block.items.length < 2) {
+            return false;
+        }
+        return block.items[1].startCol > block.items[0].startCol;
+    }
+    globalThis.__xlsx2mdNarrativeStructure = {
+        renderNarrativeBlock,
+        isSectionHeadingNarrativeBlock
+    };
+})();
+  </script>
+
+  <script>
+(() => {
+    const DEFAULT_TABLE_SCORE_WEIGHTS = {
+        minGrid: 2,
+        borderPresence: 3,
+        densityHigh: 2,
+        densityVeryHigh: 1,
+        headerish: 2,
+        mergeHeavyPenalty: -1,
+        prosePenalty: -2,
+        threshold: 4
+    };
+    const borderGridHelper = globalThis.__xlsx2mdBorderGrid;
+    if (!borderGridHelper) {
+        throw new Error("xlsx2md border grid module is not loaded");
+    }
+    function collectTableSeedCells(sheet) {
+        return sheet.cells.filter((cell) => {
+            const hasValue = !!String(cell.outputValue || "").trim();
+            const hasBorder = cell.borders.top || cell.borders.bottom || cell.borders.left || cell.borders.right;
+            return hasValue || hasBorder;
+        });
+    }
+    function detectTableCandidates(sheet, buildCellMap, scoreWeights = DEFAULT_TABLE_SCORE_WEIGHTS) {
+        const seedCells = collectTableSeedCells(sheet);
+        const cellMap = buildCellMap(sheet);
+        const positionMap = new Map();
+        for (const cell of seedCells) {
+            positionMap.set(`${cell.row}:${cell.col}`, cell);
+        }
+        const visited = new Set();
+        const candidates = [];
+        for (const cell of seedCells) {
+            const key = `${cell.row}:${cell.col}`;
+            if (visited.has(key))
+                continue;
+            const queue = [cell];
+            const component = [];
+            visited.add(key);
+            while (queue.length > 0) {
+                const current = queue.shift();
+                component.push(current);
+                for (const [rowDelta, colDelta] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+                    const nextKey = `${current.row + rowDelta}:${current.col + colDelta}`;
+                    const nextCell = positionMap.get(nextKey);
+                    if (!nextCell || visited.has(nextKey))
+                        continue;
+                    visited.add(nextKey);
+                    queue.push(nextCell);
+                }
+            }
+            const rows = component.map((entry) => entry.row);
+            const cols = component.map((entry) => entry.col);
+            const startRow = Math.min(...rows);
+            const endRow = Math.max(...rows);
+            const startCol = Math.min(...cols);
+            const endCol = Math.max(...cols);
+            const area = Math.max(1, (endRow - startRow + 1) * (endCol - startCol + 1));
+            const density = component.filter((entry) => entry.outputValue.trim()).length / area;
+            const rowCount = endRow - startRow + 1;
+            const colCount = endCol - startCol + 1;
+            if (rowCount < 2 || colCount < 2) {
+                continue;
+            }
+            let score = 0;
+            const reasons = [];
+            const normalizedBorderedCellCount = borderGridHelper.countNormalizedBorderedCells(cellMap, startRow, startCol, endRow, endCol);
+            if (rowCount >= 2 && colCount >= 2) {
+                score += scoreWeights.minGrid;
+                reasons.push(`At least 2x2 (+${scoreWeights.minGrid})`);
+            }
+            if (normalizedBorderedCellCount >= Math.max(2, Math.ceil(component.length * 0.3))) {
+                score += scoreWeights.borderPresence;
+                reasons.push(`Has borders (+${scoreWeights.borderPresence})`);
+            }
+            if (density >= 0.55) {
+                score += scoreWeights.densityHigh;
+                reasons.push(`High density (+${scoreWeights.densityHigh})`);
+            }
+            if (density >= 0.8) {
+                score += scoreWeights.densityVeryHigh;
+                reasons.push(`Very high density (+${scoreWeights.densityVeryHigh})`);
+            }
+            const firstRowCells = component.filter((entry) => entry.row === startRow).sort((a, b) => a.col - b.col);
+            const headerishCount = firstRowCells.filter((entry) => {
+                const value = entry.outputValue.trim();
+                return value.length > 0 && value.length <= 24 && !/^\d+(?:\.\d+)?$/.test(value);
+            }).length;
+            if (headerishCount >= 2) {
+                score += scoreWeights.headerish;
+                reasons.push(`Header-like first row (+${scoreWeights.headerish})`);
+            }
+            const mergedArea = sheet.merges.filter((merge) => {
+                return !(merge.endRow < startRow || merge.startRow > endRow || merge.endCol < startCol || merge.startCol > endCol);
+            }).length;
+            if (mergedArea >= Math.max(2, Math.ceil(area * 0.08))) {
+                score += scoreWeights.mergeHeavyPenalty;
+                reasons.push(`Many merged cells (${scoreWeights.mergeHeavyPenalty})`);
+            }
+            if (mergedArea >= 2 && rowCount <= 6 && colCount >= 10 && density < 0.25) {
+                continue;
+            }
+            const nonEmptyCells = component.filter((entry) => entry.outputValue.trim());
+            const avgTextLength = nonEmptyCells
+                .reduce((sum, entry) => sum + entry.outputValue.trim().length, 0) / Math.max(1, nonEmptyCells.length);
+            if (avgTextLength > 36 && density < 0.7) {
+                score += scoreWeights.prosePenalty;
+                reasons.push(`Mostly long prose (${scoreWeights.prosePenalty})`);
+            }
+            if (score >= scoreWeights.threshold) {
+                const normalizedBounds = trimTableCandidateBounds(cellMap, {
+                    startRow,
+                    startCol,
+                    endRow,
+                    endCol
+                });
+                candidates.push({
+                    startRow: normalizedBounds.startRow,
+                    startCol: normalizedBounds.startCol,
+                    endRow: normalizedBounds.endRow,
+                    endCol: normalizedBounds.endCol,
+                    score,
+                    reasonSummary: reasons
+                });
+            }
+        }
+        return candidates.sort((left, right) => {
+            if (left.startRow !== right.startRow)
+                return left.startRow - right.startRow;
+            return left.startCol - right.startCol;
+        });
+    }
+    function trimTableCandidateBounds(cellMap, bounds) {
+        let { startRow, startCol, endRow, endCol } = bounds;
+        const minBorderedCells = Math.max(2, Math.ceil((endCol - startCol + 1) * 0.5));
+        for (let row = startRow + 1; row <= endRow; row += 1) {
+            const currentStats = borderGridHelper.collectTableEdgeStats(cellMap, row, startCol, endCol);
+            const previousStats = borderGridHelper.collectTableEdgeStats(cellMap, row - 1, startCol, endCol);
+            const shouldBreakAtCurrentRow = ((previousStats.borderCount >= minBorderedCells
+                || previousStats.bottomCount >= minBorderedCells
+                || currentStats.topCount >= minBorderedCells)
+                && currentStats.rawBorderCount === 0
+                && currentStats.nonEmptyCount <= 1);
+            if (shouldBreakAtCurrentRow) {
+                endRow = row - 1;
+                break;
+            }
+        }
+        while (endRow - startRow + 1 >= 2) {
+            const bottomStats = borderGridHelper.collectTableEdgeStats(cellMap, endRow, startCol, endCol);
+            const previousStats = borderGridHelper.collectTableEdgeStats(cellMap, endRow - 1, startCol, endCol);
+            const shouldTrimBottom = ((previousStats.borderCount >= minBorderedCells
+                || previousStats.bottomCount >= minBorderedCells
+                || bottomStats.topCount >= minBorderedCells)
+                && bottomStats.rawBorderCount === 0
+                && bottomStats.nonEmptyCount <= 1) || (bottomStats.nonEmptyCount <= 1
+                && bottomStats.rawBorderCount === 0
+                && bottomStats.maxTextLength >= 12
+                && previousStats.nonEmptyCount >= Math.max(2, Math.ceil((endCol - startCol + 1) * 0.5)));
+            if (!shouldTrimBottom) {
+                break;
+            }
+            endRow -= 1;
+        }
+        return { startRow, startCol, endRow, endCol };
+    }
+    function matrixFromCandidate(sheet, candidate, options, buildCellMap, formatCellForMarkdown) {
+        const cellMap = buildCellMap(sheet);
+        const rows = [];
+        for (let row = candidate.startRow; row <= candidate.endRow; row += 1) {
+            const currentRow = [];
+            for (let col = candidate.startCol; col <= candidate.endCol; col += 1) {
+                const cell = cellMap.get(`${row}:${col}`);
+                let value = formatCellForMarkdown(cell, options);
+                if (options.trimText !== false) {
+                    value = value.trim();
+                }
+                currentRow.push(value);
+            }
+            rows.push(currentRow);
+        }
+        applyMergeTokens(rows, sheet.merges, candidate.startRow, candidate.startCol, candidate.endRow, candidate.endCol);
+        let normalizedRows = rows;
+        if (options.removeEmptyRows !== false) {
+            normalizedRows = normalizedRows.filter((row) => row.some((cell) => isMeaningfulMarkdownCell(cell)));
+        }
+        if (options.removeEmptyColumns !== false && normalizedRows.length > 0) {
+            const keepColumnFlags = normalizedRows[0].map((_, colIndex) => normalizedRows.some((row) => isMeaningfulMarkdownCell(row[colIndex])));
+            normalizedRows = normalizedRows.map((row) => row.filter((_cell, colIndex) => keepColumnFlags[colIndex]));
+        }
+        return normalizedRows;
+    }
+    function isMeaningfulMarkdownCell(value) {
+        const text = String(value || "").trim();
+        if (!text)
+            return false;
+        return text !== "[MERGED←]" && text !== "[MERGED↑]";
+    }
+    function applyMergeTokens(matrix, merges, startRow, startCol, endRow, endCol) {
+        for (const merge of merges) {
+            if (merge.endRow < startRow || merge.startRow > endRow || merge.endCol < startCol || merge.startCol > endCol) {
+                continue;
+            }
+            for (let row = merge.startRow; row <= merge.endRow; row += 1) {
+                for (let col = merge.startCol; col <= merge.endCol; col += 1) {
+                    if (row === merge.startRow && col === merge.startCol)
+                        continue;
+                    const matrixRow = row - startRow;
+                    const matrixCol = col - startCol;
+                    if (!matrix[matrixRow] || typeof matrix[matrixRow][matrixCol] === "undefined") {
+                        continue;
+                    }
+                    matrix[matrixRow][matrixCol] = row === merge.startRow ? "[MERGED←]" : "[MERGED↑]";
+                }
+            }
+        }
+    }
+    globalThis.__xlsx2mdTableDetector = {
+        collectTableSeedCells,
+        detectTableCandidates,
+        trimTableCandidateBounds,
+        matrixFromCandidate,
+        isMeaningfulMarkdownCell,
+        applyMergeTokens,
+        defaultTableScoreWeights: DEFAULT_TABLE_SCORE_WEIGHTS
+    };
+})();
+  </script>
+
+  <script>
+(() => {
+    const textEncoder = new TextEncoder();
+    const zipIoHelper = globalThis.__xlsx2mdZipIo;
+    if (!zipIoHelper) {
+        throw new Error("xlsx2md zip io module is not loaded");
+    }
+    function escapeMarkdownCell(text) {
+        return String(text || "").replace(/\|/g, "\\|").replace(/\n/g, "<br>");
+    }
+    function renderMarkdownTable(rows, treatFirstRowAsHeader) {
+        if (rows.length === 0) {
+            return "";
+        }
+        const workingRows = rows.map((row) => row.map((cell) => escapeMarkdownCell(cell)));
+        if (workingRows.length === 1 && treatFirstRowAsHeader) {
+            workingRows.push(new Array(workingRows[0].length).fill(""));
+        }
+        const header = treatFirstRowAsHeader ? workingRows[0] : new Array(workingRows[0].length).fill("");
+        const body = treatFirstRowAsHeader ? workingRows.slice(1) : workingRows;
+        const lines = [
+            `| ${header.join(" | ")} |`,
+            `| ${header.map(() => "---").join(" | ")} |`
+        ];
+        for (const row of body) {
+            lines.push(`| ${row.join(" | ")} |`);
+        }
+        return lines.join("\n");
+    }
+    function sanitizeFileNameSegment(value, fallback) {
+        const normalized = String(value || "").normalize("NFKC");
+        const sanitized = normalized
+            .replace(/[\\/:*?"<>|]/g, "_")
+            .replace(/\s+/g, "_")
+            .replace(/[^\p{L}\p{N}._-]+/gu, "_")
+            .replace(/_+/g, "_")
+            .replace(/^[_ .-]+|[_ .-]+$/g, "");
+        return sanitized || fallback;
+    }
+    function createOutputFileName(workbookName, sheetIndex, sheetName, outputMode = "display") {
+        const bookBase = sanitizeFileNameSegment(workbookName.replace(/\.xlsx$/i, ""), "workbook");
+        const safeSheetName = sanitizeFileNameSegment(sheetName, `Sheet${sheetIndex}`);
+        const suffix = outputMode === "display" ? "" : `_${outputMode}`;
+        return `${bookBase}_${String(sheetIndex).padStart(3, "0")}_${safeSheetName}${suffix}.md`;
+    }
+    function createSummaryText(markdownFile) {
+        const resolvedCount = markdownFile.summary.formulaDiagnostics.filter((item) => item.status === "resolved").length;
+        const fallbackCount = markdownFile.summary.formulaDiagnostics.filter((item) => item.status === "fallback_formula").length;
+        const unsupportedCount = markdownFile.summary.formulaDiagnostics.filter((item) => item.status === "unsupported_external").length;
+        return [
+            `Output file: ${markdownFile.fileName}`,
+            `Output mode: ${markdownFile.summary.outputMode}`,
+            `Sections: ${markdownFile.summary.sections}`,
+            `Tables: ${markdownFile.summary.tables}`,
+            `Narrative blocks: ${markdownFile.summary.narrativeBlocks}`,
+            `Merged ranges: ${markdownFile.summary.merges}`,
+            `Images: ${markdownFile.summary.images}`,
+            `Charts: ${markdownFile.summary.charts}`,
+            `Analyzed cells: ${markdownFile.summary.cells}`,
+            `Formula resolved: ${resolvedCount}`,
+            `Formula fallback_formula: ${fallbackCount}`,
+            `Formula unsupported_external: ${unsupportedCount}`,
+            ...markdownFile.summary.tableScores.map((detail) => `Table candidate ${detail.range}: score ${detail.score} / ${detail.reasons.join(", ")}`)
+        ].join("\n");
+    }
+    function createCombinedMarkdownExportFile(workbook, markdownFiles) {
+        var _a;
+        const outputMode = ((_a = markdownFiles[0]) === null || _a === void 0 ? void 0 : _a.summary.outputMode) || "display";
+        const suffix = outputMode === "display" ? "" : `_${outputMode}`;
+        const fileName = `${String(workbook.name || "workbook").replace(/\.xlsx$/i, "")}${suffix}.md`;
+        const content = markdownFiles
+            .map((markdownFile) => `<!-- ${markdownFile.fileName.replace(/\.md$/i, "")} -->\n${markdownFile.markdown}`)
+            .join("\n\n");
+        return { fileName, content };
+    }
+    function createExportEntries(workbook, markdownFiles) {
+        const entries = [];
+        if (markdownFiles.length > 0) {
+            const combined = createCombinedMarkdownExportFile(workbook, markdownFiles);
+            entries.push({
+                name: `output/${combined.fileName}`,
+                data: textEncoder.encode(`${combined.content}\n`)
+            });
+        }
+        for (const sheet of workbook.sheets) {
+            for (const image of sheet.images) {
+                entries.push({
+                    name: `output/${image.path}`,
+                    data: image.data
+                });
+            }
+            for (const shape of sheet.shapes || []) {
+                if (!shape.svgPath || !shape.svgData)
+                    continue;
+                entries.push({
+                    name: `output/${shape.svgPath}`,
+                    data: shape.svgData
+                });
+            }
+        }
+        return entries;
+    }
+    function createWorkbookExportArchive(workbook, markdownFiles) {
+        return zipIoHelper.createStoredZip(createExportEntries(workbook, markdownFiles));
+    }
+    globalThis.__xlsx2mdMarkdownExport = {
+        escapeMarkdownCell,
+        renderMarkdownTable,
+        sanitizeFileNameSegment,
+        createOutputFileName,
+        createSummaryText,
+        createCombinedMarkdownExportFile,
+        createExportEntries,
+        createWorkbookExportArchive,
+        textEncoder
+    };
+})();
+  </script>
+
+  <script>
+(() => {
+    const EMPTY_BORDERS = {
+        top: false,
+        bottom: false,
+        left: false,
+        right: false
+    };
+    const textDecoder = new TextDecoder("utf-8");
+    const BUILTIN_FORMAT_CODES = {
+        0: "General",
+        1: "0",
+        2: "0.00",
+        3: "#,##0",
+        4: "#,##0.00",
+        9: "0%",
+        10: "0.00%",
+        11: "0.00E+00",
+        12: "# ?/?",
+        13: "# ??/??",
+        14: "yyyy/m/d",
+        15: "d-mmm-yy",
+        16: "d-mmm",
+        17: "mmm-yy",
+        18: "h:mm AM/PM",
+        19: "h:mm:ss AM/PM",
+        20: "h:mm",
+        21: "h:mm:ss",
+        22: "m/d/yy h:mm",
+        45: "mm:ss",
+        46: "[h]:mm:ss",
+        47: "mmss.0",
+        49: "@",
+        56: "m月d日"
+    };
+    function decodeXmlText(bytes) {
+        return textDecoder.decode(bytes);
+    }
+    function xmlToDocument(xmlText) {
+        return new DOMParser().parseFromString(xmlText, "application/xml");
+    }
+    function hasBorderSide(side) {
+        if (!side)
+            return false;
+        return side.hasAttribute("style") || side.children.length > 0;
+    }
+    function parseCellStyles(files) {
+        const stylesBytes = files.get("xl/styles.xml");
+        if (!stylesBytes) {
+            return [{
+                    borders: EMPTY_BORDERS,
+                    numFmtId: 0,
+                    formatCode: "General"
+                }];
+        }
+        const doc = xmlToDocument(decodeXmlText(stylesBytes));
+        const borderElements = Array.from(doc.getElementsByTagName("border"));
+        const borders = borderElements.map((borderElement) => {
+            const top = borderElement.getElementsByTagName("top")[0] || null;
+            const bottom = borderElement.getElementsByTagName("bottom")[0] || null;
+            const left = borderElement.getElementsByTagName("left")[0] || null;
+            const right = borderElement.getElementsByTagName("right")[0] || null;
+            return {
+                top: hasBorderSide(top),
+                bottom: hasBorderSide(bottom),
+                left: hasBorderSide(left),
+                right: hasBorderSide(right)
+            };
+        });
+        const numFmtMap = new Map();
+        const numFmtParent = doc.getElementsByTagName("numFmts")[0];
+        if (numFmtParent) {
+            for (const numFmtElement of Array.from(numFmtParent.getElementsByTagName("numFmt"))) {
+                const numFmtId = Number(numFmtElement.getAttribute("numFmtId") || 0);
+                const formatCode = numFmtElement.getAttribute("formatCode") || "";
+                if (!Number.isNaN(numFmtId) && formatCode) {
+                    numFmtMap.set(numFmtId, formatCode);
+                }
+            }
+        }
+        const xfsParent = doc.getElementsByTagName("cellXfs")[0];
+        if (!xfsParent) {
+            return [{
+                    borders: borders[0] || EMPTY_BORDERS,
+                    numFmtId: 0,
+                    formatCode: "General"
+                }];
+        }
+        const xfElements = Array.from(xfsParent.getElementsByTagName("xf"));
+        const styles = xfElements.map((xfElement) => {
+            const borderId = Number(xfElement.getAttribute("borderId") || 0);
+            const numFmtId = Number(xfElement.getAttribute("numFmtId") || 0);
+            return {
+                borders: borders[borderId] || EMPTY_BORDERS,
+                numFmtId,
+                formatCode: numFmtMap.get(numFmtId) || BUILTIN_FORMAT_CODES[numFmtId] || "General"
+            };
+        });
+        return styles.length > 0 ? styles : [{
+                borders: EMPTY_BORDERS,
+                numFmtId: 0,
+                formatCode: "General"
+            }];
+    }
+    globalThis.__xlsx2mdStylesParser = {
+        EMPTY_BORDERS,
+        BUILTIN_FORMAT_CODES,
+        hasBorderSide,
+        parseCellStyles
+    };
+})();
+  </script>
+
+  <script>
+(() => {
+    const textDecoder = new TextDecoder("utf-8");
+    function decodeXmlText(bytes) {
+        return textDecoder.decode(bytes);
+    }
+    function xmlToDocument(xmlText) {
+        return new DOMParser().parseFromString(xmlText, "application/xml");
+    }
+    function getTextContent(node) {
+        return ((node === null || node === void 0 ? void 0 : node.textContent) || "").replace(/\r\n/g, "\n");
+    }
+    function parseSharedStrings(files) {
+        const sharedStringsBytes = files.get("xl/sharedStrings.xml");
+        if (!sharedStringsBytes) {
+            return [];
+        }
+        const doc = xmlToDocument(decodeXmlText(sharedStringsBytes));
+        const items = Array.from(doc.getElementsByTagName("si"));
+        return items.map((item) => {
+            const parts = [];
+            const walk = (node) => {
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    const element = node;
+                    if (element.localName === "rPh" || element.localName === "phoneticPr") {
+                        return;
+                    }
+                    if (element.localName === "t") {
+                        parts.push(getTextContent(element));
+                        return;
+                    }
+                }
+                for (const child of Array.from(node.childNodes)) {
+                    walk(child);
+                }
+            };
+            walk(item);
+            return parts.join("");
+        });
+    }
+    globalThis.__xlsx2mdSharedStrings = {
+        parseSharedStrings
+    };
+})();
+  </script>
+
+  <script>
+(() => {
+    const textDecoder = new TextDecoder("utf-8");
+    function decodeXmlText(bytes) {
+        return textDecoder.decode(bytes);
+    }
+    function xmlToDocument(xmlText) {
+        return new DOMParser().parseFromString(xmlText, "application/xml");
+    }
+    function getElementsByLocalName(root, localName) {
+        const elements = Array.from(root.getElementsByTagName("*"));
+        return elements.filter((element) => element.localName === localName);
+    }
+    function normalizeZipPath(baseFilePath, targetPath) {
+        const baseDirParts = baseFilePath.split("/").slice(0, -1);
+        const inputParts = targetPath.split("/");
+        const parts = targetPath.startsWith("/") ? [] : baseDirParts;
+        for (const part of inputParts) {
+            if (!part || part === ".")
+                continue;
+            if (part === "..") {
+                parts.pop();
+            }
+            else {
+                parts.push(part);
+            }
+        }
+        return parts.join("/");
+    }
+    function parseRelationships(files, relsPath, sourcePath) {
+        const relBytes = files.get(relsPath);
+        const relations = new Map();
+        if (!relBytes) {
+            return relations;
+        }
+        const doc = xmlToDocument(decodeXmlText(relBytes));
+        const nodes = Array.from(doc.getElementsByTagName("Relationship"));
+        for (const node of nodes) {
+            const id = node.getAttribute("Id") || "";
+            const target = node.getAttribute("Target") || "";
+            if (!id || !target)
+                continue;
+            relations.set(id, normalizeZipPath(sourcePath, target));
+        }
+        return relations;
+    }
+    function buildRelsPath(sourcePath) {
+        const parts = sourcePath.split("/");
+        const fileName = parts.pop() || "";
+        const dir = parts.join("/");
+        return `${dir}/_rels/${fileName}.rels`;
+    }
+    function normalizeFormulaAddress(address) {
+        return String(address || "").trim().replace(/\$/g, "").toUpperCase();
+    }
+    function parseRangeAddress(rawRange) {
+        const match = String(rawRange || "").trim().match(/^(\$?[A-Z]+\$?\d+):(\$?[A-Z]+\$?\d+)$/i);
+        if (!match)
+            return null;
+        return {
+            start: normalizeFormulaAddress(match[1]),
+            end: normalizeFormulaAddress(match[2])
+        };
+    }
+    function normalizeStructuredTableKey(value) {
+        return String(value || "").normalize("NFKC").trim().toUpperCase();
+    }
+    function parseWorksheetTables(files, worksheetDoc, sheetName, sheetPath) {
+        const sheetRels = parseRelationships(files, buildRelsPath(sheetPath), sheetPath);
+        const tablePartElements = getElementsByLocalName(worksheetDoc, "tablePart");
+        const tables = [];
+        for (const tablePartElement of tablePartElements) {
+            const relId = tablePartElement.getAttribute("r:id") || tablePartElement.getAttribute("id") || "";
+            if (!relId)
+                continue;
+            const tablePath = sheetRels.get(relId) || "";
+            if (!tablePath)
+                continue;
+            const tableBytes = files.get(tablePath);
+            if (!tableBytes)
+                continue;
+            const tableDoc = xmlToDocument(decodeXmlText(tableBytes));
+            const tableElement = getElementsByLocalName(tableDoc, "table")[0] || null;
+            if (!tableElement)
+                continue;
+            const ref = tableElement.getAttribute("ref") || "";
+            const range = parseRangeAddress(ref);
+            if (!range)
+                continue;
+            const columns = getElementsByLocalName(tableElement, "tableColumn")
+                .map((columnElement) => String(columnElement.getAttribute("name") || "").trim())
+                .filter(Boolean);
+            tables.push({
+                sheetName,
+                name: tableElement.getAttribute("name") || "",
+                displayName: tableElement.getAttribute("displayName") || tableElement.getAttribute("name") || "",
+                start: range.start,
+                end: range.end,
+                columns,
+                headerRowCount: Number(tableElement.getAttribute("headerRowCount") || 1) || 1,
+                totalsRowCount: Number(tableElement.getAttribute("totalsRowCount") || 0) || 0
+            });
+        }
+        return tables;
+    }
+    globalThis.__xlsx2mdWorksheetTables = {
+        normalizeStructuredTableKey,
+        parseWorksheetTables
+    };
+})();
+  </script>
+
+  <script>
 (function initXlsx2mdFormulaTokenizer(global) {
     var _a;
     var _b;
@@ -5716,70 +6646,42 @@ if (!customElements.get("lht-page-menu")) {
         right: false
     };
     const textDecoder = new TextDecoder("utf-8");
-    const textEncoder = new TextEncoder();
-    const crcTable = buildCrc32Table();
     const drawingHelper = globalThis.__xlsx2mdOfficeDrawing || null;
+    const narrativeStructureHelper = globalThis.__xlsx2mdNarrativeStructure;
+    if (!narrativeStructureHelper) {
+        throw new Error("xlsx2md narrative structure module is not loaded");
+    }
+    const tableDetectorHelper = globalThis.__xlsx2mdTableDetector;
+    if (!tableDetectorHelper) {
+        throw new Error("xlsx2md table detector module is not loaded");
+    }
+    const markdownExportHelper = globalThis.__xlsx2mdMarkdownExport;
+    if (!markdownExportHelper) {
+        throw new Error("xlsx2md markdown export module is not loaded");
+    }
+    const stylesParserHelper = globalThis.__xlsx2mdStylesParser;
+    if (!stylesParserHelper) {
+        throw new Error("xlsx2md styles parser module is not loaded");
+    }
+    const sharedStringsHelper = globalThis.__xlsx2mdSharedStrings;
+    if (!sharedStringsHelper) {
+        throw new Error("xlsx2md shared strings module is not loaded");
+    }
+    const worksheetTablesHelper = globalThis.__xlsx2mdWorksheetTables;
+    if (!worksheetTablesHelper) {
+        throw new Error("xlsx2md worksheet tables module is not loaded");
+    }
+    const zipIoHelper = globalThis.__xlsx2mdZipIo;
+    if (!zipIoHelper) {
+        throw new Error("xlsx2md zip io module is not loaded");
+    }
     let resolveDefinedNameScalarValue = null;
     let resolveDefinedNameRangeRef = null;
     let resolveStructuredRangeRef = null;
-    const BUILTIN_FORMAT_CODES = {
-        0: "General",
-        1: "0",
-        2: "0.00",
-        3: "#,##0",
-        4: "#,##0.00",
-        9: "0%",
-        10: "0.00%",
-        11: "0.00E+00",
-        12: "# ?/?",
-        13: "# ??/??",
-        14: "yyyy/m/d",
-        15: "d-mmm-yy",
-        16: "d-mmm",
-        17: "mmm-yy",
-        18: "h:mm AM/PM",
-        19: "h:mm:ss AM/PM",
-        20: "h:mm",
-        21: "h:mm:ss",
-        22: "m/d/yy h:mm",
-        45: "mm:ss",
-        46: "[h]:mm:ss",
-        47: "mmss.0",
-        49: "@",
-        56: "m月d日"
-    };
-    const TABLE_SCORE_WEIGHTS = {
-        minGrid: 2,
-        borderPresence: 3,
-        densityHigh: 2,
-        densityVeryHigh: 1,
-        headerish: 2,
-        mergeHeavyPenalty: -1,
-        prosePenalty: -2,
-        threshold: 4
-    };
     const DEFAULT_CELL_WIDTH_EMU = 609600;
     const DEFAULT_CELL_HEIGHT_EMU = 190500;
     const SHAPE_BLOCK_GAP_X_EMU = DEFAULT_CELL_WIDTH_EMU * 4;
     const SHAPE_BLOCK_GAP_Y_EMU = DEFAULT_CELL_HEIGHT_EMU * 6;
-    function buildCrc32Table() {
-        const table = new Uint32Array(256);
-        for (let i = 0; i < 256; i += 1) {
-            let value = i;
-            for (let bit = 0; bit < 8; bit += 1) {
-                value = (value & 1) === 1 ? (0xedb88320 ^ (value >>> 1)) : (value >>> 1);
-            }
-            table[i] = value >>> 0;
-        }
-        return table;
-    }
-    function crc32(bytes) {
-        let crc = 0xffffffff;
-        for (const byte of bytes) {
-            crc = crcTable[(crc ^ byte) & 0xff] ^ (crc >>> 8);
-        }
-        return (crc ^ 0xffffffff) >>> 0;
-    }
     function colToLetters(col) {
         let current = col;
         let result = "";
@@ -5867,188 +6769,6 @@ if (!customElements.get("lht-page-menu")) {
             }
         }
         return parts.join("/");
-    }
-    function readUint16LE(view, offset) {
-        return view.getUint16(offset, true);
-    }
-    function readUint32LE(view, offset) {
-        return view.getUint32(offset, true);
-    }
-    function hasBorderSide(side) {
-        if (!side)
-            return false;
-        return side.hasAttribute("style") || side.children.length > 0;
-    }
-    async function inflateRaw(data) {
-        if (typeof DecompressionStream === "function") {
-            const stream = new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
-            const buffer = await new Response(stream).arrayBuffer();
-            return new Uint8Array(buffer);
-        }
-        throw new Error("この環境では ZIP Deflate 展開をサポートしていません");
-    }
-    async function unzipEntries(arrayBuffer) {
-        const view = new DataView(arrayBuffer);
-        let eocdOffset = -1;
-        for (let offset = view.byteLength - 22; offset >= Math.max(0, view.byteLength - 0x10000 - 22); offset -= 1) {
-            if (readUint32LE(view, offset) === 0x06054b50) {
-                eocdOffset = offset;
-                break;
-            }
-        }
-        if (eocdOffset < 0) {
-            throw new Error("ZIP の終端レコードが見つかりません");
-        }
-        const centralDirectorySize = readUint32LE(view, eocdOffset + 12);
-        const centralDirectoryOffset = readUint32LE(view, eocdOffset + 16);
-        const endOffset = centralDirectoryOffset + centralDirectorySize;
-        const entries = [];
-        let cursor = centralDirectoryOffset;
-        while (cursor < endOffset) {
-            if (readUint32LE(view, cursor) !== 0x02014b50) {
-                throw new Error("ZIP の中央ディレクトリ形式が不正です");
-            }
-            const compressionMethod = readUint16LE(view, cursor + 10);
-            const compressedSize = readUint32LE(view, cursor + 20);
-            const uncompressedSize = readUint32LE(view, cursor + 24);
-            const fileNameLength = readUint16LE(view, cursor + 28);
-            const extraFieldLength = readUint16LE(view, cursor + 30);
-            const fileCommentLength = readUint16LE(view, cursor + 32);
-            const localHeaderOffset = readUint32LE(view, cursor + 42);
-            const fileNameBytes = new Uint8Array(arrayBuffer, cursor + 46, fileNameLength);
-            const name = decodeXmlText(fileNameBytes);
-            entries.push({
-                name,
-                compressionMethod,
-                compressedSize,
-                uncompressedSize,
-                localHeaderOffset
-            });
-            cursor += 46 + fileNameLength + extraFieldLength + fileCommentLength;
-        }
-        const files = new Map();
-        for (const entry of entries) {
-            const localOffset = entry.localHeaderOffset;
-            if (readUint32LE(view, localOffset) !== 0x04034b50) {
-                throw new Error(`ZIP ローカルヘッダが不正です: ${entry.name}`);
-            }
-            const fileNameLength = readUint16LE(view, localOffset + 26);
-            const extraFieldLength = readUint16LE(view, localOffset + 28);
-            const dataOffset = localOffset + 30 + fileNameLength + extraFieldLength;
-            const compressedData = new Uint8Array(arrayBuffer, dataOffset, entry.compressedSize);
-            let fileData;
-            if (entry.compressionMethod === 0) {
-                fileData = new Uint8Array(compressedData);
-            }
-            else if (entry.compressionMethod === 8) {
-                fileData = await inflateRaw(compressedData);
-            }
-            else {
-                throw new Error(`未対応の圧縮方式です: ${entry.name} (method=${entry.compressionMethod})`);
-            }
-            files.set(entry.name, fileData);
-        }
-        return files;
-    }
-    function createStoredZip(entries) {
-        const localChunks = [];
-        const centralChunks = [];
-        let offset = 0;
-        for (const entry of entries) {
-            const nameBytes = textEncoder.encode(entry.name);
-            const dataBytes = entry.data;
-            const entryCrc32 = crc32(dataBytes);
-            const localHeader = new Uint8Array(30 + nameBytes.length);
-            const localView = new DataView(localHeader.buffer);
-            localView.setUint32(0, 0x04034b50, true);
-            localView.setUint16(4, 20, true);
-            localView.setUint16(6, 0, true);
-            localView.setUint16(8, 0, true);
-            localView.setUint16(10, 0, true);
-            localView.setUint16(12, 0, true);
-            localView.setUint32(14, entryCrc32, true);
-            localView.setUint32(18, dataBytes.length, true);
-            localView.setUint32(22, dataBytes.length, true);
-            localView.setUint16(26, nameBytes.length, true);
-            localView.setUint16(28, 0, true);
-            localHeader.set(nameBytes, 30);
-            localChunks.push(localHeader, dataBytes);
-            const centralHeader = new Uint8Array(46 + nameBytes.length);
-            const centralView = new DataView(centralHeader.buffer);
-            centralView.setUint32(0, 0x02014b50, true);
-            centralView.setUint16(4, 20, true);
-            centralView.setUint16(6, 20, true);
-            centralView.setUint16(8, 0, true);
-            centralView.setUint16(10, 0, true);
-            centralView.setUint16(12, 0, true);
-            centralView.setUint16(14, 0, true);
-            centralView.setUint32(16, entryCrc32, true);
-            centralView.setUint32(20, dataBytes.length, true);
-            centralView.setUint32(24, dataBytes.length, true);
-            centralView.setUint16(28, nameBytes.length, true);
-            centralView.setUint16(30, 0, true);
-            centralView.setUint16(32, 0, true);
-            centralView.setUint16(34, 0, true);
-            centralView.setUint16(36, 0, true);
-            centralView.setUint32(38, 0, true);
-            centralView.setUint32(42, offset, true);
-            centralHeader.set(nameBytes, 46);
-            centralChunks.push(centralHeader);
-            offset += localHeader.length + dataBytes.length;
-        }
-        const centralDirectoryStart = offset;
-        const centralDirectorySize = centralChunks.reduce((sum, chunk) => sum + chunk.length, 0);
-        const eocd = new Uint8Array(22);
-        const eocdView = new DataView(eocd.buffer);
-        eocdView.setUint32(0, 0x06054b50, true);
-        eocdView.setUint16(4, 0, true);
-        eocdView.setUint16(6, 0, true);
-        eocdView.setUint16(8, entries.length, true);
-        eocdView.setUint16(10, entries.length, true);
-        eocdView.setUint32(12, centralDirectorySize, true);
-        eocdView.setUint32(16, centralDirectoryStart, true);
-        eocdView.setUint16(20, 0, true);
-        const totalLength = localChunks.reduce((sum, chunk) => sum + chunk.length, 0) + centralDirectorySize + eocd.length;
-        const output = new Uint8Array(totalLength);
-        let cursor = 0;
-        for (const chunk of localChunks) {
-            output.set(chunk, cursor);
-            cursor += chunk.length;
-        }
-        for (const chunk of centralChunks) {
-            output.set(chunk, cursor);
-            cursor += chunk.length;
-        }
-        output.set(eocd, cursor);
-        return output;
-    }
-    function parseSharedStrings(files) {
-        const sharedStringsBytes = files.get("xl/sharedStrings.xml");
-        if (!sharedStringsBytes) {
-            return [];
-        }
-        const doc = xmlToDocument(decodeXmlText(sharedStringsBytes));
-        const items = Array.from(doc.getElementsByTagName("si"));
-        return items.map((item) => {
-            const parts = [];
-            const walk = (node) => {
-                if (node.nodeType === Node.ELEMENT_NODE) {
-                    const element = node;
-                    if (element.localName === "rPh" || element.localName === "phoneticPr") {
-                        return;
-                    }
-                    if (element.localName === "t") {
-                        parts.push(getTextContent(element));
-                        return;
-                    }
-                }
-                for (const child of Array.from(node.childNodes)) {
-                    walk(child);
-                }
-            };
-            walk(item);
-            return parts.join("");
-        });
     }
     function isDateFormatCode(formatCode) {
         const normalized = String(formatCode || "")
@@ -6415,64 +7135,6 @@ if (!customElements.get("lht-page-menu")) {
             return null;
         return datePartsToExcelSerial(Number(parts.yyyy), Number(parts.mm), Number(parts.dd), Number(parts.hh), Number(parts.mi), Number(parts.ss));
     }
-    function parseCellStyles(files) {
-        const stylesBytes = files.get("xl/styles.xml");
-        if (!stylesBytes) {
-            return [{
-                    borders: EMPTY_BORDERS,
-                    numFmtId: 0,
-                    formatCode: "General"
-                }];
-        }
-        const doc = xmlToDocument(decodeXmlText(stylesBytes));
-        const borderElements = Array.from(doc.getElementsByTagName("border"));
-        const borders = borderElements.map((borderElement) => {
-            const top = borderElement.getElementsByTagName("top")[0] || null;
-            const bottom = borderElement.getElementsByTagName("bottom")[0] || null;
-            const left = borderElement.getElementsByTagName("left")[0] || null;
-            const right = borderElement.getElementsByTagName("right")[0] || null;
-            return {
-                top: hasBorderSide(top),
-                bottom: hasBorderSide(bottom),
-                left: hasBorderSide(left),
-                right: hasBorderSide(right)
-            };
-        });
-        const numFmtMap = new Map();
-        const numFmtParent = doc.getElementsByTagName("numFmts")[0];
-        if (numFmtParent) {
-            for (const numFmtElement of Array.from(numFmtParent.getElementsByTagName("numFmt"))) {
-                const numFmtId = Number(numFmtElement.getAttribute("numFmtId") || 0);
-                const formatCode = numFmtElement.getAttribute("formatCode") || "";
-                if (!Number.isNaN(numFmtId) && formatCode) {
-                    numFmtMap.set(numFmtId, formatCode);
-                }
-            }
-        }
-        const xfsParent = doc.getElementsByTagName("cellXfs")[0];
-        if (!xfsParent) {
-            return [{
-                    borders: borders[0] || EMPTY_BORDERS,
-                    numFmtId: 0,
-                    formatCode: "General"
-                }];
-        }
-        const xfElements = Array.from(xfsParent.getElementsByTagName("xf"));
-        const styles = xfElements.map((xfElement) => {
-            const borderId = Number(xfElement.getAttribute("borderId") || 0);
-            const numFmtId = Number(xfElement.getAttribute("numFmtId") || 0);
-            return {
-                borders: borders[borderId] || EMPTY_BORDERS,
-                numFmtId,
-                formatCode: numFmtMap.get(numFmtId) || BUILTIN_FORMAT_CODES[numFmtId] || "General"
-            };
-        });
-        return styles.length > 0 ? styles : [{
-                borders: EMPTY_BORDERS,
-                numFmtId: 0,
-                formatCode: "General"
-            }];
-    }
     function parseRelationships(files, relsPath, sourcePath) {
         const relBytes = files.get(relsPath);
         const relations = new Map();
@@ -6499,47 +7161,6 @@ if (!customElements.get("lht-page-menu")) {
     function getImageExtension(mediaPath) {
         const match = mediaPath.match(/\.([a-z0-9]+)$/i);
         return match ? match[1].toLowerCase() : "bin";
-    }
-    function normalizeStructuredTableKey(value) {
-        return String(value || "").normalize("NFKC").trim().toUpperCase();
-    }
-    function parseWorksheetTables(files, worksheetDoc, sheetName, sheetPath) {
-        const sheetRels = parseRelationships(files, buildRelsPath(sheetPath), sheetPath);
-        const tablePartElements = getElementsByLocalName(worksheetDoc, "tablePart");
-        const tables = [];
-        for (const tablePartElement of tablePartElements) {
-            const relId = tablePartElement.getAttribute("r:id") || tablePartElement.getAttribute("id") || "";
-            if (!relId)
-                continue;
-            const tablePath = sheetRels.get(relId) || "";
-            if (!tablePath)
-                continue;
-            const tableBytes = files.get(tablePath);
-            if (!tableBytes)
-                continue;
-            const tableDoc = xmlToDocument(decodeXmlText(tableBytes));
-            const tableElement = getElementsByLocalName(tableDoc, "table")[0] || null;
-            if (!tableElement)
-                continue;
-            const ref = tableElement.getAttribute("ref") || "";
-            const range = parseRangeAddress(ref);
-            if (!range)
-                continue;
-            const columns = getElementsByLocalName(tableElement, "tableColumn")
-                .map((columnElement) => String(columnElement.getAttribute("name") || "").trim())
-                .filter(Boolean);
-            tables.push({
-                sheetName,
-                name: tableElement.getAttribute("name") || "",
-                displayName: tableElement.getAttribute("displayName") || tableElement.getAttribute("name") || "",
-                start: range.start,
-                end: range.end,
-                columns,
-                headerRowCount: Number(tableElement.getAttribute("headerRowCount") || 1) || 1,
-                totalsRowCount: Number(tableElement.getAttribute("totalsRowCount") || 0) || 0
-            });
-        }
-        return tables;
     }
     function createSafeSheetAssetDir(sheetName) {
         return sheetName.replace(/[\\/:*?"<>|]+/g, "_").trim() || "Sheet";
@@ -6592,23 +7213,23 @@ if (!customElements.get("lht-page-menu")) {
     }
     function parseChartType(chartDoc) {
         const typeMap = [
-            { localName: "barChart", label: "棒グラフ" },
-            { localName: "lineChart", label: "折れ線グラフ" },
-            { localName: "pieChart", label: "円グラフ" },
-            { localName: "doughnutChart", label: "ドーナツグラフ" },
-            { localName: "areaChart", label: "面グラフ" },
-            { localName: "scatterChart", label: "散布図" },
-            { localName: "radarChart", label: "レーダーチャート" },
-            { localName: "bubbleChart", label: "バブルチャート" }
+            { localName: "barChart", label: "Bar Chart" },
+            { localName: "lineChart", label: "Line Chart" },
+            { localName: "pieChart", label: "Pie Chart" },
+            { localName: "doughnutChart", label: "Doughnut Chart" },
+            { localName: "areaChart", label: "Area Chart" },
+            { localName: "scatterChart", label: "Scatter Chart" },
+            { localName: "radarChart", label: "Radar Chart" },
+            { localName: "bubbleChart", label: "Bubble Chart" }
         ];
         const matched = typeMap
             .filter((entry) => getElementsByLocalName(chartDoc, entry.localName).length > 0)
             .map((entry) => entry.label);
         if (matched.length === 0)
-            return "グラフ";
+            return "Chart";
         if (matched.length === 1)
             return matched[0];
-        return `${matched.join(" + ")} (複合)`;
+        return `${matched.join(" + ")} (Combined)`;
     }
     function parseChartTitle(chartDoc) {
         const richText = getElementsByLocalName(chartDoc, "t")
@@ -6661,7 +7282,7 @@ if (!customElements.get("lht-page-menu")) {
                     const valRef = getFirstChildByLocalName(getFirstChildByLocalName(seriesNode, "val") || seriesNode, "f")
                         || getFirstChildByLocalName(getFirstChildByLocalName(getFirstChildByLocalName(seriesNode, "val") || seriesNode, "numRef") || seriesNode, "f");
                     series.push({
-                        name: nameText || getTextContent(nameValue) || getTextContent(nameRef) || "系列",
+                        name: nameText || getTextContent(nameValue) || getTextContent(nameRef) || "Series",
                         categoriesRef: getTextContent(catRef),
                         valuesRef: getTextContent(valRef),
                         axis: isSecondary ? "secondary" : "primary"
@@ -6716,29 +7337,29 @@ if (!customElements.get("lht-page-menu")) {
     }
     function parseShapeKind(shapeNode) {
         if (!shapeNode)
-            return "図形";
+            return "Shape";
         if (shapeNode.localName === "cxnSp") {
             const geomNode = getFirstChildByLocalName(getFirstChildByLocalName(shapeNode, "spPr") || shapeNode, "prstGeom");
             const prst = String((geomNode === null || geomNode === void 0 ? void 0 : geomNode.getAttribute("prst")) || "").trim();
             if (prst === "straightConnector1") {
-                return "直線矢印コネクタ";
+                return "Straight Arrow Connector";
             }
-            return prst ? `コネクタ (${prst})` : "コネクタ";
+            return prst ? `Connector (${prst})` : "Connector";
         }
         if (shapeNode.localName !== "sp") {
-            return "図形";
+            return "Shape";
         }
         const nvSpPr = getFirstChildByLocalName(shapeNode, "nvSpPr");
         const cNvSpPr = getFirstChildByLocalName(nvSpPr || shapeNode, "cNvSpPr");
         if ((cNvSpPr === null || cNvSpPr === void 0 ? void 0 : cNvSpPr.getAttribute("txBox")) === "1") {
-            return "テキストボックス";
+            return "Text Box";
         }
         const geomNode = getFirstChildByLocalName(getFirstChildByLocalName(shapeNode, "spPr") || shapeNode, "prstGeom");
         const prst = String((geomNode === null || geomNode === void 0 ? void 0 : geomNode.getAttribute("prst")) || "").trim();
         if (prst === "rect") {
-            return "長方形";
+            return "Rectangle";
         }
-        return prst ? `図形 (${prst})` : "図形";
+        return prst ? `Shape (${prst})` : "Shape";
     }
     function parseShapeText(shapeNode) {
         return getElementsByLocalName(shapeNode || document, "t")
@@ -6953,7 +7574,7 @@ if (!customElements.get("lht-page-menu")) {
                 shapes.push({
                     sheetName,
                     anchor: `${colToLetters(col)}${row}`,
-                    name: String((cNvPr === null || cNvPr === void 0 ? void 0 : cNvPr.getAttribute("name")) || "").trim() || "図形",
+                    name: String((cNvPr === null || cNvPr === void 0 ? void 0 : cNvPr.getAttribute("name")) || "").trim() || "Shape",
                     kind: parseShapeKind(shapeNode),
                     text: parseShapeText(shapeNode),
                     widthEmu,
@@ -7218,10 +7839,10 @@ if (!customElements.get("lht-page-menu")) {
             cellMaps.set(sheet.name, cellMap);
             for (const table of sheet.tables) {
                 if (table.name) {
-                    tableMap.set(normalizeStructuredTableKey(table.name), table);
+                    tableMap.set(worksheetTablesHelper.normalizeStructuredTableKey(table.name), table);
                 }
                 if (table.displayName) {
-                    tableMap.set(normalizeStructuredTableKey(table.displayName), table);
+                    tableMap.set(worksheetTablesHelper.normalizeStructuredTableKey(table.displayName), table);
                 }
             }
         }
@@ -7362,15 +7983,15 @@ if (!customElements.get("lht-page-menu")) {
             const match = String(text || "").trim().match(/^(.+?)\[([^\]]+)\]$/);
             if (!match)
                 return null;
-            const tableKey = normalizeStructuredTableKey(match[1].replace(/^'(.*)'$/, "$1"));
-            const columnKey = normalizeStructuredTableKey(match[2]);
+            const tableKey = worksheetTablesHelper.normalizeStructuredTableKey(match[1].replace(/^'(.*)'$/, "$1"));
+            const columnKey = worksheetTablesHelper.normalizeStructuredTableKey(match[2]);
             if (!tableKey || !columnKey || columnKey.startsWith("#") || columnKey.startsWith("@")) {
                 return null;
             }
             const table = tableMap.get(tableKey);
             if (!table)
                 return null;
-            const columnIndex = table.columns.findIndex((columnName) => normalizeStructuredTableKey(columnName) === columnKey);
+            const columnIndex = table.columns.findIndex((columnName) => worksheetTablesHelper.normalizeStructuredTableKey(columnName) === columnKey);
             if (columnIndex < 0)
                 return null;
             const startAddress = parseCellAddress(table.start);
@@ -9093,7 +9714,7 @@ if (!customElements.get("lht-page-menu")) {
     function parseWorksheet(files, sheetName, sheetPath, sheetIndex, sharedStrings, cellStyles) {
         const bytes = files.get(sheetPath);
         if (!bytes) {
-            throw new Error(`シート XML が見つかりません: ${sheetPath}`);
+            throw new Error(`Sheet XML not found: ${sheetPath}`);
         }
         const doc = xmlToDocument(decodeXmlText(bytes));
         const sharedFormulaMap = new Map();
@@ -9146,7 +9767,7 @@ if (!customElements.get("lht-page-menu")) {
             };
         });
         const merges = Array.from(doc.getElementsByTagName("mergeCell")).map((mergeElement) => parseRangeRef(mergeElement.getAttribute("ref") || ""));
-        const tables = parseWorksheetTables(files, doc, sheetName, sheetPath);
+        const tables = worksheetTablesHelper.parseWorksheetTables(files, doc, sheetName, sheetPath);
         const images = parseDrawingImages(files, sheetName, sheetPath);
         const charts = parseDrawingCharts(files, sheetName, sheetPath);
         const shapes = parseDrawingShapes(files, sheetName, sheetPath);
@@ -9179,13 +9800,13 @@ if (!customElements.get("lht-page-menu")) {
         };
     }
     async function parseWorkbook(arrayBuffer, workbookName = "workbook.xlsx") {
-        const files = await unzipEntries(arrayBuffer);
+        const files = await zipIoHelper.unzipEntries(arrayBuffer);
         const workbookBytes = files.get("xl/workbook.xml");
         if (!workbookBytes) {
-            throw new Error("xl/workbook.xml が見つかりません");
+            throw new Error("xl/workbook.xml was not found.");
         }
-        const sharedStrings = parseSharedStrings(files);
-        const cellStyles = parseCellStyles(files);
+        const sharedStrings = sharedStringsHelper.parseSharedStrings(files);
+        const cellStyles = stylesParserHelper.parseCellStyles(files);
         const rels = parseRelationships(files, "xl/_rels/workbook.xml.rels", "xl/workbook.xml");
         const workbookDoc = xmlToDocument(decodeXmlText(workbookBytes));
         const sheetNodes = Array.from(workbookDoc.getElementsByTagName("sheet"));
@@ -9316,105 +9937,6 @@ if (!customElements.get("lht-page-menu")) {
             values: segment.values
         }));
     }
-    function isNarrativeListCandidate(item) {
-        const text = String(item.text || "").trim();
-        if (!text || text.length < 4 || text.length > 140)
-            return false;
-        if (item.cellValues.length >= 2) {
-            const marker = String(item.cellValues[0] || "").trim();
-            const content = item.cellValues.slice(1).join(" ").trim();
-            if (!content || content.length < 4)
-                return false;
-            if (marker.length <= 6)
-                return true;
-        }
-        if (item.cellValues.length === 1) {
-            if (/[:：]$/.test(text))
-                return false;
-            if (/[。．]$/.test(text) && text.length < 18)
-                return false;
-            return true;
-        }
-        return false;
-    }
-    function formatNarrativeListItem(item) {
-        const values = item.cellValues.map((value) => String(value || "").trim()).filter(Boolean);
-        if (values.length >= 2) {
-            const marker = values[0];
-            const content = values.slice(1).join(" ").trim();
-            if (/^(x|X|✓|✔|☑)$/u.test(marker)) {
-                return `- [x] ${content}`;
-            }
-            if (/^(□|☐)$/u.test(marker)) {
-                return `- [ ] ${content}`;
-            }
-            return `- ${content}`;
-        }
-        const text = String(item.text || "").trim();
-        const checkedMatch = text.match(/^(x|X|✓|✔|☑)\s+(.+)$/u);
-        if (checkedMatch) {
-            return `- [x] ${checkedMatch[2].trim()}`;
-        }
-        const uncheckedMatch = text.match(/^(□|☐)\s+(.+)$/u);
-        if (uncheckedMatch) {
-            return `- [ ] ${uncheckedMatch[2].trim()}`;
-        }
-        return `- ${text}`;
-    }
-    function renderNarrativeBlock(block) {
-        if (!block.items || block.items.length === 0) {
-            return block.lines.join("\n");
-        }
-        const parts = [];
-        let index = 0;
-        while (index < block.items.length) {
-            let runEnd = index;
-            while (runEnd < block.items.length
-                && isNarrativeListCandidate(block.items[runEnd])
-                && (runEnd === index || block.items[runEnd].row === block.items[runEnd - 1].row + 1)) {
-                runEnd += 1;
-            }
-            const runLength = runEnd - index;
-            if (runLength >= 4) {
-                parts.push(block.items.slice(index, runEnd).map((item) => formatNarrativeListItem(item)).join("\n"));
-                index = runEnd;
-                continue;
-            }
-            let proseEnd = index;
-            while (proseEnd < block.items.length) {
-                const nextRunStart = proseEnd;
-                let candidateEnd = nextRunStart;
-                while (candidateEnd < block.items.length
-                    && isNarrativeListCandidate(block.items[candidateEnd])
-                    && (candidateEnd === nextRunStart || block.items[candidateEnd].row === block.items[candidateEnd - 1].row + 1)) {
-                    candidateEnd += 1;
-                }
-                if (candidateEnd - nextRunStart >= 4) {
-                    break;
-                }
-                proseEnd += 1;
-            }
-            parts.push(block.items.slice(index, proseEnd).map((item) => item.text).join("\n"));
-            index = proseEnd;
-        }
-        return parts.join("\n\n");
-    }
-    function isSectionHeadingNarrativeBlock(block) {
-        var _a;
-        if (!block || !block.items || block.items.length !== 1) {
-            return false;
-        }
-        const text = String(((_a = block.items[0]) === null || _a === void 0 ? void 0 : _a.text) || "").trim();
-        if (!text)
-            return false;
-        if (text.length > 32)
-            return false;
-        if (/[。．:：]$/.test(text))
-            return false;
-        if (/^[\-*#]/.test(text))
-            return false;
-        return true;
-    }
     function extractSectionBlocks(sheet, tables, narrativeBlocks) {
         const charts = sheet.charts || [];
         const anchors = [];
@@ -9489,211 +10011,13 @@ if (!customElements.get("lht-page-menu")) {
         }
         return sections;
     }
-    function collectTableSeedCells(sheet) {
-        return sheet.cells.filter((cell) => {
-            const hasValue = !!String(cell.outputValue || "").trim();
-            const hasBorder = cell.borders.top || cell.borders.bottom || cell.borders.left || cell.borders.right;
-            return hasValue || hasBorder;
-        });
-    }
-    function detectTableCandidates(sheet) {
-        const seedCells = collectTableSeedCells(sheet);
-        const positionMap = new Map();
-        for (const cell of seedCells) {
-            positionMap.set(`${cell.row}:${cell.col}`, cell);
-        }
-        const visited = new Set();
-        const candidates = [];
-        for (const cell of seedCells) {
-            const key = `${cell.row}:${cell.col}`;
-            if (visited.has(key))
-                continue;
-            const queue = [cell];
-            const component = [];
-            visited.add(key);
-            while (queue.length > 0) {
-                const current = queue.shift();
-                component.push(current);
-                for (const [rowDelta, colDelta] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-                    const nextKey = `${current.row + rowDelta}:${current.col + colDelta}`;
-                    const nextCell = positionMap.get(nextKey);
-                    if (!nextCell || visited.has(nextKey))
-                        continue;
-                    visited.add(nextKey);
-                    queue.push(nextCell);
-                }
-            }
-            const rows = component.map((entry) => entry.row);
-            const cols = component.map((entry) => entry.col);
-            const startRow = Math.min(...rows);
-            const endRow = Math.max(...rows);
-            const startCol = Math.min(...cols);
-            const endCol = Math.max(...cols);
-            const area = Math.max(1, (endRow - startRow + 1) * (endCol - startCol + 1));
-            const density = component.filter((entry) => entry.outputValue.trim()).length / area;
-            const rowCount = endRow - startRow + 1;
-            const colCount = endCol - startCol + 1;
-            if (rowCount < 2 || colCount < 2) {
-                continue;
-            }
-            let score = 0;
-            const reasons = [];
-            const borderCells = component.filter((entry) => entry.borders.top || entry.borders.bottom || entry.borders.left || entry.borders.right);
-            if (rowCount >= 2 && colCount >= 2) {
-                score += TABLE_SCORE_WEIGHTS.minGrid;
-                reasons.push(`2x2 以上 (+${TABLE_SCORE_WEIGHTS.minGrid})`);
-            }
-            if (borderCells.length >= Math.max(2, Math.ceil(component.length * 0.3))) {
-                score += TABLE_SCORE_WEIGHTS.borderPresence;
-                reasons.push(`罫線あり (+${TABLE_SCORE_WEIGHTS.borderPresence})`);
-            }
-            if (density >= 0.55) {
-                score += TABLE_SCORE_WEIGHTS.densityHigh;
-                reasons.push(`密度高 (+${TABLE_SCORE_WEIGHTS.densityHigh})`);
-            }
-            if (density >= 0.8) {
-                score += TABLE_SCORE_WEIGHTS.densityVeryHigh;
-                reasons.push(`密度非常に高 (+${TABLE_SCORE_WEIGHTS.densityVeryHigh})`);
-            }
-            const firstRowCells = component.filter((entry) => entry.row === startRow).sort((a, b) => a.col - b.col);
-            const headerishCount = firstRowCells.filter((entry) => {
-                const value = entry.outputValue.trim();
-                return value.length > 0 && value.length <= 24 && !/^\d+(?:\.\d+)?$/.test(value);
-            }).length;
-            if (headerishCount >= 2) {
-                score += TABLE_SCORE_WEIGHTS.headerish;
-                reasons.push(`ヘッダらしさ (+${TABLE_SCORE_WEIGHTS.headerish})`);
-            }
-            const mergedArea = sheet.merges.filter((merge) => {
-                return !(merge.endRow < startRow || merge.startRow > endRow || merge.endCol < startCol || merge.startCol > endCol);
-            }).length;
-            if (mergedArea >= Math.max(2, Math.ceil(area * 0.08))) {
-                score += TABLE_SCORE_WEIGHTS.mergeHeavyPenalty;
-                reasons.push(`結合セル多 (${TABLE_SCORE_WEIGHTS.mergeHeavyPenalty})`);
-            }
-            if (mergedArea >= 2 && rowCount <= 6 && colCount >= 10 && density < 0.25) {
-                continue;
-            }
-            const avgTextLength = component
-                .filter((entry) => entry.outputValue.trim())
-                .reduce((sum, entry) => sum + entry.outputValue.trim().length, 0) / Math.max(1, component.filter((entry) => entry.outputValue.trim()).length);
-            if (avgTextLength > 36 && density < 0.7) {
-                score += TABLE_SCORE_WEIGHTS.prosePenalty;
-                reasons.push(`長文中心 (${TABLE_SCORE_WEIGHTS.prosePenalty})`);
-            }
-            if (score >= TABLE_SCORE_WEIGHTS.threshold) {
-                candidates.push({
-                    startRow,
-                    startCol,
-                    endRow,
-                    endCol,
-                    score,
-                    reasonSummary: reasons
-                });
-            }
-        }
-        return candidates.sort((left, right) => {
-            if (left.startRow !== right.startRow)
-                return left.startRow - right.startRow;
-            return left.startCol - right.startCol;
-        });
-    }
-    function matrixFromCandidate(sheet, candidate, options) {
-        const cellMap = buildCellMap(sheet);
-        const rows = [];
-        for (let row = candidate.startRow; row <= candidate.endRow; row += 1) {
-            const currentRow = [];
-            for (let col = candidate.startCol; col <= candidate.endCol; col += 1) {
-                const cell = cellMap.get(`${row}:${col}`);
-                let value = formatCellForMarkdown(cell, options);
-                if (options.trimText !== false) {
-                    value = value.trim();
-                }
-                currentRow.push(value);
-            }
-            rows.push(currentRow);
-        }
-        applyMergeTokens(rows, sheet.merges, candidate.startRow, candidate.startCol, candidate.endRow, candidate.endCol);
-        let normalizedRows = rows;
-        if (options.removeEmptyRows !== false) {
-            normalizedRows = normalizedRows.filter((row) => row.some((cell) => isMeaningfulMarkdownCell(cell)));
-        }
-        if (options.removeEmptyColumns !== false && normalizedRows.length > 0) {
-            const keepColumnFlags = normalizedRows[0].map((_, colIndex) => normalizedRows.some((row) => isMeaningfulMarkdownCell(row[colIndex])));
-            normalizedRows = normalizedRows.map((row) => row.filter((_cell, colIndex) => keepColumnFlags[colIndex]));
-        }
-        return normalizedRows;
-    }
-    function isMeaningfulMarkdownCell(value) {
-        const text = String(value || "").trim();
-        if (!text)
-            return false;
-        return text !== "[MERGED←]" && text !== "[MERGED↑]";
-    }
-    function applyMergeTokens(matrix, merges, startRow, startCol, endRow, endCol) {
-        for (const merge of merges) {
-            if (merge.endRow < startRow || merge.startRow > endRow || merge.endCol < startCol || merge.startCol > endCol) {
-                continue;
-            }
-            for (let row = merge.startRow; row <= merge.endRow; row += 1) {
-                for (let col = merge.startCol; col <= merge.endCol; col += 1) {
-                    if (row === merge.startRow && col === merge.startCol)
-                        continue;
-                    const matrixRow = row - startRow;
-                    const matrixCol = col - startCol;
-                    if (!matrix[matrixRow] || typeof matrix[matrixRow][matrixCol] === "undefined") {
-                        continue;
-                    }
-                    matrix[matrixRow][matrixCol] = row === merge.startRow ? "[MERGED←]" : "[MERGED↑]";
-                }
-            }
-        }
-    }
-    function escapeMarkdownCell(text) {
-        return String(text || "").replace(/\|/g, "\\|").replace(/\n/g, "<br>");
-    }
-    function renderMarkdownTable(rows, treatFirstRowAsHeader) {
-        if (rows.length === 0) {
-            return "";
-        }
-        const workingRows = rows.map((row) => row.map((cell) => escapeMarkdownCell(cell)));
-        if (workingRows.length === 1 && treatFirstRowAsHeader) {
-            workingRows.push(new Array(workingRows[0].length).fill(""));
-        }
-        const header = treatFirstRowAsHeader ? workingRows[0] : new Array(workingRows[0].length).fill("");
-        const body = treatFirstRowAsHeader ? workingRows.slice(1) : workingRows;
-        const lines = [
-            `| ${header.join(" | ")} |`,
-            `| ${header.map(() => "---").join(" | ")} |`
-        ];
-        for (const row of body) {
-            lines.push(`| ${row.join(" | ")} |`);
-        }
-        return lines.join("\n");
-    }
-    function createOutputFileName(workbookName, sheetIndex, sheetName, outputMode = "display") {
-        const bookBase = sanitizeFileNameSegment(workbookName.replace(/\.xlsx$/i, ""), "workbook");
-        const safeSheetName = sanitizeFileNameSegment(sheetName, `Sheet${sheetIndex}`);
-        const suffix = outputMode === "display" ? "" : `_${outputMode}`;
-        return `${bookBase}_${String(sheetIndex).padStart(3, "0")}_${safeSheetName}${suffix}.md`;
-    }
-    function sanitizeFileNameSegment(value, fallback) {
-        const normalized = String(value || "").normalize("NFKC");
-        const sanitized = normalized
-            .replace(/[\\/:*?"<>|]/g, "_")
-            .replace(/\s+/g, "_")
-            .replace(/[^\p{L}\p{N}._-]+/gu, "_")
-            .replace(/_+/g, "_")
-            .replace(/^[_ .-]+|[_ .-]+$/g, "");
-        return sanitized || fallback;
-    }
     function convertSheetToMarkdown(workbook, sheet, options = {}) {
         var _a;
         const charts = sheet.charts || [];
         const shapes = sheet.shapes || [];
         const shapeBlocks = extractShapeBlocks(shapes);
         const treatFirstRowAsHeader = options.treatFirstRowAsHeader !== false;
-        const tables = detectTableCandidates(sheet);
+        const tables = tableDetectorHelper.detectTableCandidates(sheet, buildCellMap);
         const narrativeBlocks = extractNarrativeBlocks(sheet, tables, options);
         const sectionBlocks = extractSectionBlocks(sheet, tables, narrativeBlocks);
         const formulaDiagnostics = sheet.cells
@@ -9710,21 +10034,21 @@ if (!customElements.get("lht-page-menu")) {
             sections.push({
                 sortRow: block.startRow,
                 sortCol: block.startCol,
-                markdown: `${renderNarrativeBlock(block)}\n`,
+                markdown: `${narrativeStructureHelper.renderNarrativeBlock(block)}\n`,
                 kind: "narrative",
                 narrativeBlock: block
             });
         }
         let tableCounter = 1;
         for (const table of tables) {
-            const rows = matrixFromCandidate(sheet, table, options);
+            const rows = tableDetectorHelper.matrixFromCandidate(sheet, table, options, buildCellMap, formatCellForMarkdown);
             if (rows.length === 0 || ((_a = rows[0]) === null || _a === void 0 ? void 0 : _a.length) === 0)
                 continue;
-            const tableMarkdown = renderMarkdownTable(rows, treatFirstRowAsHeader);
+            const tableMarkdown = markdownExportHelper.renderMarkdownTable(rows, treatFirstRowAsHeader);
             sections.push({
                 sortRow: table.startRow,
                 sortCol: table.startCol,
-                markdown: `### 表${String(tableCounter).padStart(3, "0")} (${formatRange(table.startRow, table.startCol, table.endRow, table.endCol)})\n\n${tableMarkdown}\n`,
+                markdown: `### Table ${String(tableCounter).padStart(3, "0")} (${formatRange(table.startRow, table.startCol, table.endRow, table.endCol)})\n\n${tableMarkdown}\n`,
                 kind: "table"
             });
             tableCounter += 1;
@@ -9748,18 +10072,7 @@ if (!customElements.get("lht-page-menu")) {
         })).filter((group) => group.entries.length > 0);
         const body = groupedSections
             .map((group) => {
-            const entries = group.entries.map((entry) => {
-                var _a, _b;
-                if (entry.kind === "narrative" && isSectionHeadingNarrativeBlock(entry.narrativeBlock)) {
-                    const headingText = String(((_b = (_a = entry.narrativeBlock) === null || _a === void 0 ? void 0 : _a.items[0]) === null || _b === void 0 ? void 0 : _b.text) || "").trim();
-                    return {
-                        ...entry,
-                        markdown: `### ${headingText}\n`
-                    };
-                }
-                return entry;
-            });
-            return entries.map((section) => section.markdown.trimEnd()).join("\n\n").trim();
+            return group.entries.map((section) => section.markdown.trimEnd()).join("\n\n").trim();
         })
             .filter(Boolean)
             .join("\n\n---\n\n")
@@ -9767,10 +10080,10 @@ if (!customElements.get("lht-page-menu")) {
         const imageSection = sheet.images.length > 0
             ? [
                 "",
-                "## 画像",
+                "## Images",
                 "",
                 ...sheet.images.map((image, index) => [
-                    `### 画像${String(index + 1).padStart(3, "0")} (${image.anchor})`,
+                    `### Image ${String(index + 1).padStart(3, "0")} (${image.anchor})`,
                     `- File: ${image.path}`,
                     "",
                     `![${image.filename}](${image.path})`
@@ -9780,20 +10093,20 @@ if (!customElements.get("lht-page-menu")) {
         const chartSection = charts.length > 0
             ? [
                 "",
-                "## グラフ",
+                "## Charts",
                 "",
                 ...charts.map((chart, index) => {
                     const lines = [
-                        `### グラフ${String(index + 1).padStart(3, "0")} (${chart.anchor})`,
-                        `- タイトル: ${chart.title || "(なし)"}`,
-                        `- 種別: ${chart.chartType}`
+                        `### Chart ${String(index + 1).padStart(3, "0")} (${chart.anchor})`,
+                        `- Title: ${chart.title || "(none)"}`,
+                        `- Type: ${chart.chartType}`
                     ];
                     if (chart.series.length > 0) {
-                        lines.push("- 系列:");
+                        lines.push("- Series:");
                         for (const series of chart.series) {
                             lines.push(`  - ${series.name}`);
                             if (series.axis === "secondary") {
-                                lines.push("    - 軸: 副軸");
+                                lines.push("    - Axis: secondary");
                             }
                             if (series.categoriesRef) {
                                 lines.push(`    - categories: ${series.categoriesRef}`);
@@ -9810,19 +10123,19 @@ if (!customElements.get("lht-page-menu")) {
         const shapeSection = shapes.length > 0
             ? [
                 "",
-                "## 図ブロック",
+                "## Shape Blocks",
                 "",
                 ...shapeBlocks.map((block, blockIndex) => [
-                    `### 図ブロック${String(blockIndex + 1).padStart(3, "0")} (${formatRange(block.startRow, block.startCol, block.endRow, block.endCol)})`,
-                    `- 図形: ${block.shapeIndexes.map((shapeIndex) => `図形${String(shapeIndex + 1).padStart(3, "0")}`).join(", ")}`,
+                    `### Shape Block ${String(blockIndex + 1).padStart(3, "0")} (${formatRange(block.startRow, block.startCol, block.endRow, block.endCol)})`,
+                    `- Shapes: ${block.shapeIndexes.map((shapeIndex) => `Shape ${String(shapeIndex + 1).padStart(3, "0")}`).join(", ")}`,
                     `- anchorRange: ${colToLetters(block.startCol)}${block.startRow}-${colToLetters(block.endCol)}${block.endRow}`
                 ].join("\n")),
                 "",
-                "## 図形",
+                "## Shapes",
                 "",
                 ...shapes.map((shape, index) => {
                     const lines = [
-                        `### 図形${String(index + 1).padStart(3, "0")} (${shape.anchor})`,
+                        `### Shape ${String(index + 1).padStart(3, "0")} (${shape.anchor})`,
                         ...renderHierarchicalRawEntries(shape.rawEntries)
                     ];
                     if (shape.svgPath) {
@@ -9837,19 +10150,19 @@ if (!customElements.get("lht-page-menu")) {
         const markdown = [
             `# ${sheet.name}`,
             "",
-            "## ソース情報",
+            "## Source Information",
             `- Workbook: ${workbook.name}`,
             `- Sheet: ${sheet.name}`,
             "",
-            "## 本文",
+            "## Body",
             "",
-            body || "_抽出できる本文はありませんでした。_",
+            body || "_No extractable body content was found._",
             chartSection,
             shapeSection,
             imageSection
         ].join("\n");
         return {
-            fileName: createOutputFileName(workbook.name, sheet.index, sheet.name, options.outputMode || "display"),
+            fileName: markdownExportHelper.createOutputFileName(workbook.name, sheet.index, sheet.name, options.outputMode || "display"),
             sheetName: sheet.name,
             markdown,
             summary: {
@@ -9873,83 +10186,23 @@ if (!customElements.get("lht-page-menu")) {
     function convertWorkbookToMarkdownFiles(workbook, options = {}) {
         return workbook.sheets.map((sheet) => convertSheetToMarkdown(workbook, sheet, options));
     }
-    function createSummaryText(markdownFile) {
-        const resolvedCount = markdownFile.summary.formulaDiagnostics.filter((item) => item.status === "resolved").length;
-        const fallbackCount = markdownFile.summary.formulaDiagnostics.filter((item) => item.status === "fallback_formula").length;
-        const unsupportedCount = markdownFile.summary.formulaDiagnostics.filter((item) => item.status === "unsupported_external").length;
-        return [
-            `出力ファイル: ${markdownFile.fileName}`,
-            `出力モード: ${markdownFile.summary.outputMode}`,
-            `セクション: ${markdownFile.summary.sections}`,
-            `表: ${markdownFile.summary.tables}`,
-            `地の文ブロック: ${markdownFile.summary.narrativeBlocks}`,
-            `結合セル範囲: ${markdownFile.summary.merges}`,
-            `画像: ${markdownFile.summary.images}`,
-            `グラフ: ${markdownFile.summary.charts}`,
-            `解析セル数: ${markdownFile.summary.cells}`,
-            `数式 resolved: ${resolvedCount}`,
-            `数式 fallback_formula: ${fallbackCount}`,
-            `数式 unsupported_external: ${unsupportedCount}`,
-            ...markdownFile.summary.tableScores.map((detail) => `表候補 ${detail.range}: ${detail.score}点 / ${detail.reasons.join(", ")}`)
-        ].join("\n");
-    }
-    function createCombinedMarkdownExportFile(workbook, markdownFiles) {
-        var _a;
-        const outputMode = ((_a = markdownFiles[0]) === null || _a === void 0 ? void 0 : _a.summary.outputMode) || "display";
-        const suffix = outputMode === "display" ? "" : `_${outputMode}`;
-        const fileName = `${String(workbook.name || "workbook").replace(/\.xlsx$/i, "")}${suffix}.md`;
-        const content = markdownFiles
-            .map((markdownFile) => `<!-- ${markdownFile.fileName.replace(/\.md$/i, "")} -->\n${markdownFile.markdown}`)
-            .join("\n\n");
-        return { fileName, content };
-    }
-    function createExportEntries(workbook, markdownFiles) {
-        const entries = [];
-        if (markdownFiles.length > 0) {
-            const combined = createCombinedMarkdownExportFile(workbook, markdownFiles);
-            entries.push({
-                name: `output/${combined.fileName}`,
-                data: textEncoder.encode(`${combined.content}\n`)
-            });
-        }
-        for (const sheet of workbook.sheets) {
-            for (const image of sheet.images) {
-                entries.push({
-                    name: `output/${image.path}`,
-                    data: image.data
-                });
-            }
-            for (const shape of sheet.shapes || []) {
-                if (!shape.svgPath || !shape.svgData)
-                    continue;
-                entries.push({
-                    name: `output/${shape.svgPath}`,
-                    data: shape.svgData
-                });
-            }
-        }
-        return entries;
-    }
-    function createWorkbookExportArchive(workbook, markdownFiles) {
-        return createStoredZip(createExportEntries(workbook, markdownFiles));
-    }
     globalThis.__xlsx2md = {
         parseWorkbook,
-        unzipEntries,
+        unzipEntries: zipIoHelper.unzipEntries,
         parseRangeRef,
-        applyMergeTokens,
-        detectTableCandidates,
+        applyMergeTokens: tableDetectorHelper.applyMergeTokens,
+        detectTableCandidates: (sheet) => tableDetectorHelper.detectTableCandidates(sheet, buildCellMap),
         extractNarrativeBlocks,
         convertSheetToMarkdown,
         convertWorkbookToMarkdownFiles,
-        createSummaryText,
-        createCombinedMarkdownExportFile,
-        createExportEntries,
-        createWorkbookExportArchive,
+        createSummaryText: markdownExportHelper.createSummaryText,
+        createCombinedMarkdownExportFile: markdownExportHelper.createCombinedMarkdownExportFile,
+        createExportEntries: markdownExportHelper.createExportEntries,
+        createWorkbookExportArchive: markdownExportHelper.createWorkbookExportArchive,
         formatRange,
         colToLetters,
         lettersToCol,
-        textEncoder
+        textEncoder: markdownExportHelper.textEncoder
     };
 })();
   </script>
@@ -10019,19 +10272,19 @@ if (!customElements.get("lht-page-menu")) {
     function renderScoreSummary(files) {
         const sheetsWithScores = files.filter((file) => file.summary.tableScores.length > 0);
         if (sheetsWithScores.length === 0) {
-            return '<div class="md-summary-empty">表候補はありません。</div>';
+            return '<div class="md-summary-empty">No table candidates found.</div>';
         }
         const totalScores = sheetsWithScores.reduce((sum, file) => sum + file.summary.tableScores.length, 0);
         const totalStrong = sheetsWithScores.reduce((sum, file) => (sum + file.summary.tableScores.filter((detail) => getTableScoreLabel(detail.score) === "strong").length), 0);
         const totalCandidate = sheetsWithScores.reduce((sum, file) => (sum + file.summary.tableScores.filter((detail) => getTableScoreLabel(detail.score) === "candidate").length), 0);
-        return `<div class="md-summary-overview">全体 ${totalScores}件 / strong ${totalStrong} / candidate ${totalCandidate}</div>${sheetsWithScores.map((file) => {
+        return `<div class="md-summary-overview">Total ${totalScores} / strong ${totalStrong} / candidate ${totalCandidate}</div>${sheetsWithScores.map((file) => {
             const items = [...file.summary.tableScores].sort((left, right) => {
                 if (right.score !== left.score) {
                     return right.score - left.score;
                 }
                 return left.range.localeCompare(right.range);
-            }).map((detail) => (`<div class="md-summary-item"><div class="md-summary-item-head"><span class="md-summary-item-title">${escapeHtml(detail.range)}</span><span class="md-summary-item-status md-summary-item-status--${escapeHtml(getTableScoreLabel(detail.score))}">${escapeHtml(getTableScoreText(detail.score))}</span></div><div class="md-summary-item-meta">${detail.score}点</div><div class="md-summary-item-body">${escapeHtml(detail.reasons.join(" / "))}</div></div>`)).join("");
-            return `<section class="md-summary-group"><div class="md-summary-group-head"><h3 class="md-summary-group-title">${escapeHtml(file.sheetName)}</h3><span class="md-summary-group-count">${file.summary.tableScores.length}件</span></div><div class="md-summary-group-meta">${escapeHtml(renderTableScoreCounts(file))}</div>${items}</section>`;
+            }).map((detail) => (`<div class="md-summary-item"><div class="md-summary-item-head"><span class="md-summary-item-title">${escapeHtml(detail.range)}</span><span class="md-summary-item-status md-summary-item-status--${escapeHtml(getTableScoreLabel(detail.score))}">${escapeHtml(getTableScoreText(detail.score))}</span></div><div class="md-summary-item-meta">Score ${detail.score}</div><div class="md-summary-item-body">${escapeHtml(detail.reasons.join(" / "))}</div></div>`)).join("");
+            return `<section class="md-summary-group"><div class="md-summary-group-head"><h3 class="md-summary-group-title">${escapeHtml(file.sheetName)}</h3><span class="md-summary-group-count">${file.summary.tableScores.length}</span></div><div class="md-summary-group-meta">${escapeHtml(renderTableScoreCounts(file))}</div>${items}</section>`;
         }).join("")}`;
     }
     function getTableScoreLabel(score) {
@@ -10136,7 +10389,7 @@ if (!customElements.get("lht-page-menu")) {
     function renderFormulaSummary(files) {
         const sheetsWithDiagnostics = files.filter((file) => file.summary.formulaDiagnostics.length > 0);
         if (sheetsWithDiagnostics.length === 0) {
-            return '<div class="md-summary-empty">数式セルはありません。</div>';
+            return '<div class="md-summary-empty">No formula cells found.</div>';
         }
         const totalDiagnostics = sheetsWithDiagnostics.reduce((sum, file) => sum + file.summary.formulaDiagnostics.length, 0);
         const totalResolved = sheetsWithDiagnostics.reduce((sum, file) => (sum + file.summary.formulaDiagnostics.filter((diagnostic) => getFormulaStatusLabel(diagnostic.status) === "resolved").length), 0);
@@ -10146,7 +10399,7 @@ if (!customElements.get("lht-page-menu")) {
         const totalAst = sheetsWithDiagnostics.reduce((sum, file) => (sum + file.summary.formulaDiagnostics.filter((diagnostic) => diagnostic.source === "ast_evaluator").length), 0);
         const totalLegacy = sheetsWithDiagnostics.reduce((sum, file) => (sum + file.summary.formulaDiagnostics.filter((diagnostic) => diagnostic.source === "legacy_resolver").length), 0);
         const totalFormula = sheetsWithDiagnostics.reduce((sum, file) => (sum + file.summary.formulaDiagnostics.filter((diagnostic) => diagnostic.source === "formula_text").length), 0);
-        return `<div class="md-summary-overview">全体 ${totalDiagnostics}件 / cached ${totalCached} / ast ${totalAst} / legacy ${totalLegacy} / formula ${totalFormula} / resolved ${totalResolved} / fallback ${totalFallback} / unsupported ${totalUnsupported}</div>${sheetsWithDiagnostics.map((file) => {
+        return `<div class="md-summary-overview">Total ${totalDiagnostics} / cached ${totalCached} / ast ${totalAst} / legacy ${totalLegacy} / formula ${totalFormula} / resolved ${totalResolved} / fallback ${totalFallback} / unsupported ${totalUnsupported}</div>${sheetsWithDiagnostics.map((file) => {
             const items = [...file.summary.formulaDiagnostics].sort((left, right) => {
                 const priorityDiff = getFormulaStatusPriority(left.status) - getFormulaStatusPriority(right.status);
                 if (priorityDiff !== 0) {
@@ -10154,13 +10407,13 @@ if (!customElements.get("lht-page-menu")) {
                 }
                 return left.address.localeCompare(right.address);
             }).map((diagnostic) => (`<div class="md-summary-item"><div class="md-summary-item-head"><span class="md-summary-item-title">${escapeHtml(diagnostic.address)}</span><span class="md-summary-item-badges"><span class="md-summary-item-status md-summary-item-status--source-${escapeHtml(getFormulaSourceLabel(diagnostic.source))}">${escapeHtml(getFormulaSourceLabel(diagnostic.source))}</span><span class="md-summary-item-status md-summary-item-status--${escapeHtml(getFormulaStatusLabel(diagnostic.status))}">${escapeHtml(getFormulaStatusLabel(diagnostic.status))}</span></span></div><div class="md-summary-item-body">${escapeHtml(`${diagnostic.formulaText} => ${diagnostic.outputValue}`)}</div></div>`)).join("");
-            return `<section class="md-summary-group"><div class="md-summary-group-head"><h3 class="md-summary-group-title">${escapeHtml(file.sheetName)}</h3><span class="md-summary-group-count">${file.summary.formulaDiagnostics.length}件</span></div><div class="md-summary-group-meta">${escapeHtml(renderFormulaSourceCounts(file))}</div><div class="md-summary-group-meta">${escapeHtml(renderFormulaStatusCounts(file))}</div>${items}</section>`;
+            return `<section class="md-summary-group"><div class="md-summary-group-head"><h3 class="md-summary-group-title">${escapeHtml(file.sheetName)}</h3><span class="md-summary-group-count">${file.summary.formulaDiagnostics.length}</span></div><div class="md-summary-group-meta">${escapeHtml(renderFormulaSourceCounts(file))}</div><div class="md-summary-group-meta">${escapeHtml(renderFormulaStatusCounts(file))}</div>${items}</section>`;
         }).join("")}`;
     }
     function renderAnalysisSummary(files, workbookName) {
         var _a;
         if (files.length === 0) {
-            return '<div class="md-summary-empty">まだ変換していません。</div>';
+            return '<div class="md-summary-empty">No conversion yet.</div>';
         }
         const totalTables = files.reduce((sum, file) => sum + file.summary.tables, 0);
         const totalNarratives = files.reduce((sum, file) => sum + file.summary.narrativeBlocks, 0);
@@ -10169,33 +10422,33 @@ if (!customElements.get("lht-page-menu")) {
         const totalCells = files.reduce((sum, file) => sum + file.summary.cells, 0);
         const totalFormulas = files.reduce((sum, file) => sum + file.summary.formulaDiagnostics.length, 0);
         const outputMode = ((_a = files[0]) === null || _a === void 0 ? void 0 : _a.summary.outputMode) || "display";
-        const overview = `<div class="md-summary-overview">Workbook ${escapeHtml(workbookName)} / ${files.length} sheet / mode ${escapeHtml(outputMode)}</div>`;
-        const items = files.map((file) => (`<section class="md-summary-group"><div class="md-summary-group-head"><h3 class="md-summary-group-title">${escapeHtml(file.sheetName)}</h3><span class="md-summary-group-count">${file.summary.cells} cells</span></div><div class="md-summary-group-meta">表 ${file.summary.tables} / 地の文 ${file.summary.narrativeBlocks} / 結合 ${file.summary.merges} / 画像 ${file.summary.images} / 数式 ${file.summary.formulaDiagnostics.length}</div></section>`)).join("");
-        const totals = `<section class="md-summary-group"><div class="md-summary-group-head"><h3 class="md-summary-group-title">全体</h3><span class="md-summary-group-count">${files.length} sheets</span></div><div class="md-summary-group-meta">表 ${totalTables} / 地の文 ${totalNarratives} / 結合 ${totalMerges} / 画像 ${totalImages} / 数式 ${totalFormulas} / 解析セル ${totalCells}</div></section>`;
+        const overview = `<div class="md-summary-overview">Workbook ${escapeHtml(workbookName)} / ${files.length} sheet(s) / mode ${escapeHtml(outputMode)}</div>`;
+        const items = files.map((file) => (`<section class="md-summary-group"><div class="md-summary-group-head"><h3 class="md-summary-group-title">${escapeHtml(file.sheetName)}</h3><span class="md-summary-group-count">${file.summary.cells} cells</span></div><div class="md-summary-group-meta">tables ${file.summary.tables} / narrative ${file.summary.narrativeBlocks} / merges ${file.summary.merges} / images ${file.summary.images} / formulas ${file.summary.formulaDiagnostics.length}</div></section>`)).join("");
+        const totals = `<section class="md-summary-group"><div class="md-summary-group-head"><h3 class="md-summary-group-title">Total</h3><span class="md-summary-group-count">${files.length} sheets</span></div><div class="md-summary-group-meta">tables ${totalTables} / narrative ${totalNarratives} / merges ${totalMerges} / images ${totalImages} / formulas ${totalFormulas} / analyzed cells ${totalCells}</div></section>`;
         return `${overview}${totals}${items}`;
     }
     function updateOutputModeNotice(mode) {
         const notice = getElement("outputModeNotice");
         if (mode === "raw") {
-            notice.textContent = "`raw` は Excel の表示値ではなく、内部値を優先して Markdown に出力します。";
+            notice.textContent = "`raw` outputs internal values instead of Excel's displayed values.";
             return;
         }
         if (mode === "both") {
-            notice.textContent = "`both` は表示値に加えて `[raw=...]` 形式の補助情報を出力します。";
+            notice.textContent = "`both` outputs displayed values plus supplemental `[raw=...]` data.";
             return;
         }
-        notice.textContent = "`display` は Excel の表示値寄りで出力します。";
+        notice.textContent = "`display` outputs values close to what Excel shows.";
     }
     function updatePreviewModeBanner(mode) {
         const banner = getElement("previewModeBanner");
         if (mode === "raw") {
             banner.hidden = false;
-            banner.textContent = "`raw` モードです。Markdown には Excel の表示値ではなく内部値が出ます。";
+            banner.textContent = "`raw` mode is active. Markdown will show internal values instead of Excel's displayed values.";
             return;
         }
         if (mode === "both") {
             banner.hidden = false;
-            banner.textContent = "`both` モードです。Markdown には表示値に加えて `[raw=...]` が出ます。";
+            banner.textContent = "`both` mode is active. Markdown will include displayed values plus `[raw=...]` annotations.";
             return;
         }
         banner.hidden = true;
@@ -10239,7 +10492,7 @@ if (!customElements.get("lht-page-menu")) {
                 overlay.setAttribute("text", message);
             }
             if (typeof overlay.show === "function") {
-                overlay.show(message || "処理中です");
+                overlay.show(message || "Processing");
             }
             else {
                 overlay.setAttribute("active", "");
@@ -10256,9 +10509,9 @@ if (!customElements.get("lht-page-menu")) {
     function renderCurrentSelection() {
         var _a;
         if (!currentFiles.length) {
-            setSummaryText("まだ変換していません。");
-            setScoreSummaryHtml('<div class="md-summary-empty">まだ変換していません。</div>');
-            setFormulaSummaryHtml('<div class="md-summary-empty">まだ変換していません。</div>');
+            setSummaryText("No conversion yet.");
+            setScoreSummaryHtml('<div class="md-summary-empty">No conversion yet.</div>');
+            setFormulaSummaryHtml('<div class="md-summary-empty">No conversion yet.</div>');
             setPreviewMarkdown("");
             updatePreviewModeBanner(getSelectedOutputMode());
             return;
@@ -10285,7 +10538,7 @@ if (!customElements.get("lht-page-menu")) {
     function downloadCurrentMarkdown() {
         const payload = getSelectedFileForDownload();
         if (!payload) {
-            showError("保存対象の Markdown がありません");
+            showError("No Markdown is available to save.");
             return;
         }
         const blob = new Blob([`${payload.content}\n`], { type: "text/markdown;charset=utf-8" });
@@ -10297,12 +10550,12 @@ if (!customElements.get("lht-page-menu")) {
         link.click();
         document.body.removeChild(link);
         window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
-        showToast("Markdown を保存しました");
+        showToast("Saved Markdown.");
     }
     function downloadExportZip() {
         var _a;
         if (!currentWorkbook || currentFiles.length === 0) {
-            showError("先に Markdown を生成してください");
+            showError("Generate Markdown first.");
             return;
         }
         const zipBytes = xlsx2md.createWorkbookExportArchive(currentWorkbook, currentFiles);
@@ -10317,45 +10570,45 @@ if (!customElements.get("lht-page-menu")) {
         link.click();
         document.body.removeChild(link);
         window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
-        showToast("ZIP を保存しました");
+        showToast("Saved ZIP archive.");
     }
     function convertCurrentWorkbook(showSuccessToast = true) {
         clearError();
         if (!currentWorkbook) {
-            showError("先に xlsx ファイルを読み込んでください");
+            showError("Load an xlsx file first.");
             return;
         }
         try {
             currentFiles = xlsx2md.convertWorkbookToMarkdownFiles(currentWorkbook, getOptions());
             renderCurrentSelection();
             if (showSuccessToast) {
-                showToast("Markdown を生成しました");
+                showToast("Generated Markdown.");
             }
         }
         catch (error) {
-            showError(error instanceof Error ? error.message : "Markdown 生成に失敗しました");
+            showError(error instanceof Error ? error.message : "Failed to generate Markdown.");
         }
     }
     async function loadWorkbookFromFile(file) {
         clearError();
-        setLoading(true, "xlsx を読み込んでいます");
+        setLoading(true, "Loading xlsx");
         try {
             const arrayBuffer = await file.arrayBuffer();
             currentWorkbook = await xlsx2md.parseWorkbook(arrayBuffer, file.name);
             currentFiles = [];
             convertCurrentWorkbook(false);
-            showToast("xlsx を読み込み、Markdown を生成しました");
+            showToast("Loaded xlsx and generated Markdown.");
         }
         catch (error) {
             currentWorkbook = null;
             currentFiles = [];
-            setSummaryText("Workbook の読込に失敗しました。");
-            setScoreSummaryHtml('<div class="md-summary-empty">まだ変換していません。</div>');
-            setFormulaSummaryHtml('<div class="md-summary-empty">まだ変換していません。</div>');
+            setSummaryText("Failed to load the workbook.");
+            setScoreSummaryHtml('<div class="md-summary-empty">No conversion yet.</div>');
+            setFormulaSummaryHtml('<div class="md-summary-empty">No conversion yet.</div>');
             setPreviewMarkdown("");
             getElement("downloadBtn").disabled = true;
             getElement("exportZipBtn").disabled = true;
-            showError(error instanceof Error ? error.message : "xlsx の読込に失敗しました");
+            showError(error instanceof Error ? error.message : "Failed to load the xlsx file.");
         }
         finally {
             setLoading(false);
@@ -10391,9 +10644,9 @@ if (!customElements.get("lht-page-menu")) {
     }
     function initialize() {
         clearError();
-        setSummaryText("まだ変換していません。");
-        setScoreSummaryHtml('<div class="md-summary-empty">まだ変換していません。</div>');
-        setFormulaSummaryHtml('<div class="md-summary-empty">まだ変換していません。</div>');
+        setSummaryText("No conversion yet.");
+        setScoreSummaryHtml('<div class="md-summary-empty">No conversion yet.</div>');
+        setFormulaSummaryHtml('<div class="md-summary-empty">No conversion yet.</div>');
         setPreviewMarkdown("");
         updateOutputModeNotice(getSelectedOutputMode());
         updatePreviewModeBanner(getSelectedOutputMode());

@@ -6,70 +6,42 @@
         right: false
     };
     const textDecoder = new TextDecoder("utf-8");
-    const textEncoder = new TextEncoder();
-    const crcTable = buildCrc32Table();
     const drawingHelper = globalThis.__xlsx2mdOfficeDrawing || null;
+    const narrativeStructureHelper = globalThis.__xlsx2mdNarrativeStructure;
+    if (!narrativeStructureHelper) {
+        throw new Error("xlsx2md narrative structure module is not loaded");
+    }
+    const tableDetectorHelper = globalThis.__xlsx2mdTableDetector;
+    if (!tableDetectorHelper) {
+        throw new Error("xlsx2md table detector module is not loaded");
+    }
+    const markdownExportHelper = globalThis.__xlsx2mdMarkdownExport;
+    if (!markdownExportHelper) {
+        throw new Error("xlsx2md markdown export module is not loaded");
+    }
+    const stylesParserHelper = globalThis.__xlsx2mdStylesParser;
+    if (!stylesParserHelper) {
+        throw new Error("xlsx2md styles parser module is not loaded");
+    }
+    const sharedStringsHelper = globalThis.__xlsx2mdSharedStrings;
+    if (!sharedStringsHelper) {
+        throw new Error("xlsx2md shared strings module is not loaded");
+    }
+    const worksheetTablesHelper = globalThis.__xlsx2mdWorksheetTables;
+    if (!worksheetTablesHelper) {
+        throw new Error("xlsx2md worksheet tables module is not loaded");
+    }
+    const zipIoHelper = globalThis.__xlsx2mdZipIo;
+    if (!zipIoHelper) {
+        throw new Error("xlsx2md zip io module is not loaded");
+    }
     let resolveDefinedNameScalarValue = null;
     let resolveDefinedNameRangeRef = null;
     let resolveStructuredRangeRef = null;
-    const BUILTIN_FORMAT_CODES = {
-        0: "General",
-        1: "0",
-        2: "0.00",
-        3: "#,##0",
-        4: "#,##0.00",
-        9: "0%",
-        10: "0.00%",
-        11: "0.00E+00",
-        12: "# ?/?",
-        13: "# ??/??",
-        14: "yyyy/m/d",
-        15: "d-mmm-yy",
-        16: "d-mmm",
-        17: "mmm-yy",
-        18: "h:mm AM/PM",
-        19: "h:mm:ss AM/PM",
-        20: "h:mm",
-        21: "h:mm:ss",
-        22: "m/d/yy h:mm",
-        45: "mm:ss",
-        46: "[h]:mm:ss",
-        47: "mmss.0",
-        49: "@",
-        56: "m月d日"
-    };
-    const TABLE_SCORE_WEIGHTS = {
-        minGrid: 2,
-        borderPresence: 3,
-        densityHigh: 2,
-        densityVeryHigh: 1,
-        headerish: 2,
-        mergeHeavyPenalty: -1,
-        prosePenalty: -2,
-        threshold: 4
-    };
     const DEFAULT_CELL_WIDTH_EMU = 609600;
     const DEFAULT_CELL_HEIGHT_EMU = 190500;
     const SHAPE_BLOCK_GAP_X_EMU = DEFAULT_CELL_WIDTH_EMU * 4;
     const SHAPE_BLOCK_GAP_Y_EMU = DEFAULT_CELL_HEIGHT_EMU * 6;
-    function buildCrc32Table() {
-        const table = new Uint32Array(256);
-        for (let i = 0; i < 256; i += 1) {
-            let value = i;
-            for (let bit = 0; bit < 8; bit += 1) {
-                value = (value & 1) === 1 ? (0xedb88320 ^ (value >>> 1)) : (value >>> 1);
-            }
-            table[i] = value >>> 0;
-        }
-        return table;
-    }
-    function crc32(bytes) {
-        let crc = 0xffffffff;
-        for (const byte of bytes) {
-            crc = crcTable[(crc ^ byte) & 0xff] ^ (crc >>> 8);
-        }
-        return (crc ^ 0xffffffff) >>> 0;
-    }
     function colToLetters(col) {
         let current = col;
         let result = "";
@@ -157,188 +129,6 @@
             }
         }
         return parts.join("/");
-    }
-    function readUint16LE(view, offset) {
-        return view.getUint16(offset, true);
-    }
-    function readUint32LE(view, offset) {
-        return view.getUint32(offset, true);
-    }
-    function hasBorderSide(side) {
-        if (!side)
-            return false;
-        return side.hasAttribute("style") || side.children.length > 0;
-    }
-    async function inflateRaw(data) {
-        if (typeof DecompressionStream === "function") {
-            const stream = new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
-            const buffer = await new Response(stream).arrayBuffer();
-            return new Uint8Array(buffer);
-        }
-        throw new Error("この環境では ZIP Deflate 展開をサポートしていません");
-    }
-    async function unzipEntries(arrayBuffer) {
-        const view = new DataView(arrayBuffer);
-        let eocdOffset = -1;
-        for (let offset = view.byteLength - 22; offset >= Math.max(0, view.byteLength - 0x10000 - 22); offset -= 1) {
-            if (readUint32LE(view, offset) === 0x06054b50) {
-                eocdOffset = offset;
-                break;
-            }
-        }
-        if (eocdOffset < 0) {
-            throw new Error("ZIP の終端レコードが見つかりません");
-        }
-        const centralDirectorySize = readUint32LE(view, eocdOffset + 12);
-        const centralDirectoryOffset = readUint32LE(view, eocdOffset + 16);
-        const endOffset = centralDirectoryOffset + centralDirectorySize;
-        const entries = [];
-        let cursor = centralDirectoryOffset;
-        while (cursor < endOffset) {
-            if (readUint32LE(view, cursor) !== 0x02014b50) {
-                throw new Error("ZIP の中央ディレクトリ形式が不正です");
-            }
-            const compressionMethod = readUint16LE(view, cursor + 10);
-            const compressedSize = readUint32LE(view, cursor + 20);
-            const uncompressedSize = readUint32LE(view, cursor + 24);
-            const fileNameLength = readUint16LE(view, cursor + 28);
-            const extraFieldLength = readUint16LE(view, cursor + 30);
-            const fileCommentLength = readUint16LE(view, cursor + 32);
-            const localHeaderOffset = readUint32LE(view, cursor + 42);
-            const fileNameBytes = new Uint8Array(arrayBuffer, cursor + 46, fileNameLength);
-            const name = decodeXmlText(fileNameBytes);
-            entries.push({
-                name,
-                compressionMethod,
-                compressedSize,
-                uncompressedSize,
-                localHeaderOffset
-            });
-            cursor += 46 + fileNameLength + extraFieldLength + fileCommentLength;
-        }
-        const files = new Map();
-        for (const entry of entries) {
-            const localOffset = entry.localHeaderOffset;
-            if (readUint32LE(view, localOffset) !== 0x04034b50) {
-                throw new Error(`ZIP ローカルヘッダが不正です: ${entry.name}`);
-            }
-            const fileNameLength = readUint16LE(view, localOffset + 26);
-            const extraFieldLength = readUint16LE(view, localOffset + 28);
-            const dataOffset = localOffset + 30 + fileNameLength + extraFieldLength;
-            const compressedData = new Uint8Array(arrayBuffer, dataOffset, entry.compressedSize);
-            let fileData;
-            if (entry.compressionMethod === 0) {
-                fileData = new Uint8Array(compressedData);
-            }
-            else if (entry.compressionMethod === 8) {
-                fileData = await inflateRaw(compressedData);
-            }
-            else {
-                throw new Error(`未対応の圧縮方式です: ${entry.name} (method=${entry.compressionMethod})`);
-            }
-            files.set(entry.name, fileData);
-        }
-        return files;
-    }
-    function createStoredZip(entries) {
-        const localChunks = [];
-        const centralChunks = [];
-        let offset = 0;
-        for (const entry of entries) {
-            const nameBytes = textEncoder.encode(entry.name);
-            const dataBytes = entry.data;
-            const entryCrc32 = crc32(dataBytes);
-            const localHeader = new Uint8Array(30 + nameBytes.length);
-            const localView = new DataView(localHeader.buffer);
-            localView.setUint32(0, 0x04034b50, true);
-            localView.setUint16(4, 20, true);
-            localView.setUint16(6, 0, true);
-            localView.setUint16(8, 0, true);
-            localView.setUint16(10, 0, true);
-            localView.setUint16(12, 0, true);
-            localView.setUint32(14, entryCrc32, true);
-            localView.setUint32(18, dataBytes.length, true);
-            localView.setUint32(22, dataBytes.length, true);
-            localView.setUint16(26, nameBytes.length, true);
-            localView.setUint16(28, 0, true);
-            localHeader.set(nameBytes, 30);
-            localChunks.push(localHeader, dataBytes);
-            const centralHeader = new Uint8Array(46 + nameBytes.length);
-            const centralView = new DataView(centralHeader.buffer);
-            centralView.setUint32(0, 0x02014b50, true);
-            centralView.setUint16(4, 20, true);
-            centralView.setUint16(6, 20, true);
-            centralView.setUint16(8, 0, true);
-            centralView.setUint16(10, 0, true);
-            centralView.setUint16(12, 0, true);
-            centralView.setUint16(14, 0, true);
-            centralView.setUint32(16, entryCrc32, true);
-            centralView.setUint32(20, dataBytes.length, true);
-            centralView.setUint32(24, dataBytes.length, true);
-            centralView.setUint16(28, nameBytes.length, true);
-            centralView.setUint16(30, 0, true);
-            centralView.setUint16(32, 0, true);
-            centralView.setUint16(34, 0, true);
-            centralView.setUint16(36, 0, true);
-            centralView.setUint32(38, 0, true);
-            centralView.setUint32(42, offset, true);
-            centralHeader.set(nameBytes, 46);
-            centralChunks.push(centralHeader);
-            offset += localHeader.length + dataBytes.length;
-        }
-        const centralDirectoryStart = offset;
-        const centralDirectorySize = centralChunks.reduce((sum, chunk) => sum + chunk.length, 0);
-        const eocd = new Uint8Array(22);
-        const eocdView = new DataView(eocd.buffer);
-        eocdView.setUint32(0, 0x06054b50, true);
-        eocdView.setUint16(4, 0, true);
-        eocdView.setUint16(6, 0, true);
-        eocdView.setUint16(8, entries.length, true);
-        eocdView.setUint16(10, entries.length, true);
-        eocdView.setUint32(12, centralDirectorySize, true);
-        eocdView.setUint32(16, centralDirectoryStart, true);
-        eocdView.setUint16(20, 0, true);
-        const totalLength = localChunks.reduce((sum, chunk) => sum + chunk.length, 0) + centralDirectorySize + eocd.length;
-        const output = new Uint8Array(totalLength);
-        let cursor = 0;
-        for (const chunk of localChunks) {
-            output.set(chunk, cursor);
-            cursor += chunk.length;
-        }
-        for (const chunk of centralChunks) {
-            output.set(chunk, cursor);
-            cursor += chunk.length;
-        }
-        output.set(eocd, cursor);
-        return output;
-    }
-    function parseSharedStrings(files) {
-        const sharedStringsBytes = files.get("xl/sharedStrings.xml");
-        if (!sharedStringsBytes) {
-            return [];
-        }
-        const doc = xmlToDocument(decodeXmlText(sharedStringsBytes));
-        const items = Array.from(doc.getElementsByTagName("si"));
-        return items.map((item) => {
-            const parts = [];
-            const walk = (node) => {
-                if (node.nodeType === Node.ELEMENT_NODE) {
-                    const element = node;
-                    if (element.localName === "rPh" || element.localName === "phoneticPr") {
-                        return;
-                    }
-                    if (element.localName === "t") {
-                        parts.push(getTextContent(element));
-                        return;
-                    }
-                }
-                for (const child of Array.from(node.childNodes)) {
-                    walk(child);
-                }
-            };
-            walk(item);
-            return parts.join("");
-        });
     }
     function isDateFormatCode(formatCode) {
         const normalized = String(formatCode || "")
@@ -705,64 +495,6 @@
             return null;
         return datePartsToExcelSerial(Number(parts.yyyy), Number(parts.mm), Number(parts.dd), Number(parts.hh), Number(parts.mi), Number(parts.ss));
     }
-    function parseCellStyles(files) {
-        const stylesBytes = files.get("xl/styles.xml");
-        if (!stylesBytes) {
-            return [{
-                    borders: EMPTY_BORDERS,
-                    numFmtId: 0,
-                    formatCode: "General"
-                }];
-        }
-        const doc = xmlToDocument(decodeXmlText(stylesBytes));
-        const borderElements = Array.from(doc.getElementsByTagName("border"));
-        const borders = borderElements.map((borderElement) => {
-            const top = borderElement.getElementsByTagName("top")[0] || null;
-            const bottom = borderElement.getElementsByTagName("bottom")[0] || null;
-            const left = borderElement.getElementsByTagName("left")[0] || null;
-            const right = borderElement.getElementsByTagName("right")[0] || null;
-            return {
-                top: hasBorderSide(top),
-                bottom: hasBorderSide(bottom),
-                left: hasBorderSide(left),
-                right: hasBorderSide(right)
-            };
-        });
-        const numFmtMap = new Map();
-        const numFmtParent = doc.getElementsByTagName("numFmts")[0];
-        if (numFmtParent) {
-            for (const numFmtElement of Array.from(numFmtParent.getElementsByTagName("numFmt"))) {
-                const numFmtId = Number(numFmtElement.getAttribute("numFmtId") || 0);
-                const formatCode = numFmtElement.getAttribute("formatCode") || "";
-                if (!Number.isNaN(numFmtId) && formatCode) {
-                    numFmtMap.set(numFmtId, formatCode);
-                }
-            }
-        }
-        const xfsParent = doc.getElementsByTagName("cellXfs")[0];
-        if (!xfsParent) {
-            return [{
-                    borders: borders[0] || EMPTY_BORDERS,
-                    numFmtId: 0,
-                    formatCode: "General"
-                }];
-        }
-        const xfElements = Array.from(xfsParent.getElementsByTagName("xf"));
-        const styles = xfElements.map((xfElement) => {
-            const borderId = Number(xfElement.getAttribute("borderId") || 0);
-            const numFmtId = Number(xfElement.getAttribute("numFmtId") || 0);
-            return {
-                borders: borders[borderId] || EMPTY_BORDERS,
-                numFmtId,
-                formatCode: numFmtMap.get(numFmtId) || BUILTIN_FORMAT_CODES[numFmtId] || "General"
-            };
-        });
-        return styles.length > 0 ? styles : [{
-                borders: EMPTY_BORDERS,
-                numFmtId: 0,
-                formatCode: "General"
-            }];
-    }
     function parseRelationships(files, relsPath, sourcePath) {
         const relBytes = files.get(relsPath);
         const relations = new Map();
@@ -789,47 +521,6 @@
     function getImageExtension(mediaPath) {
         const match = mediaPath.match(/\.([a-z0-9]+)$/i);
         return match ? match[1].toLowerCase() : "bin";
-    }
-    function normalizeStructuredTableKey(value) {
-        return String(value || "").normalize("NFKC").trim().toUpperCase();
-    }
-    function parseWorksheetTables(files, worksheetDoc, sheetName, sheetPath) {
-        const sheetRels = parseRelationships(files, buildRelsPath(sheetPath), sheetPath);
-        const tablePartElements = getElementsByLocalName(worksheetDoc, "tablePart");
-        const tables = [];
-        for (const tablePartElement of tablePartElements) {
-            const relId = tablePartElement.getAttribute("r:id") || tablePartElement.getAttribute("id") || "";
-            if (!relId)
-                continue;
-            const tablePath = sheetRels.get(relId) || "";
-            if (!tablePath)
-                continue;
-            const tableBytes = files.get(tablePath);
-            if (!tableBytes)
-                continue;
-            const tableDoc = xmlToDocument(decodeXmlText(tableBytes));
-            const tableElement = getElementsByLocalName(tableDoc, "table")[0] || null;
-            if (!tableElement)
-                continue;
-            const ref = tableElement.getAttribute("ref") || "";
-            const range = parseRangeAddress(ref);
-            if (!range)
-                continue;
-            const columns = getElementsByLocalName(tableElement, "tableColumn")
-                .map((columnElement) => String(columnElement.getAttribute("name") || "").trim())
-                .filter(Boolean);
-            tables.push({
-                sheetName,
-                name: tableElement.getAttribute("name") || "",
-                displayName: tableElement.getAttribute("displayName") || tableElement.getAttribute("name") || "",
-                start: range.start,
-                end: range.end,
-                columns,
-                headerRowCount: Number(tableElement.getAttribute("headerRowCount") || 1) || 1,
-                totalsRowCount: Number(tableElement.getAttribute("totalsRowCount") || 0) || 0
-            });
-        }
-        return tables;
     }
     function createSafeSheetAssetDir(sheetName) {
         return sheetName.replace(/[\\/:*?"<>|]+/g, "_").trim() || "Sheet";
@@ -882,23 +573,23 @@
     }
     function parseChartType(chartDoc) {
         const typeMap = [
-            { localName: "barChart", label: "棒グラフ" },
-            { localName: "lineChart", label: "折れ線グラフ" },
-            { localName: "pieChart", label: "円グラフ" },
-            { localName: "doughnutChart", label: "ドーナツグラフ" },
-            { localName: "areaChart", label: "面グラフ" },
-            { localName: "scatterChart", label: "散布図" },
-            { localName: "radarChart", label: "レーダーチャート" },
-            { localName: "bubbleChart", label: "バブルチャート" }
+            { localName: "barChart", label: "Bar Chart" },
+            { localName: "lineChart", label: "Line Chart" },
+            { localName: "pieChart", label: "Pie Chart" },
+            { localName: "doughnutChart", label: "Doughnut Chart" },
+            { localName: "areaChart", label: "Area Chart" },
+            { localName: "scatterChart", label: "Scatter Chart" },
+            { localName: "radarChart", label: "Radar Chart" },
+            { localName: "bubbleChart", label: "Bubble Chart" }
         ];
         const matched = typeMap
             .filter((entry) => getElementsByLocalName(chartDoc, entry.localName).length > 0)
             .map((entry) => entry.label);
         if (matched.length === 0)
-            return "グラフ";
+            return "Chart";
         if (matched.length === 1)
             return matched[0];
-        return `${matched.join(" + ")} (複合)`;
+        return `${matched.join(" + ")} (Combined)`;
     }
     function parseChartTitle(chartDoc) {
         const richText = getElementsByLocalName(chartDoc, "t")
@@ -951,7 +642,7 @@
                     const valRef = getFirstChildByLocalName(getFirstChildByLocalName(seriesNode, "val") || seriesNode, "f")
                         || getFirstChildByLocalName(getFirstChildByLocalName(getFirstChildByLocalName(seriesNode, "val") || seriesNode, "numRef") || seriesNode, "f");
                     series.push({
-                        name: nameText || getTextContent(nameValue) || getTextContent(nameRef) || "系列",
+                        name: nameText || getTextContent(nameValue) || getTextContent(nameRef) || "Series",
                         categoriesRef: getTextContent(catRef),
                         valuesRef: getTextContent(valRef),
                         axis: isSecondary ? "secondary" : "primary"
@@ -1006,29 +697,29 @@
     }
     function parseShapeKind(shapeNode) {
         if (!shapeNode)
-            return "図形";
+            return "Shape";
         if (shapeNode.localName === "cxnSp") {
             const geomNode = getFirstChildByLocalName(getFirstChildByLocalName(shapeNode, "spPr") || shapeNode, "prstGeom");
             const prst = String((geomNode === null || geomNode === void 0 ? void 0 : geomNode.getAttribute("prst")) || "").trim();
             if (prst === "straightConnector1") {
-                return "直線矢印コネクタ";
+                return "Straight Arrow Connector";
             }
-            return prst ? `コネクタ (${prst})` : "コネクタ";
+            return prst ? `Connector (${prst})` : "Connector";
         }
         if (shapeNode.localName !== "sp") {
-            return "図形";
+            return "Shape";
         }
         const nvSpPr = getFirstChildByLocalName(shapeNode, "nvSpPr");
         const cNvSpPr = getFirstChildByLocalName(nvSpPr || shapeNode, "cNvSpPr");
         if ((cNvSpPr === null || cNvSpPr === void 0 ? void 0 : cNvSpPr.getAttribute("txBox")) === "1") {
-            return "テキストボックス";
+            return "Text Box";
         }
         const geomNode = getFirstChildByLocalName(getFirstChildByLocalName(shapeNode, "spPr") || shapeNode, "prstGeom");
         const prst = String((geomNode === null || geomNode === void 0 ? void 0 : geomNode.getAttribute("prst")) || "").trim();
         if (prst === "rect") {
-            return "長方形";
+            return "Rectangle";
         }
-        return prst ? `図形 (${prst})` : "図形";
+        return prst ? `Shape (${prst})` : "Shape";
     }
     function parseShapeText(shapeNode) {
         return getElementsByLocalName(shapeNode || document, "t")
@@ -1243,7 +934,7 @@
                 shapes.push({
                     sheetName,
                     anchor: `${colToLetters(col)}${row}`,
-                    name: String((cNvPr === null || cNvPr === void 0 ? void 0 : cNvPr.getAttribute("name")) || "").trim() || "図形",
+                    name: String((cNvPr === null || cNvPr === void 0 ? void 0 : cNvPr.getAttribute("name")) || "").trim() || "Shape",
                     kind: parseShapeKind(shapeNode),
                     text: parseShapeText(shapeNode),
                     widthEmu,
@@ -1508,10 +1199,10 @@
             cellMaps.set(sheet.name, cellMap);
             for (const table of sheet.tables) {
                 if (table.name) {
-                    tableMap.set(normalizeStructuredTableKey(table.name), table);
+                    tableMap.set(worksheetTablesHelper.normalizeStructuredTableKey(table.name), table);
                 }
                 if (table.displayName) {
-                    tableMap.set(normalizeStructuredTableKey(table.displayName), table);
+                    tableMap.set(worksheetTablesHelper.normalizeStructuredTableKey(table.displayName), table);
                 }
             }
         }
@@ -1652,15 +1343,15 @@
             const match = String(text || "").trim().match(/^(.+?)\[([^\]]+)\]$/);
             if (!match)
                 return null;
-            const tableKey = normalizeStructuredTableKey(match[1].replace(/^'(.*)'$/, "$1"));
-            const columnKey = normalizeStructuredTableKey(match[2]);
+            const tableKey = worksheetTablesHelper.normalizeStructuredTableKey(match[1].replace(/^'(.*)'$/, "$1"));
+            const columnKey = worksheetTablesHelper.normalizeStructuredTableKey(match[2]);
             if (!tableKey || !columnKey || columnKey.startsWith("#") || columnKey.startsWith("@")) {
                 return null;
             }
             const table = tableMap.get(tableKey);
             if (!table)
                 return null;
-            const columnIndex = table.columns.findIndex((columnName) => normalizeStructuredTableKey(columnName) === columnKey);
+            const columnIndex = table.columns.findIndex((columnName) => worksheetTablesHelper.normalizeStructuredTableKey(columnName) === columnKey);
             if (columnIndex < 0)
                 return null;
             const startAddress = parseCellAddress(table.start);
@@ -3383,7 +3074,7 @@
     function parseWorksheet(files, sheetName, sheetPath, sheetIndex, sharedStrings, cellStyles) {
         const bytes = files.get(sheetPath);
         if (!bytes) {
-            throw new Error(`シート XML が見つかりません: ${sheetPath}`);
+            throw new Error(`Sheet XML not found: ${sheetPath}`);
         }
         const doc = xmlToDocument(decodeXmlText(bytes));
         const sharedFormulaMap = new Map();
@@ -3436,7 +3127,7 @@
             };
         });
         const merges = Array.from(doc.getElementsByTagName("mergeCell")).map((mergeElement) => parseRangeRef(mergeElement.getAttribute("ref") || ""));
-        const tables = parseWorksheetTables(files, doc, sheetName, sheetPath);
+        const tables = worksheetTablesHelper.parseWorksheetTables(files, doc, sheetName, sheetPath);
         const images = parseDrawingImages(files, sheetName, sheetPath);
         const charts = parseDrawingCharts(files, sheetName, sheetPath);
         const shapes = parseDrawingShapes(files, sheetName, sheetPath);
@@ -3469,13 +3160,13 @@
         };
     }
     async function parseWorkbook(arrayBuffer, workbookName = "workbook.xlsx") {
-        const files = await unzipEntries(arrayBuffer);
+        const files = await zipIoHelper.unzipEntries(arrayBuffer);
         const workbookBytes = files.get("xl/workbook.xml");
         if (!workbookBytes) {
-            throw new Error("xl/workbook.xml が見つかりません");
+            throw new Error("xl/workbook.xml was not found.");
         }
-        const sharedStrings = parseSharedStrings(files);
-        const cellStyles = parseCellStyles(files);
+        const sharedStrings = sharedStringsHelper.parseSharedStrings(files);
+        const cellStyles = stylesParserHelper.parseCellStyles(files);
         const rels = parseRelationships(files, "xl/_rels/workbook.xml.rels", "xl/workbook.xml");
         const workbookDoc = xmlToDocument(decodeXmlText(workbookBytes));
         const sheetNodes = Array.from(workbookDoc.getElementsByTagName("sheet"));
@@ -3606,105 +3297,6 @@
             values: segment.values
         }));
     }
-    function isNarrativeListCandidate(item) {
-        const text = String(item.text || "").trim();
-        if (!text || text.length < 4 || text.length > 140)
-            return false;
-        if (item.cellValues.length >= 2) {
-            const marker = String(item.cellValues[0] || "").trim();
-            const content = item.cellValues.slice(1).join(" ").trim();
-            if (!content || content.length < 4)
-                return false;
-            if (marker.length <= 6)
-                return true;
-        }
-        if (item.cellValues.length === 1) {
-            if (/[:：]$/.test(text))
-                return false;
-            if (/[。．]$/.test(text) && text.length < 18)
-                return false;
-            return true;
-        }
-        return false;
-    }
-    function formatNarrativeListItem(item) {
-        const values = item.cellValues.map((value) => String(value || "").trim()).filter(Boolean);
-        if (values.length >= 2) {
-            const marker = values[0];
-            const content = values.slice(1).join(" ").trim();
-            if (/^(x|X|✓|✔|☑)$/u.test(marker)) {
-                return `- [x] ${content}`;
-            }
-            if (/^(□|☐)$/u.test(marker)) {
-                return `- [ ] ${content}`;
-            }
-            return `- ${content}`;
-        }
-        const text = String(item.text || "").trim();
-        const checkedMatch = text.match(/^(x|X|✓|✔|☑)\s+(.+)$/u);
-        if (checkedMatch) {
-            return `- [x] ${checkedMatch[2].trim()}`;
-        }
-        const uncheckedMatch = text.match(/^(□|☐)\s+(.+)$/u);
-        if (uncheckedMatch) {
-            return `- [ ] ${uncheckedMatch[2].trim()}`;
-        }
-        return `- ${text}`;
-    }
-    function renderNarrativeBlock(block) {
-        if (!block.items || block.items.length === 0) {
-            return block.lines.join("\n");
-        }
-        const parts = [];
-        let index = 0;
-        while (index < block.items.length) {
-            let runEnd = index;
-            while (runEnd < block.items.length
-                && isNarrativeListCandidate(block.items[runEnd])
-                && (runEnd === index || block.items[runEnd].row === block.items[runEnd - 1].row + 1)) {
-                runEnd += 1;
-            }
-            const runLength = runEnd - index;
-            if (runLength >= 4) {
-                parts.push(block.items.slice(index, runEnd).map((item) => formatNarrativeListItem(item)).join("\n"));
-                index = runEnd;
-                continue;
-            }
-            let proseEnd = index;
-            while (proseEnd < block.items.length) {
-                const nextRunStart = proseEnd;
-                let candidateEnd = nextRunStart;
-                while (candidateEnd < block.items.length
-                    && isNarrativeListCandidate(block.items[candidateEnd])
-                    && (candidateEnd === nextRunStart || block.items[candidateEnd].row === block.items[candidateEnd - 1].row + 1)) {
-                    candidateEnd += 1;
-                }
-                if (candidateEnd - nextRunStart >= 4) {
-                    break;
-                }
-                proseEnd += 1;
-            }
-            parts.push(block.items.slice(index, proseEnd).map((item) => item.text).join("\n"));
-            index = proseEnd;
-        }
-        return parts.join("\n\n");
-    }
-    function isSectionHeadingNarrativeBlock(block) {
-        var _a;
-        if (!block || !block.items || block.items.length !== 1) {
-            return false;
-        }
-        const text = String(((_a = block.items[0]) === null || _a === void 0 ? void 0 : _a.text) || "").trim();
-        if (!text)
-            return false;
-        if (text.length > 32)
-            return false;
-        if (/[。．:：]$/.test(text))
-            return false;
-        if (/^[\-*#]/.test(text))
-            return false;
-        return true;
-    }
     function extractSectionBlocks(sheet, tables, narrativeBlocks) {
         const charts = sheet.charts || [];
         const anchors = [];
@@ -3779,211 +3371,13 @@
         }
         return sections;
     }
-    function collectTableSeedCells(sheet) {
-        return sheet.cells.filter((cell) => {
-            const hasValue = !!String(cell.outputValue || "").trim();
-            const hasBorder = cell.borders.top || cell.borders.bottom || cell.borders.left || cell.borders.right;
-            return hasValue || hasBorder;
-        });
-    }
-    function detectTableCandidates(sheet) {
-        const seedCells = collectTableSeedCells(sheet);
-        const positionMap = new Map();
-        for (const cell of seedCells) {
-            positionMap.set(`${cell.row}:${cell.col}`, cell);
-        }
-        const visited = new Set();
-        const candidates = [];
-        for (const cell of seedCells) {
-            const key = `${cell.row}:${cell.col}`;
-            if (visited.has(key))
-                continue;
-            const queue = [cell];
-            const component = [];
-            visited.add(key);
-            while (queue.length > 0) {
-                const current = queue.shift();
-                component.push(current);
-                for (const [rowDelta, colDelta] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-                    const nextKey = `${current.row + rowDelta}:${current.col + colDelta}`;
-                    const nextCell = positionMap.get(nextKey);
-                    if (!nextCell || visited.has(nextKey))
-                        continue;
-                    visited.add(nextKey);
-                    queue.push(nextCell);
-                }
-            }
-            const rows = component.map((entry) => entry.row);
-            const cols = component.map((entry) => entry.col);
-            const startRow = Math.min(...rows);
-            const endRow = Math.max(...rows);
-            const startCol = Math.min(...cols);
-            const endCol = Math.max(...cols);
-            const area = Math.max(1, (endRow - startRow + 1) * (endCol - startCol + 1));
-            const density = component.filter((entry) => entry.outputValue.trim()).length / area;
-            const rowCount = endRow - startRow + 1;
-            const colCount = endCol - startCol + 1;
-            if (rowCount < 2 || colCount < 2) {
-                continue;
-            }
-            let score = 0;
-            const reasons = [];
-            const borderCells = component.filter((entry) => entry.borders.top || entry.borders.bottom || entry.borders.left || entry.borders.right);
-            if (rowCount >= 2 && colCount >= 2) {
-                score += TABLE_SCORE_WEIGHTS.minGrid;
-                reasons.push(`2x2 以上 (+${TABLE_SCORE_WEIGHTS.minGrid})`);
-            }
-            if (borderCells.length >= Math.max(2, Math.ceil(component.length * 0.3))) {
-                score += TABLE_SCORE_WEIGHTS.borderPresence;
-                reasons.push(`罫線あり (+${TABLE_SCORE_WEIGHTS.borderPresence})`);
-            }
-            if (density >= 0.55) {
-                score += TABLE_SCORE_WEIGHTS.densityHigh;
-                reasons.push(`密度高 (+${TABLE_SCORE_WEIGHTS.densityHigh})`);
-            }
-            if (density >= 0.8) {
-                score += TABLE_SCORE_WEIGHTS.densityVeryHigh;
-                reasons.push(`密度非常に高 (+${TABLE_SCORE_WEIGHTS.densityVeryHigh})`);
-            }
-            const firstRowCells = component.filter((entry) => entry.row === startRow).sort((a, b) => a.col - b.col);
-            const headerishCount = firstRowCells.filter((entry) => {
-                const value = entry.outputValue.trim();
-                return value.length > 0 && value.length <= 24 && !/^\d+(?:\.\d+)?$/.test(value);
-            }).length;
-            if (headerishCount >= 2) {
-                score += TABLE_SCORE_WEIGHTS.headerish;
-                reasons.push(`ヘッダらしさ (+${TABLE_SCORE_WEIGHTS.headerish})`);
-            }
-            const mergedArea = sheet.merges.filter((merge) => {
-                return !(merge.endRow < startRow || merge.startRow > endRow || merge.endCol < startCol || merge.startCol > endCol);
-            }).length;
-            if (mergedArea >= Math.max(2, Math.ceil(area * 0.08))) {
-                score += TABLE_SCORE_WEIGHTS.mergeHeavyPenalty;
-                reasons.push(`結合セル多 (${TABLE_SCORE_WEIGHTS.mergeHeavyPenalty})`);
-            }
-            if (mergedArea >= 2 && rowCount <= 6 && colCount >= 10 && density < 0.25) {
-                continue;
-            }
-            const avgTextLength = component
-                .filter((entry) => entry.outputValue.trim())
-                .reduce((sum, entry) => sum + entry.outputValue.trim().length, 0) / Math.max(1, component.filter((entry) => entry.outputValue.trim()).length);
-            if (avgTextLength > 36 && density < 0.7) {
-                score += TABLE_SCORE_WEIGHTS.prosePenalty;
-                reasons.push(`長文中心 (${TABLE_SCORE_WEIGHTS.prosePenalty})`);
-            }
-            if (score >= TABLE_SCORE_WEIGHTS.threshold) {
-                candidates.push({
-                    startRow,
-                    startCol,
-                    endRow,
-                    endCol,
-                    score,
-                    reasonSummary: reasons
-                });
-            }
-        }
-        return candidates.sort((left, right) => {
-            if (left.startRow !== right.startRow)
-                return left.startRow - right.startRow;
-            return left.startCol - right.startCol;
-        });
-    }
-    function matrixFromCandidate(sheet, candidate, options) {
-        const cellMap = buildCellMap(sheet);
-        const rows = [];
-        for (let row = candidate.startRow; row <= candidate.endRow; row += 1) {
-            const currentRow = [];
-            for (let col = candidate.startCol; col <= candidate.endCol; col += 1) {
-                const cell = cellMap.get(`${row}:${col}`);
-                let value = formatCellForMarkdown(cell, options);
-                if (options.trimText !== false) {
-                    value = value.trim();
-                }
-                currentRow.push(value);
-            }
-            rows.push(currentRow);
-        }
-        applyMergeTokens(rows, sheet.merges, candidate.startRow, candidate.startCol, candidate.endRow, candidate.endCol);
-        let normalizedRows = rows;
-        if (options.removeEmptyRows !== false) {
-            normalizedRows = normalizedRows.filter((row) => row.some((cell) => isMeaningfulMarkdownCell(cell)));
-        }
-        if (options.removeEmptyColumns !== false && normalizedRows.length > 0) {
-            const keepColumnFlags = normalizedRows[0].map((_, colIndex) => normalizedRows.some((row) => isMeaningfulMarkdownCell(row[colIndex])));
-            normalizedRows = normalizedRows.map((row) => row.filter((_cell, colIndex) => keepColumnFlags[colIndex]));
-        }
-        return normalizedRows;
-    }
-    function isMeaningfulMarkdownCell(value) {
-        const text = String(value || "").trim();
-        if (!text)
-            return false;
-        return text !== "[MERGED←]" && text !== "[MERGED↑]";
-    }
-    function applyMergeTokens(matrix, merges, startRow, startCol, endRow, endCol) {
-        for (const merge of merges) {
-            if (merge.endRow < startRow || merge.startRow > endRow || merge.endCol < startCol || merge.startCol > endCol) {
-                continue;
-            }
-            for (let row = merge.startRow; row <= merge.endRow; row += 1) {
-                for (let col = merge.startCol; col <= merge.endCol; col += 1) {
-                    if (row === merge.startRow && col === merge.startCol)
-                        continue;
-                    const matrixRow = row - startRow;
-                    const matrixCol = col - startCol;
-                    if (!matrix[matrixRow] || typeof matrix[matrixRow][matrixCol] === "undefined") {
-                        continue;
-                    }
-                    matrix[matrixRow][matrixCol] = row === merge.startRow ? "[MERGED←]" : "[MERGED↑]";
-                }
-            }
-        }
-    }
-    function escapeMarkdownCell(text) {
-        return String(text || "").replace(/\|/g, "\\|").replace(/\n/g, "<br>");
-    }
-    function renderMarkdownTable(rows, treatFirstRowAsHeader) {
-        if (rows.length === 0) {
-            return "";
-        }
-        const workingRows = rows.map((row) => row.map((cell) => escapeMarkdownCell(cell)));
-        if (workingRows.length === 1 && treatFirstRowAsHeader) {
-            workingRows.push(new Array(workingRows[0].length).fill(""));
-        }
-        const header = treatFirstRowAsHeader ? workingRows[0] : new Array(workingRows[0].length).fill("");
-        const body = treatFirstRowAsHeader ? workingRows.slice(1) : workingRows;
-        const lines = [
-            `| ${header.join(" | ")} |`,
-            `| ${header.map(() => "---").join(" | ")} |`
-        ];
-        for (const row of body) {
-            lines.push(`| ${row.join(" | ")} |`);
-        }
-        return lines.join("\n");
-    }
-    function createOutputFileName(workbookName, sheetIndex, sheetName, outputMode = "display") {
-        const bookBase = sanitizeFileNameSegment(workbookName.replace(/\.xlsx$/i, ""), "workbook");
-        const safeSheetName = sanitizeFileNameSegment(sheetName, `Sheet${sheetIndex}`);
-        const suffix = outputMode === "display" ? "" : `_${outputMode}`;
-        return `${bookBase}_${String(sheetIndex).padStart(3, "0")}_${safeSheetName}${suffix}.md`;
-    }
-    function sanitizeFileNameSegment(value, fallback) {
-        const normalized = String(value || "").normalize("NFKC");
-        const sanitized = normalized
-            .replace(/[\\/:*?"<>|]/g, "_")
-            .replace(/\s+/g, "_")
-            .replace(/[^\p{L}\p{N}._-]+/gu, "_")
-            .replace(/_+/g, "_")
-            .replace(/^[_ .-]+|[_ .-]+$/g, "");
-        return sanitized || fallback;
-    }
     function convertSheetToMarkdown(workbook, sheet, options = {}) {
         var _a;
         const charts = sheet.charts || [];
         const shapes = sheet.shapes || [];
         const shapeBlocks = extractShapeBlocks(shapes);
         const treatFirstRowAsHeader = options.treatFirstRowAsHeader !== false;
-        const tables = detectTableCandidates(sheet);
+        const tables = tableDetectorHelper.detectTableCandidates(sheet, buildCellMap);
         const narrativeBlocks = extractNarrativeBlocks(sheet, tables, options);
         const sectionBlocks = extractSectionBlocks(sheet, tables, narrativeBlocks);
         const formulaDiagnostics = sheet.cells
@@ -4000,21 +3394,21 @@
             sections.push({
                 sortRow: block.startRow,
                 sortCol: block.startCol,
-                markdown: `${renderNarrativeBlock(block)}\n`,
+                markdown: `${narrativeStructureHelper.renderNarrativeBlock(block)}\n`,
                 kind: "narrative",
                 narrativeBlock: block
             });
         }
         let tableCounter = 1;
         for (const table of tables) {
-            const rows = matrixFromCandidate(sheet, table, options);
+            const rows = tableDetectorHelper.matrixFromCandidate(sheet, table, options, buildCellMap, formatCellForMarkdown);
             if (rows.length === 0 || ((_a = rows[0]) === null || _a === void 0 ? void 0 : _a.length) === 0)
                 continue;
-            const tableMarkdown = renderMarkdownTable(rows, treatFirstRowAsHeader);
+            const tableMarkdown = markdownExportHelper.renderMarkdownTable(rows, treatFirstRowAsHeader);
             sections.push({
                 sortRow: table.startRow,
                 sortCol: table.startCol,
-                markdown: `### 表${String(tableCounter).padStart(3, "0")} (${formatRange(table.startRow, table.startCol, table.endRow, table.endCol)})\n\n${tableMarkdown}\n`,
+                markdown: `### Table ${String(tableCounter).padStart(3, "0")} (${formatRange(table.startRow, table.startCol, table.endRow, table.endCol)})\n\n${tableMarkdown}\n`,
                 kind: "table"
             });
             tableCounter += 1;
@@ -4038,18 +3432,7 @@
         })).filter((group) => group.entries.length > 0);
         const body = groupedSections
             .map((group) => {
-            const entries = group.entries.map((entry) => {
-                var _a, _b;
-                if (entry.kind === "narrative" && isSectionHeadingNarrativeBlock(entry.narrativeBlock)) {
-                    const headingText = String(((_b = (_a = entry.narrativeBlock) === null || _a === void 0 ? void 0 : _a.items[0]) === null || _b === void 0 ? void 0 : _b.text) || "").trim();
-                    return {
-                        ...entry,
-                        markdown: `### ${headingText}\n`
-                    };
-                }
-                return entry;
-            });
-            return entries.map((section) => section.markdown.trimEnd()).join("\n\n").trim();
+            return group.entries.map((section) => section.markdown.trimEnd()).join("\n\n").trim();
         })
             .filter(Boolean)
             .join("\n\n---\n\n")
@@ -4057,10 +3440,10 @@
         const imageSection = sheet.images.length > 0
             ? [
                 "",
-                "## 画像",
+                "## Images",
                 "",
                 ...sheet.images.map((image, index) => [
-                    `### 画像${String(index + 1).padStart(3, "0")} (${image.anchor})`,
+                    `### Image ${String(index + 1).padStart(3, "0")} (${image.anchor})`,
                     `- File: ${image.path}`,
                     "",
                     `![${image.filename}](${image.path})`
@@ -4070,20 +3453,20 @@
         const chartSection = charts.length > 0
             ? [
                 "",
-                "## グラフ",
+                "## Charts",
                 "",
                 ...charts.map((chart, index) => {
                     const lines = [
-                        `### グラフ${String(index + 1).padStart(3, "0")} (${chart.anchor})`,
-                        `- タイトル: ${chart.title || "(なし)"}`,
-                        `- 種別: ${chart.chartType}`
+                        `### Chart ${String(index + 1).padStart(3, "0")} (${chart.anchor})`,
+                        `- Title: ${chart.title || "(none)"}`,
+                        `- Type: ${chart.chartType}`
                     ];
                     if (chart.series.length > 0) {
-                        lines.push("- 系列:");
+                        lines.push("- Series:");
                         for (const series of chart.series) {
                             lines.push(`  - ${series.name}`);
                             if (series.axis === "secondary") {
-                                lines.push("    - 軸: 副軸");
+                                lines.push("    - Axis: secondary");
                             }
                             if (series.categoriesRef) {
                                 lines.push(`    - categories: ${series.categoriesRef}`);
@@ -4100,19 +3483,19 @@
         const shapeSection = shapes.length > 0
             ? [
                 "",
-                "## 図ブロック",
+                "## Shape Blocks",
                 "",
                 ...shapeBlocks.map((block, blockIndex) => [
-                    `### 図ブロック${String(blockIndex + 1).padStart(3, "0")} (${formatRange(block.startRow, block.startCol, block.endRow, block.endCol)})`,
-                    `- 図形: ${block.shapeIndexes.map((shapeIndex) => `図形${String(shapeIndex + 1).padStart(3, "0")}`).join(", ")}`,
+                    `### Shape Block ${String(blockIndex + 1).padStart(3, "0")} (${formatRange(block.startRow, block.startCol, block.endRow, block.endCol)})`,
+                    `- Shapes: ${block.shapeIndexes.map((shapeIndex) => `Shape ${String(shapeIndex + 1).padStart(3, "0")}`).join(", ")}`,
                     `- anchorRange: ${colToLetters(block.startCol)}${block.startRow}-${colToLetters(block.endCol)}${block.endRow}`
                 ].join("\n")),
                 "",
-                "## 図形",
+                "## Shapes",
                 "",
                 ...shapes.map((shape, index) => {
                     const lines = [
-                        `### 図形${String(index + 1).padStart(3, "0")} (${shape.anchor})`,
+                        `### Shape ${String(index + 1).padStart(3, "0")} (${shape.anchor})`,
                         ...renderHierarchicalRawEntries(shape.rawEntries)
                     ];
                     if (shape.svgPath) {
@@ -4127,19 +3510,19 @@
         const markdown = [
             `# ${sheet.name}`,
             "",
-            "## ソース情報",
+            "## Source Information",
             `- Workbook: ${workbook.name}`,
             `- Sheet: ${sheet.name}`,
             "",
-            "## 本文",
+            "## Body",
             "",
-            body || "_抽出できる本文はありませんでした。_",
+            body || "_No extractable body content was found._",
             chartSection,
             shapeSection,
             imageSection
         ].join("\n");
         return {
-            fileName: createOutputFileName(workbook.name, sheet.index, sheet.name, options.outputMode || "display"),
+            fileName: markdownExportHelper.createOutputFileName(workbook.name, sheet.index, sheet.name, options.outputMode || "display"),
             sheetName: sheet.name,
             markdown,
             summary: {
@@ -4163,82 +3546,22 @@
     function convertWorkbookToMarkdownFiles(workbook, options = {}) {
         return workbook.sheets.map((sheet) => convertSheetToMarkdown(workbook, sheet, options));
     }
-    function createSummaryText(markdownFile) {
-        const resolvedCount = markdownFile.summary.formulaDiagnostics.filter((item) => item.status === "resolved").length;
-        const fallbackCount = markdownFile.summary.formulaDiagnostics.filter((item) => item.status === "fallback_formula").length;
-        const unsupportedCount = markdownFile.summary.formulaDiagnostics.filter((item) => item.status === "unsupported_external").length;
-        return [
-            `出力ファイル: ${markdownFile.fileName}`,
-            `出力モード: ${markdownFile.summary.outputMode}`,
-            `セクション: ${markdownFile.summary.sections}`,
-            `表: ${markdownFile.summary.tables}`,
-            `地の文ブロック: ${markdownFile.summary.narrativeBlocks}`,
-            `結合セル範囲: ${markdownFile.summary.merges}`,
-            `画像: ${markdownFile.summary.images}`,
-            `グラフ: ${markdownFile.summary.charts}`,
-            `解析セル数: ${markdownFile.summary.cells}`,
-            `数式 resolved: ${resolvedCount}`,
-            `数式 fallback_formula: ${fallbackCount}`,
-            `数式 unsupported_external: ${unsupportedCount}`,
-            ...markdownFile.summary.tableScores.map((detail) => `表候補 ${detail.range}: ${detail.score}点 / ${detail.reasons.join(", ")}`)
-        ].join("\n");
-    }
-    function createCombinedMarkdownExportFile(workbook, markdownFiles) {
-        var _a;
-        const outputMode = ((_a = markdownFiles[0]) === null || _a === void 0 ? void 0 : _a.summary.outputMode) || "display";
-        const suffix = outputMode === "display" ? "" : `_${outputMode}`;
-        const fileName = `${String(workbook.name || "workbook").replace(/\.xlsx$/i, "")}${suffix}.md`;
-        const content = markdownFiles
-            .map((markdownFile) => `<!-- ${markdownFile.fileName.replace(/\.md$/i, "")} -->\n${markdownFile.markdown}`)
-            .join("\n\n");
-        return { fileName, content };
-    }
-    function createExportEntries(workbook, markdownFiles) {
-        const entries = [];
-        if (markdownFiles.length > 0) {
-            const combined = createCombinedMarkdownExportFile(workbook, markdownFiles);
-            entries.push({
-                name: `output/${combined.fileName}`,
-                data: textEncoder.encode(`${combined.content}\n`)
-            });
-        }
-        for (const sheet of workbook.sheets) {
-            for (const image of sheet.images) {
-                entries.push({
-                    name: `output/${image.path}`,
-                    data: image.data
-                });
-            }
-            for (const shape of sheet.shapes || []) {
-                if (!shape.svgPath || !shape.svgData)
-                    continue;
-                entries.push({
-                    name: `output/${shape.svgPath}`,
-                    data: shape.svgData
-                });
-            }
-        }
-        return entries;
-    }
-    function createWorkbookExportArchive(workbook, markdownFiles) {
-        return createStoredZip(createExportEntries(workbook, markdownFiles));
-    }
     globalThis.__xlsx2md = {
         parseWorkbook,
-        unzipEntries,
+        unzipEntries: zipIoHelper.unzipEntries,
         parseRangeRef,
-        applyMergeTokens,
-        detectTableCandidates,
+        applyMergeTokens: tableDetectorHelper.applyMergeTokens,
+        detectTableCandidates: (sheet) => tableDetectorHelper.detectTableCandidates(sheet, buildCellMap),
         extractNarrativeBlocks,
         convertSheetToMarkdown,
         convertWorkbookToMarkdownFiles,
-        createSummaryText,
-        createCombinedMarkdownExportFile,
-        createExportEntries,
-        createWorkbookExportArchive,
+        createSummaryText: markdownExportHelper.createSummaryText,
+        createCombinedMarkdownExportFile: markdownExportHelper.createCombinedMarkdownExportFile,
+        createExportEntries: markdownExportHelper.createExportEntries,
+        createWorkbookExportArchive: markdownExportHelper.createWorkbookExportArchive,
         formatRange,
         colToLetters,
         lettersToCol,
-        textEncoder
+        textEncoder: markdownExportHelper.textEncoder
     };
 })();
