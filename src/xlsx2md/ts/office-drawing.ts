@@ -1,4 +1,5 @@
 (() => {
+  const moduleRegistry = getXlsx2mdModuleRegistry();
   type SvgRenderResult = {
     filename: string;
     path: string;
@@ -6,11 +7,12 @@
   } | null;
 
   const textEncoder = new TextEncoder();
+  const runtimeEnv = requireXlsx2mdRuntimeEnv();
 
   function getDirectChildByLocalName(root: ParentNode | null, localName: string): Element | null {
     if (!root) return null;
     for (const node of Array.from(root.childNodes)) {
-      if (node.nodeType === Node.ELEMENT_NODE && (node as Element).localName === localName) {
+      if (node.nodeType === runtimeEnv.ELEMENT_NODE && (node as Element).localName === localName) {
         return node as Element;
       }
     }
@@ -164,11 +166,9 @@
     };
   }
 
-  (globalThis as typeof globalThis & {
-    __xlsx2mdOfficeDrawing?: {
-      renderShapeSvg: typeof renderShapeSvg;
-    };
-  }).__xlsx2mdOfficeDrawing = {
+  const officeDrawingApi = {
     renderShapeSvg
   };
+
+  moduleRegistry.registerModule("officeDrawing", officeDrawingApi);
 })();

@@ -1,5 +1,6 @@
 (() => {
-    const xlsx2md = globalThis.__xlsx2md;
+    const moduleRegistry = getXlsx2mdModuleRegistry();
+    const xlsx2md = moduleRegistry.getModule("xlsx2md");
     if (!xlsx2md) {
         throw new Error("xlsx2md core module is not loaded");
     }
@@ -27,6 +28,7 @@
             trimText: getSwitchValue("trimTextEnabled"),
             removeEmptyRows: getSwitchValue("removeEmptyRowsEnabled"),
             removeEmptyColumns: getSwitchValue("removeEmptyColumnsEnabled"),
+            includeShapeDetails: getSwitchValue("includeShapeDetailsEnabled"),
             outputMode: outputMode === "raw" || outputMode === "both" ? outputMode : "display"
         };
     }
@@ -62,19 +64,19 @@
     function renderScoreSummary(files) {
         const sheetsWithScores = files.filter((file) => file.summary.tableScores.length > 0);
         if (sheetsWithScores.length === 0) {
-            return '<div class="md-summary-empty">表候補はありません。</div>';
+            return '<div class="md-summary-empty">No table candidates found.</div>';
         }
         const totalScores = sheetsWithScores.reduce((sum, file) => sum + file.summary.tableScores.length, 0);
         const totalStrong = sheetsWithScores.reduce((sum, file) => (sum + file.summary.tableScores.filter((detail) => getTableScoreLabel(detail.score) === "strong").length), 0);
         const totalCandidate = sheetsWithScores.reduce((sum, file) => (sum + file.summary.tableScores.filter((detail) => getTableScoreLabel(detail.score) === "candidate").length), 0);
-        return `<div class="md-summary-overview">全体 ${totalScores}件 / strong ${totalStrong} / candidate ${totalCandidate}</div>${sheetsWithScores.map((file) => {
+        return `<div class="md-summary-overview">Total ${totalScores} / strong ${totalStrong} / candidate ${totalCandidate}</div>${sheetsWithScores.map((file) => {
             const items = [...file.summary.tableScores].sort((left, right) => {
                 if (right.score !== left.score) {
                     return right.score - left.score;
                 }
                 return left.range.localeCompare(right.range);
-            }).map((detail) => (`<div class="md-summary-item"><div class="md-summary-item-head"><span class="md-summary-item-title">${escapeHtml(detail.range)}</span><span class="md-summary-item-status md-summary-item-status--${escapeHtml(getTableScoreLabel(detail.score))}">${escapeHtml(getTableScoreText(detail.score))}</span></div><div class="md-summary-item-meta">${detail.score}点</div><div class="md-summary-item-body">${escapeHtml(detail.reasons.join(" / "))}</div></div>`)).join("");
-            return `<section class="md-summary-group"><div class="md-summary-group-head"><h3 class="md-summary-group-title">${escapeHtml(file.sheetName)}</h3><span class="md-summary-group-count">${file.summary.tableScores.length}件</span></div><div class="md-summary-group-meta">${escapeHtml(renderTableScoreCounts(file))}</div>${items}</section>`;
+            }).map((detail) => (`<div class="md-summary-item"><div class="md-summary-item-head"><span class="md-summary-item-title">${escapeHtml(detail.range)}</span><span class="md-summary-item-status md-summary-item-status--${escapeHtml(getTableScoreLabel(detail.score))}">${escapeHtml(getTableScoreText(detail.score))}</span></div><div class="md-summary-item-meta">Score ${detail.score}</div><div class="md-summary-item-body">${escapeHtml(detail.reasons.join(" / "))}</div></div>`)).join("");
+            return `<section class="md-summary-group"><div class="md-summary-group-head"><h3 class="md-summary-group-title">${escapeHtml(file.sheetName)}</h3><span class="md-summary-group-count">${file.summary.tableScores.length}</span></div><div class="md-summary-group-meta">${escapeHtml(renderTableScoreCounts(file))}</div>${items}</section>`;
         }).join("")}`;
     }
     function getTableScoreLabel(score) {
@@ -179,7 +181,7 @@
     function renderFormulaSummary(files) {
         const sheetsWithDiagnostics = files.filter((file) => file.summary.formulaDiagnostics.length > 0);
         if (sheetsWithDiagnostics.length === 0) {
-            return '<div class="md-summary-empty">数式セルはありません。</div>';
+            return '<div class="md-summary-empty">No formula cells found.</div>';
         }
         const totalDiagnostics = sheetsWithDiagnostics.reduce((sum, file) => sum + file.summary.formulaDiagnostics.length, 0);
         const totalResolved = sheetsWithDiagnostics.reduce((sum, file) => (sum + file.summary.formulaDiagnostics.filter((diagnostic) => getFormulaStatusLabel(diagnostic.status) === "resolved").length), 0);
@@ -189,7 +191,7 @@
         const totalAst = sheetsWithDiagnostics.reduce((sum, file) => (sum + file.summary.formulaDiagnostics.filter((diagnostic) => diagnostic.source === "ast_evaluator").length), 0);
         const totalLegacy = sheetsWithDiagnostics.reduce((sum, file) => (sum + file.summary.formulaDiagnostics.filter((diagnostic) => diagnostic.source === "legacy_resolver").length), 0);
         const totalFormula = sheetsWithDiagnostics.reduce((sum, file) => (sum + file.summary.formulaDiagnostics.filter((diagnostic) => diagnostic.source === "formula_text").length), 0);
-        return `<div class="md-summary-overview">全体 ${totalDiagnostics}件 / cached ${totalCached} / ast ${totalAst} / legacy ${totalLegacy} / formula ${totalFormula} / resolved ${totalResolved} / fallback ${totalFallback} / unsupported ${totalUnsupported}</div>${sheetsWithDiagnostics.map((file) => {
+        return `<div class="md-summary-overview">Total ${totalDiagnostics} / cached ${totalCached} / ast ${totalAst} / legacy ${totalLegacy} / formula ${totalFormula} / resolved ${totalResolved} / fallback ${totalFallback} / unsupported ${totalUnsupported}</div>${sheetsWithDiagnostics.map((file) => {
             const items = [...file.summary.formulaDiagnostics].sort((left, right) => {
                 const priorityDiff = getFormulaStatusPriority(left.status) - getFormulaStatusPriority(right.status);
                 if (priorityDiff !== 0) {
@@ -197,13 +199,13 @@
                 }
                 return left.address.localeCompare(right.address);
             }).map((diagnostic) => (`<div class="md-summary-item"><div class="md-summary-item-head"><span class="md-summary-item-title">${escapeHtml(diagnostic.address)}</span><span class="md-summary-item-badges"><span class="md-summary-item-status md-summary-item-status--source-${escapeHtml(getFormulaSourceLabel(diagnostic.source))}">${escapeHtml(getFormulaSourceLabel(diagnostic.source))}</span><span class="md-summary-item-status md-summary-item-status--${escapeHtml(getFormulaStatusLabel(diagnostic.status))}">${escapeHtml(getFormulaStatusLabel(diagnostic.status))}</span></span></div><div class="md-summary-item-body">${escapeHtml(`${diagnostic.formulaText} => ${diagnostic.outputValue}`)}</div></div>`)).join("");
-            return `<section class="md-summary-group"><div class="md-summary-group-head"><h3 class="md-summary-group-title">${escapeHtml(file.sheetName)}</h3><span class="md-summary-group-count">${file.summary.formulaDiagnostics.length}件</span></div><div class="md-summary-group-meta">${escapeHtml(renderFormulaSourceCounts(file))}</div><div class="md-summary-group-meta">${escapeHtml(renderFormulaStatusCounts(file))}</div>${items}</section>`;
+            return `<section class="md-summary-group"><div class="md-summary-group-head"><h3 class="md-summary-group-title">${escapeHtml(file.sheetName)}</h3><span class="md-summary-group-count">${file.summary.formulaDiagnostics.length}</span></div><div class="md-summary-group-meta">${escapeHtml(renderFormulaSourceCounts(file))}</div><div class="md-summary-group-meta">${escapeHtml(renderFormulaStatusCounts(file))}</div>${items}</section>`;
         }).join("")}`;
     }
     function renderAnalysisSummary(files, workbookName) {
         var _a;
         if (files.length === 0) {
-            return '<div class="md-summary-empty">まだ変換していません。</div>';
+            return '<div class="md-summary-empty">No conversion yet.</div>';
         }
         const totalTables = files.reduce((sum, file) => sum + file.summary.tables, 0);
         const totalNarratives = files.reduce((sum, file) => sum + file.summary.narrativeBlocks, 0);
@@ -212,33 +214,33 @@
         const totalCells = files.reduce((sum, file) => sum + file.summary.cells, 0);
         const totalFormulas = files.reduce((sum, file) => sum + file.summary.formulaDiagnostics.length, 0);
         const outputMode = ((_a = files[0]) === null || _a === void 0 ? void 0 : _a.summary.outputMode) || "display";
-        const overview = `<div class="md-summary-overview">Workbook ${escapeHtml(workbookName)} / ${files.length} sheet / mode ${escapeHtml(outputMode)}</div>`;
-        const items = files.map((file) => (`<section class="md-summary-group"><div class="md-summary-group-head"><h3 class="md-summary-group-title">${escapeHtml(file.sheetName)}</h3><span class="md-summary-group-count">${file.summary.cells} cells</span></div><div class="md-summary-group-meta">表 ${file.summary.tables} / 地の文 ${file.summary.narrativeBlocks} / 結合 ${file.summary.merges} / 画像 ${file.summary.images} / 数式 ${file.summary.formulaDiagnostics.length}</div></section>`)).join("");
-        const totals = `<section class="md-summary-group"><div class="md-summary-group-head"><h3 class="md-summary-group-title">全体</h3><span class="md-summary-group-count">${files.length} sheets</span></div><div class="md-summary-group-meta">表 ${totalTables} / 地の文 ${totalNarratives} / 結合 ${totalMerges} / 画像 ${totalImages} / 数式 ${totalFormulas} / 解析セル ${totalCells}</div></section>`;
+        const overview = `<div class="md-summary-overview">Workbook ${escapeHtml(workbookName)} / ${files.length} sheet(s) / mode ${escapeHtml(outputMode)}</div>`;
+        const items = files.map((file) => (`<section class="md-summary-group"><div class="md-summary-group-head"><h3 class="md-summary-group-title">${escapeHtml(file.sheetName)}</h3><span class="md-summary-group-count">${file.summary.cells} cells</span></div><div class="md-summary-group-meta">tables ${file.summary.tables} / narrative ${file.summary.narrativeBlocks} / merges ${file.summary.merges} / images ${file.summary.images} / formulas ${file.summary.formulaDiagnostics.length}</div></section>`)).join("");
+        const totals = `<section class="md-summary-group"><div class="md-summary-group-head"><h3 class="md-summary-group-title">Total</h3><span class="md-summary-group-count">${files.length} sheets</span></div><div class="md-summary-group-meta">tables ${totalTables} / narrative ${totalNarratives} / merges ${totalMerges} / images ${totalImages} / formulas ${totalFormulas} / analyzed cells ${totalCells}</div></section>`;
         return `${overview}${totals}${items}`;
     }
     function updateOutputModeNotice(mode) {
         const notice = getElement("outputModeNotice");
         if (mode === "raw") {
-            notice.textContent = "`raw` は Excel の表示値ではなく、内部値を優先して Markdown に出力します。";
+            notice.textContent = "`raw` outputs internal values instead of Excel's displayed values.";
             return;
         }
         if (mode === "both") {
-            notice.textContent = "`both` は表示値に加えて `[raw=...]` 形式の補助情報を出力します。";
+            notice.textContent = "`both` outputs displayed values plus supplemental `[raw=...]` data.";
             return;
         }
-        notice.textContent = "`display` は Excel の表示値寄りで出力します。";
+        notice.textContent = "`display` outputs values close to what Excel shows.";
     }
     function updatePreviewModeBanner(mode) {
         const banner = getElement("previewModeBanner");
         if (mode === "raw") {
             banner.hidden = false;
-            banner.textContent = "`raw` モードです。Markdown には Excel の表示値ではなく内部値が出ます。";
+            banner.textContent = "`raw` mode is active. Markdown will show internal values instead of Excel's displayed values.";
             return;
         }
         if (mode === "both") {
             banner.hidden = false;
-            banner.textContent = "`both` モードです。Markdown には表示値に加えて `[raw=...]` が出ます。";
+            banner.textContent = "`both` mode is active. Markdown will include displayed values plus `[raw=...]` annotations.";
             return;
         }
         banner.hidden = true;
@@ -282,7 +284,7 @@
                 overlay.setAttribute("text", message);
             }
             if (typeof overlay.show === "function") {
-                overlay.show(message || "処理中です");
+                overlay.show(message || "Processing");
             }
             else {
                 overlay.setAttribute("active", "");
@@ -299,9 +301,9 @@
     function renderCurrentSelection() {
         var _a;
         if (!currentFiles.length) {
-            setSummaryText("まだ変換していません。");
-            setScoreSummaryHtml('<div class="md-summary-empty">まだ変換していません。</div>');
-            setFormulaSummaryHtml('<div class="md-summary-empty">まだ変換していません。</div>');
+            setSummaryText("No conversion yet.");
+            setScoreSummaryHtml('<div class="md-summary-empty">No conversion yet.</div>');
+            setFormulaSummaryHtml('<div class="md-summary-empty">No conversion yet.</div>');
             setPreviewMarkdown("");
             updatePreviewModeBanner(getSelectedOutputMode());
             return;
@@ -328,7 +330,7 @@
     function downloadCurrentMarkdown() {
         const payload = getSelectedFileForDownload();
         if (!payload) {
-            showError("保存対象の Markdown がありません");
+            showError("No Markdown is available to save.");
             return;
         }
         const blob = new Blob([`${payload.content}\n`], { type: "text/markdown;charset=utf-8" });
@@ -340,12 +342,12 @@
         link.click();
         document.body.removeChild(link);
         window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
-        showToast("Markdown を保存しました");
+        showToast("Saved Markdown.");
     }
     function downloadExportZip() {
         var _a;
         if (!currentWorkbook || currentFiles.length === 0) {
-            showError("先に Markdown を生成してください");
+            showError("Generate Markdown first.");
             return;
         }
         const zipBytes = xlsx2md.createWorkbookExportArchive(currentWorkbook, currentFiles);
@@ -360,45 +362,45 @@
         link.click();
         document.body.removeChild(link);
         window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
-        showToast("ZIP を保存しました");
+        showToast("Saved ZIP archive.");
     }
     function convertCurrentWorkbook(showSuccessToast = true) {
         clearError();
         if (!currentWorkbook) {
-            showError("先に xlsx ファイルを読み込んでください");
+            showError("Load an xlsx file first.");
             return;
         }
         try {
             currentFiles = xlsx2md.convertWorkbookToMarkdownFiles(currentWorkbook, getOptions());
             renderCurrentSelection();
             if (showSuccessToast) {
-                showToast("Markdown を生成しました");
+                showToast("Generated Markdown.");
             }
         }
         catch (error) {
-            showError(error instanceof Error ? error.message : "Markdown 生成に失敗しました");
+            showError(error instanceof Error ? error.message : "Failed to generate Markdown.");
         }
     }
     async function loadWorkbookFromFile(file) {
         clearError();
-        setLoading(true, "xlsx を読み込んでいます");
+        setLoading(true, "Loading xlsx");
         try {
             const arrayBuffer = await file.arrayBuffer();
             currentWorkbook = await xlsx2md.parseWorkbook(arrayBuffer, file.name);
             currentFiles = [];
             convertCurrentWorkbook(false);
-            showToast("xlsx を読み込み、Markdown を生成しました");
+            showToast("Loaded xlsx and generated Markdown.");
         }
         catch (error) {
             currentWorkbook = null;
             currentFiles = [];
-            setSummaryText("Workbook の読込に失敗しました。");
-            setScoreSummaryHtml('<div class="md-summary-empty">まだ変換していません。</div>');
-            setFormulaSummaryHtml('<div class="md-summary-empty">まだ変換していません。</div>');
+            setSummaryText("Failed to load the workbook.");
+            setScoreSummaryHtml('<div class="md-summary-empty">No conversion yet.</div>');
+            setFormulaSummaryHtml('<div class="md-summary-empty">No conversion yet.</div>');
             setPreviewMarkdown("");
             getElement("downloadBtn").disabled = true;
             getElement("exportZipBtn").disabled = true;
-            showError(error instanceof Error ? error.message : "xlsx の読込に失敗しました");
+            showError(error instanceof Error ? error.message : "Failed to load the xlsx file.");
         }
         finally {
             setLoading(false);
@@ -434,9 +436,9 @@
     }
     function initialize() {
         clearError();
-        setSummaryText("まだ変換していません。");
-        setScoreSummaryHtml('<div class="md-summary-empty">まだ変換していません。</div>');
-        setFormulaSummaryHtml('<div class="md-summary-empty">まだ変換していません。</div>');
+        setSummaryText("No conversion yet.");
+        setScoreSummaryHtml('<div class="md-summary-empty">No conversion yet.</div>');
+        setFormulaSummaryHtml('<div class="md-summary-empty">No conversion yet.</div>');
         setPreviewMarkdown("");
         updateOutputModeNotice(getSelectedOutputMode());
         updatePreviewModeBanner(getSelectedOutputMode());

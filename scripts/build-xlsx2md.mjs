@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { buildSingleHtmlFromSource } from "./lib/single-html.mjs";
+import { XLSX2MD_APP_TS_ORDER } from "./lib/xlsx2md-module-order.mjs";
 
 const ROOT = process.cwd();
 
@@ -9,14 +10,7 @@ const TARGETS = [
     id: "xlsx2md",
     srcHtml: "xlsx2md-src.html",
     outHtml: "xlsx2md.html",
-    tsOrder: [
-      "src/xlsx2md/ts/office-drawing.ts",
-      "src/xlsx2md/ts/formula/tokenizer.ts",
-      "src/xlsx2md/ts/formula/parser.ts",
-      "src/xlsx2md/ts/formula/evaluator.ts",
-      "src/xlsx2md/ts/core.ts",
-      "src/xlsx2md/ts/main.ts"
-    ]
+    tsOrder: XLSX2MD_APP_TS_ORDER
   }
 ];
 

@@ -335,8 +335,8 @@ Primary
 
 現状:
 
-- `docs/xlsx2md/src/xlsx2md/ts/formula/tokenizer.ts`
-- `docs/xlsx2md/src/xlsx2md/ts/formula/parser.ts`
+- `src/xlsx2md/ts/formula/tokenizer.ts`
+- `src/xlsx2md/ts/formula/parser.ts`
 - parser で対応済み:
   - 絶対参照
     - `$A$1`
@@ -364,8 +364,8 @@ Primary
 
 現状:
 
-- `docs/xlsx2md/src/xlsx2md/ts/formula/evaluator.ts`
-- `docs/xlsx2md/src/xlsx2md/ts/core.ts` から限定的に AST フック済み
+- `src/xlsx2md/ts/formula/evaluator.ts`
+- `src/xlsx2md/ts/core.ts` から限定的に AST フック済み
 - evaluator で対応済みの主な関数:
   - 条件・論理
     - `IF`
@@ -440,7 +440,7 @@ Primary
 ### 観測状況
 
 - `scripts/observe-xlsx2md-formulas.mjs` で `local-data` を観測可能
-- 現在は parser 観点では `docs/xlsx2md/local-data/` の全対象で `ast_ng 0`
+- 現在は parser 観点では `local-data/` の全対象で `ast_ng 0`
 - 次段の焦点は parser ではなく、AST evaluator をどこまで優先し、どの関数群をさらに寄せるか
 
 ## 未決事項
