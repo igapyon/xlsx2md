@@ -37,6 +37,25 @@
 ### Experimental Node CLI
 
 You can also run the conversion in batch mode from Node.js.
+The CLI intentionally stays small in the Unix style: one input workbook at a time, with Markdown or ZIP written to a file.
+
+Options:
+
+- `--out <file>`: Write combined Markdown to a file
+- `--zip <file>`: Write ZIP export to a file
+- `--output-mode <mode>`: `display`, `raw`, or `both`
+- `--include-shape-details`: Include shape source details in Markdown
+- `--no-header-row`: Do not treat the first row as a table header
+- `--no-trim-text`: Preserve surrounding whitespace
+- `--keep-empty-rows`: Keep empty rows
+- `--keep-empty-columns`: Keep empty columns
+- `--summary`: Print per-sheet summary to stdout
+- `--help`: Show help and exit
+
+Exit codes:
+
+- `0`: Success
+- `1`: Error
 
 ```bash
 npm run cli -- ./tests/fixtures/xlsx2md-basic-sample01.xlsx --out /tmp/xlsx2md-basic.md
@@ -46,6 +65,12 @@ ZIP export is also available.
 
 ```bash
 npm run cli -- ./tests/fixtures/xlsx2md-basic-sample01.xlsx --zip /tmp/xlsx2md-basic.zip
+```
+
+You can also switch the Markdown output mode or include shape source details.
+
+```bash
+npm run cli -- ./tests/fixtures/shape/shape-basic-sample01.xlsx --output-mode both --include-shape-details
 ```
 
 ## Tech Stack
@@ -139,6 +164,25 @@ The generated Markdown can then be previewed as a readable document.
 ### Experimental Node CLI
 
 Node.js からバッチ実行することもできます。
+CLI は UNIX 的に小さく保つ方針で、基本は 1 回につき 1 つのワークブックを受け取り、Markdown または ZIP をファイルへ出力します。
+
+オプション一覧:
+
+- `--out <file>`: 結合済み Markdown をファイルへ出力
+- `--zip <file>`: ZIP をファイルへ出力
+- `--output-mode <mode>`: `display` / `raw` / `both`
+- `--include-shape-details`: Markdown に図形の source details を含める
+- `--no-header-row`: 先頭行を表ヘッダーとして扱わない
+- `--no-trim-text`: 前後の空白を維持する
+- `--keep-empty-rows`: 空行を維持する
+- `--keep-empty-columns`: 空列を維持する
+- `--summary`: シートごとのサマリーを標準出力に表示
+- `--help`: ヘルプを表示して終了
+
+終了コード:
+
+- `0`: 成功
+- `1`: エラー
 
 ```bash
 npm run cli -- ./tests/fixtures/xlsx2md-basic-sample01.xlsx --out /tmp/xlsx2md-basic.md
@@ -148,6 +192,12 @@ ZIP 出力にも対応しています。
 
 ```bash
 npm run cli -- ./tests/fixtures/xlsx2md-basic-sample01.xlsx --zip /tmp/xlsx2md-basic.zip
+```
+
+Markdown の出力モードを切り替えたり、図形の source details を含めたりすることもできます。
+
+```bash
+npm run cli -- ./tests/fixtures/shape/shape-basic-sample01.xlsx --output-mode both --include-shape-details
 ```
 
 ## Tech Stack
