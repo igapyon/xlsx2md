@@ -1,8 +1,6 @@
 (() => {
-    const markdownNormalizeHelper = globalThis.__xlsx2mdMarkdownNormalize;
-    if (!markdownNormalizeHelper) {
-        throw new Error("xlsx2md markdown normalize module is not loaded");
-    }
+    const moduleRegistry = getXlsx2mdModuleRegistry();
+    const markdownNormalizeHelper = requireXlsx2mdMarkdownNormalize();
     function renderNarrativeBlock(block) {
         if (!block.items || block.items.length === 0) {
             return block.lines.map((line) => markdownNormalizeHelper.normalizeMarkdownText(line)).join("\n");
@@ -38,8 +36,9 @@
         }
         return block.items[1].startCol > block.items[0].startCol;
     }
-    globalThis.__xlsx2mdNarrativeStructure = {
+    const narrativeStructureApi = {
         renderNarrativeBlock,
         isSectionHeadingNarrativeBlock
     };
+    moduleRegistry.registerModule("narrativeStructure", narrativeStructureApi);
 })();

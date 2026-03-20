@@ -5,6 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
+import { loadModuleRegistry } from "./helpers/module-registry.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,8 +17,9 @@ const formulaAstCode = readFileSync(
 
 function bootFormulaAst() {
   document.body.innerHTML = "";
+  loadModuleRegistry(__dirname);
   new Function(formulaAstCode)();
-  return globalThis.__xlsx2mdFormulaAst;
+  return globalThis.__xlsx2mdModuleRegistry.getModule("formulaAst");
 }
 
 function createDeps() {

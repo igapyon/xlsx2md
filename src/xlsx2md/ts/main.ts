@@ -39,15 +39,14 @@
     sheets: Array<{ name: string; index: number }>;
   };
 
-  const xlsx2md = (globalThis as typeof globalThis & {
-    __xlsx2md?: {
-      parseWorkbook: (arrayBuffer: ArrayBuffer, workbookName?: string) => Promise<ParsedWorkbook & { sheets: Array<Record<string, unknown>> }>;
-      convertWorkbookToMarkdownFiles: (workbook: ParsedWorkbook & { sheets: Array<Record<string, unknown>> }, options?: MarkdownOptions) => WorkbookFile[];
-      createSummaryText: (file: WorkbookFile) => string;
-      createCombinedMarkdownExportFile: (workbook: ParsedWorkbook & { sheets: Array<Record<string, unknown>> }, files: WorkbookFile[]) => { fileName: string; content: string };
-      createWorkbookExportArchive: (workbook: ParsedWorkbook & { sheets: Array<Record<string, unknown>> }, files: WorkbookFile[]) => Uint8Array;
-    };
-  }).__xlsx2md;
+  const moduleRegistry = getXlsx2mdModuleRegistry();
+  const xlsx2md = moduleRegistry.getModule<{
+    parseWorkbook: (arrayBuffer: ArrayBuffer, workbookName?: string) => Promise<ParsedWorkbook & { sheets: Array<Record<string, unknown>> }>;
+    convertWorkbookToMarkdownFiles: (workbook: ParsedWorkbook & { sheets: Array<Record<string, unknown>> }, options?: MarkdownOptions) => WorkbookFile[];
+    createSummaryText: (file: WorkbookFile) => string;
+    createCombinedMarkdownExportFile: (workbook: ParsedWorkbook & { sheets: Array<Record<string, unknown>> }, files: WorkbookFile[]) => { fileName: string; content: string };
+    createWorkbookExportArchive: (workbook: ParsedWorkbook & { sheets: Array<Record<string, unknown>> }, files: WorkbookFile[]) => Uint8Array;
+  }>("xlsx2md");
 
   if (!xlsx2md) {
     throw new Error("xlsx2md core module is not loaded");

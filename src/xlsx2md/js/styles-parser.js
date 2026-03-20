@@ -1,10 +1,12 @@
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     const EMPTY_BORDERS = {
         top: false,
         bottom: false,
         left: false,
         right: false
     };
+    const runtimeEnv = requireXlsx2mdRuntimeEnv();
     const textDecoder = new TextDecoder("utf-8");
     const BUILTIN_FORMAT_CODES = {
         0: "General",
@@ -36,7 +38,7 @@
         return textDecoder.decode(bytes);
     }
     function xmlToDocument(xmlText) {
-        return new DOMParser().parseFromString(xmlText, "application/xml");
+        return runtimeEnv.xmlToDocument(xmlText);
     }
     function hasBorderSide(side) {
         if (!side)
@@ -101,10 +103,11 @@
                 formatCode: "General"
             }];
     }
-    globalThis.__xlsx2mdStylesParser = {
+    const stylesParserApi = {
         EMPTY_BORDERS,
         BUILTIN_FORMAT_CODES,
         hasBorderSide,
         parseCellStyles
     };
+    moduleRegistry.registerModule("stylesParser", stylesParserApi);
 })();

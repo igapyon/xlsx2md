@@ -1,5 +1,6 @@
 (() => {
-    const xlsx2md = globalThis.__xlsx2md;
+    const moduleRegistry = getXlsx2mdModuleRegistry();
+    const xlsx2md = moduleRegistry.getModule("xlsx2md");
     if (!xlsx2md) {
         throw new Error("xlsx2md core module is not loaded");
     }

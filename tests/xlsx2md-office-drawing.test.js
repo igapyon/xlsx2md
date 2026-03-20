@@ -5,6 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
+import { loadModuleRegistry, loadRuntimeEnv } from "./helpers/module-registry.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,8 +17,10 @@ const officeDrawingCode = readFileSync(
 
 function bootOfficeDrawing() {
   document.body.innerHTML = "";
+  loadModuleRegistry(__dirname);
+  loadRuntimeEnv(__dirname);
   new Function(officeDrawingCode)();
-  return globalThis.__xlsx2mdOfficeDrawing;
+  return globalThis.__xlsx2mdModuleRegistry.getModule("officeDrawing");
 }
 
 function parseXml(xmlText) {

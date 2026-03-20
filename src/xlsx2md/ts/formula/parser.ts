@@ -1,5 +1,9 @@
 (function initXlsx2mdFormulaParser(global: typeof globalThis) {
-  const api = ((global as any).__xlsx2mdFormula ??= {});
+  const moduleRegistry = getXlsx2mdModuleRegistry();
+  const api = moduleRegistry.getModule<Record<string, unknown>>("formulaRuntime");
+  if (!api) {
+    throw new Error("xlsx2md formula runtime module is not loaded");
+  }
 
   type FormulaAstNode =
     | { type: "number"; value: number; raw: string; }
@@ -352,4 +356,6 @@
   }
 
   api.parseFormula = parseFormula;
+
+  moduleRegistry.registerModule("formulaRuntime", api);
 })(globalThis);

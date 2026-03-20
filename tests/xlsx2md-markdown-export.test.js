@@ -5,6 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
+import { loadModuleRegistry } from "./helpers/module-registry.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,10 +25,11 @@ const markdownExportCode = readFileSync(
 
 function bootMarkdownExport() {
   document.body.innerHTML = "";
+  loadModuleRegistry(__dirname);
   new Function(zipIoCode)();
   new Function(markdownNormalizeCode)();
   new Function(markdownExportCode)();
-  return globalThis.__xlsx2mdMarkdownExport;
+  return globalThis.__xlsx2mdModuleRegistry.getModule("markdownExport");
 }
 
 describe("xlsx2md markdown export", () => {
@@ -120,7 +122,7 @@ describe("xlsx2md markdown export", () => {
 
     const entries = api.createExportEntries(workbook, markdownFiles);
     const archive = api.createWorkbookExportArchive(workbook, markdownFiles);
-    const zipIo = globalThis.__xlsx2mdZipIo;
+    const zipIo = globalThis.__xlsx2mdModuleRegistry.getModule("zipIo");
     const extracted = await zipIo.unzipEntries(archive.buffer.slice(archive.byteOffset, archive.byteOffset + archive.byteLength));
 
     expect(entries.map((entry) => entry.name).sort()).toEqual([

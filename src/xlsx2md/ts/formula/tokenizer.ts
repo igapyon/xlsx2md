@@ -1,5 +1,6 @@
 (function initXlsx2mdFormulaTokenizer(global: typeof globalThis) {
-  const api = ((global as any).__xlsx2mdFormula ??= {});
+  const moduleRegistry = getXlsx2mdModuleRegistry();
+  const api = moduleRegistry.getModule<Record<string, unknown>>("formulaRuntime") || {};
 
   type FormulaTokenType =
     | "number"
@@ -312,4 +313,6 @@
   api.tokenizeFormula = tokenizeFormula;
   api.normalizeFormulaInput = normalizeFormulaInput;
   api.isCellReference = isCellReference;
+
+  moduleRegistry.registerModule("formulaRuntime", api);
 })(globalThis);

@@ -1,4 +1,5 @@
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     function createRelsParserApi(deps) {
         function normalizeZipPath(baseFilePath, targetPath) {
             const baseDirParts = baseFilePath.split("/").slice(0, -1);
@@ -45,7 +46,8 @@
             buildRelsPath
         };
     }
-    globalThis.__xlsx2mdRelsParser = {
+    const relsParserApi = {
         createRelsParserApi
     };
+    moduleRegistry.registerModule("relsParser", relsParserApi);
 })();

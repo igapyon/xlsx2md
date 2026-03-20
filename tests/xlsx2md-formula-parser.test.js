@@ -13,6 +13,14 @@ const tokenizerCode = readFileSync(
   path.resolve(__dirname, "../src/xlsx2md/js/formula/tokenizer.js"),
   "utf8"
 );
+const moduleRegistryCode = readFileSync(
+  path.resolve(__dirname, "../src/xlsx2md/js/module-registry.js"),
+  "utf8"
+);
+const moduleRegistryAccessCode = readFileSync(
+  path.resolve(__dirname, "../src/xlsx2md/js/module-registry-access.js"),
+  "utf8"
+);
 const parserCode = readFileSync(
   path.resolve(__dirname, "../src/xlsx2md/js/formula/parser.js"),
   "utf8"
@@ -24,11 +32,13 @@ const evaluatorCode = readFileSync(
 
 function bootFormulaParser() {
   document.body.innerHTML = "";
+  new Function(moduleRegistryCode)();
+  new Function(moduleRegistryAccessCode)();
   delete globalThis.__xlsx2mdFormula;
   new Function(tokenizerCode)();
   new Function(parserCode)();
   new Function(evaluatorCode)();
-  return globalThis.__xlsx2mdFormula;
+  return globalThis.__xlsx2mdModuleRegistry.getModule("formulaRuntime");
 }
 
 describe("xlsx2md formula parser", () => {

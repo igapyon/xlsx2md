@@ -1,4 +1,5 @@
 (() => {
+  const moduleRegistry = getXlsx2mdModuleRegistry();
   type FormulaLegacyDeps = {
     normalizeFormulaSheetName: (rawName: string) => string;
     normalizeFormulaAddress: (address: string) => string;
@@ -1326,11 +1327,9 @@
     };
   }
 
-  (globalThis as typeof globalThis & {
-    __xlsx2mdFormulaLegacy?: {
-      createFormulaLegacyApi: typeof createFormulaLegacyApi;
-    };
-  }).__xlsx2mdFormulaLegacy = {
+  const formulaLegacyApi = {
     createFormulaLegacyApi
   };
+
+  moduleRegistry.registerModule("formulaLegacy", formulaLegacyApi);
 })();

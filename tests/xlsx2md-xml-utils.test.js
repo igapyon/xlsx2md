@@ -5,6 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
+import { loadModuleRegistry, loadRuntimeEnv } from "./helpers/module-registry.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,8 +17,10 @@ const xmlUtilsCode = readFileSync(
 
 function bootXmlUtils() {
   document.body.innerHTML = "";
+  loadModuleRegistry(__dirname);
+  loadRuntimeEnv(__dirname);
   new Function(xmlUtilsCode)();
-  return globalThis.__xlsx2mdXmlUtils;
+  return globalThis.__xlsx2mdModuleRegistry.getModule("xmlUtils");
 }
 
 describe("xlsx2md xml utils", () => {

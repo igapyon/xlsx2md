@@ -1,7 +1,9 @@
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     const textDecoder = new TextDecoder("utf-8");
+    const runtimeEnv = requireXlsx2mdRuntimeEnv();
     function xmlToDocument(xmlText) {
-        return new DOMParser().parseFromString(xmlText, "application/xml");
+        return runtimeEnv.xmlToDocument(xmlText);
     }
     function getElementsByLocalName(root, localName) {
         const elements = Array.from(root.getElementsByTagName("*"));
@@ -14,7 +16,7 @@
         if (!root)
             return null;
         for (const node of Array.from(root.childNodes)) {
-            if (node.nodeType === Node.ELEMENT_NODE && node.localName === localName) {
+            if (node.nodeType === runtimeEnv.ELEMENT_NODE && node.localName === localName) {
                 return node;
             }
         }
@@ -26,7 +28,7 @@
     function getTextContent(node) {
         return ((node === null || node === void 0 ? void 0 : node.textContent) || "").replace(/\r\n/g, "\n");
     }
-    globalThis.__xlsx2mdXmlUtils = {
+    const xmlUtilsApi = {
         xmlToDocument,
         getElementsByLocalName,
         getFirstChildByLocalName,
@@ -34,4 +36,5 @@
         decodeXmlText,
         getTextContent
     };
+    moduleRegistry.registerModule("xmlUtils", xmlUtilsApi);
 })();

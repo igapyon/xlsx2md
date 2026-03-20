@@ -5,6 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
+import { loadModuleRegistry, loadRuntimeEnv } from "./helpers/module-registry.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,8 +17,10 @@ const sheetAssetsCode = readFileSync(
 
 function bootSheetAssets() {
   document.body.innerHTML = "";
+  loadModuleRegistry(__dirname);
+  loadRuntimeEnv(__dirname);
   new Function(sheetAssetsCode)();
-  return globalThis.__xlsx2mdSheetAssets;
+  return globalThis.__xlsx2mdModuleRegistry.getModule("sheetAssets");
 }
 
 function createDeps() {

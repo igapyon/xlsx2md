@@ -1,4 +1,5 @@
 (() => {
+  const moduleRegistry = getXlsx2mdModuleRegistry();
   type BorderFlags = {
     top: boolean;
     bottom: boolean;
@@ -18,6 +19,7 @@
     left: false,
     right: false
   };
+  const runtimeEnv = requireXlsx2mdRuntimeEnv();
 
   const textDecoder = new TextDecoder("utf-8");
   const BUILTIN_FORMAT_CODES: Record<number, string> = {
@@ -52,7 +54,7 @@
   }
 
   function xmlToDocument(xmlText: string): Document {
-    return new DOMParser().parseFromString(xmlText, "application/xml");
+    return runtimeEnv.xmlToDocument(xmlText);
   }
 
   function hasBorderSide(side: Element | null): boolean {
@@ -120,17 +122,12 @@
     }];
   }
 
-  (globalThis as typeof globalThis & {
-    __xlsx2mdStylesParser?: {
-      EMPTY_BORDERS: typeof EMPTY_BORDERS;
-      BUILTIN_FORMAT_CODES: typeof BUILTIN_FORMAT_CODES;
-      hasBorderSide: typeof hasBorderSide;
-      parseCellStyles: typeof parseCellStyles;
-    };
-  }).__xlsx2mdStylesParser = {
+  const stylesParserApi = {
     EMPTY_BORDERS,
     BUILTIN_FORMAT_CODES,
     hasBorderSide,
     parseCellStyles
   };
+
+  moduleRegistry.registerModule("stylesParser", stylesParserApi);
 })();

@@ -1,4 +1,5 @@
 (() => {
+  const moduleRegistry = getXlsx2mdModuleRegistry();
   type RelsParserDeps = {
     xmlToDocument: (xmlText: string) => Document;
     decodeXmlText: (bytes: Uint8Array) => string;
@@ -51,11 +52,9 @@
     };
   }
 
-  (globalThis as typeof globalThis & {
-    __xlsx2mdRelsParser?: {
-      createRelsParserApi: typeof createRelsParserApi;
-    };
-  }).__xlsx2mdRelsParser = {
+  const relsParserApi = {
     createRelsParserApi
   };
+
+  moduleRegistry.registerModule("relsParser", relsParserApi);
 })();

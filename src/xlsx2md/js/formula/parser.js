@@ -1,7 +1,9 @@
 (function initXlsx2mdFormulaParser(global) {
-    var _a;
-    var _b;
-    const api = ((_a = (_b = global).__xlsx2mdFormula) !== null && _a !== void 0 ? _a : (_b.__xlsx2mdFormula = {}));
+    const moduleRegistry = getXlsx2mdModuleRegistry();
+    const api = moduleRegistry.getModule("formulaRuntime");
+    if (!api) {
+        throw new Error("xlsx2md formula runtime module is not loaded");
+    }
     function parseFormula(input) {
         var _a;
         const tokens = api.tokenizeFormula(input);
@@ -302,4 +304,5 @@
         return false;
     }
     api.parseFormula = parseFormula;
+    moduleRegistry.registerModule("formulaRuntime", api);
 })(globalThis);

@@ -5,6 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
+import { loadModuleRegistry } from "./helpers/module-registry.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,9 +21,10 @@ const narrativeStructureCode = readFileSync(
 
 function bootNarrativeStructure() {
   document.body.innerHTML = "";
+  loadModuleRegistry(__dirname);
   new Function(markdownNormalizeCode)();
   new Function(narrativeStructureCode)();
-  return globalThis.__xlsx2mdNarrativeStructure;
+  return globalThis.__xlsx2mdModuleRegistry.getModule("narrativeStructure");
 }
 
 describe("xlsx2md narrative structure", () => {

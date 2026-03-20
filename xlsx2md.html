@@ -1663,6 +1663,9 @@ lht-preview-output {
   
   
   
+  
+  
+  
   <script>
 (()=>{function s(o,e,t,r){var i=arguments.length,n=i<3?e:r===null?r=Object.getOwnPropertyDescriptor(e,t):r,a;if(typeof Reflect=="object"&&typeof Reflect.decorate=="function")n=Reflect.decorate(o,e,t,r);else for(var d=o.length-1;d>=0;d--)(a=o[d])&&(n=(i<3?a(n):i>3?a(e,t,n):a(e,t))||n);return i>3&&n&&Object.defineProperty(e,t,n),n}var E=o=>(e,t)=>{t!==void 0?t.addInitializer(()=>{customElements.define(o,e)}):customElements.define(o,e)};var Qe=globalThis,et=Qe.ShadowRoot&&(Qe.ShadyCSS===void 0||Qe.ShadyCSS.nativeShadow)&&"adoptedStyleSheets"in Document.prototype&&"replace"in CSSStyleSheet.prototype,Bt=Symbol(),$r=new WeakMap,Ne=class{constructor(e,t,r){if(this._$cssResult$=!0,r!==Bt)throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");this.cssText=e,this.t=t}get styleSheet(){let e=this.o,t=this.t;if(et&&e===void 0){let r=t!==void 0&&t.length===1;r&&(e=$r.get(t)),e===void 0&&((this.o=e=new CSSStyleSheet).replaceSync(this.cssText),r&&$r.set(t,e))}return e}toString(){return this.cssText}},Tr=o=>new Ne(typeof o=="string"?o:o+"",void 0,Bt),g=(o,...e)=>{let t=o.length===1?o[0]:e.reduce((r,i,n)=>r+(a=>{if(a._$cssResult$===!0)return a.cssText;if(typeof a=="number")return a;throw Error("Value passed to 'css' function must be a 'css' function result: "+a+". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.")})(i)+o[n+1],o[0]);return new Ne(t,o,Bt)},Sr=(o,e)=>{if(et)o.adoptedStyleSheets=e.map(t=>t instanceof CSSStyleSheet?t:t.styleSheet);else for(let t of e){let r=document.createElement("style"),i=Qe.litNonce;i!==void 0&&r.setAttribute("nonce",i),r.textContent=t.cssText,o.appendChild(r)}},Ft=et?o=>o:o=>o instanceof CSSStyleSheet?(e=>{let t="";for(let r of e.cssRules)t+=r.cssText;return Tr(t)})(o):o;var{is:Io,defineProperty:ko,getOwnPropertyDescriptor:Oo,getOwnPropertyNames:Ro,getOwnPropertySymbols:Po,getPrototypeOf:Lo}=Object,ce=globalThis,Ir=ce.trustedTypes,Do=Ir?Ir.emptyScript:"",zo=ce.reactiveElementPolyfillSupport,Be=(o,e)=>o,Fe={toAttribute(o,e){switch(e){case Boolean:o=o?Do:null;break;case Object:case Array:o=o==null?o:JSON.stringify(o)}return o},fromAttribute(o,e){let t=o;switch(e){case Boolean:t=o!==null;break;case Number:t=o===null?null:Number(o);break;case Object:case Array:try{t=JSON.parse(o)}catch{t=null}}return t}},tt=(o,e)=>!Io(o,e),kr={attribute:!0,type:String,converter:Fe,reflect:!1,useDefault:!1,hasChanged:tt};Symbol.metadata??(Symbol.metadata=Symbol("metadata")),ce.litPropertyMetadata??(ce.litPropertyMetadata=new WeakMap);var re=class extends HTMLElement{static addInitializer(e){this._$Ei(),(this.l??(this.l=[])).push(e)}static get observedAttributes(){return this.finalize(),this._$Eh&&[...this._$Eh.keys()]}static createProperty(e,t=kr){if(t.state&&(t.attribute=!1),this._$Ei(),this.prototype.hasOwnProperty(e)&&((t=Object.create(t)).wrapped=!0),this.elementProperties.set(e,t),!t.noAccessor){let r=Symbol(),i=this.getPropertyDescriptor(e,r,t);i!==void 0&&ko(this.prototype,e,i)}}static getPropertyDescriptor(e,t,r){let{get:i,set:n}=Oo(this.prototype,e)??{get(){return this[t]},set(a){this[t]=a}};return{get:i,set(a){let d=i?.call(this);n?.call(this,a),this.requestUpdate(e,d,r)},configurable:!0,enumerable:!0}}static getPropertyOptions(e){return this.elementProperties.get(e)??kr}static _$Ei(){if(this.hasOwnProperty(Be("elementProperties")))return;let e=Lo(this);e.finalize(),e.l!==void 0&&(this.l=[...e.l]),this.elementProperties=new Map(e.elementProperties)}static finalize(){if(this.hasOwnProperty(Be("finalized")))return;if(this.finalized=!0,this._$Ei(),this.hasOwnProperty(Be("properties"))){let t=this.properties,r=[...Ro(t),...Po(t)];for(let i of r)this.createProperty(i,t[i])}let e=this[Symbol.metadata];if(e!==null){let t=litPropertyMetadata.get(e);if(t!==void 0)for(let[r,i]of t)this.elementProperties.set(r,i)}this._$Eh=new Map;for(let[t,r]of this.elementProperties){let i=this._$Eu(t,r);i!==void 0&&this._$Eh.set(i,t)}this.elementStyles=this.finalizeStyles(this.styles)}static finalizeStyles(e){let t=[];if(Array.isArray(e)){let r=new Set(e.flat(1/0).reverse());for(let i of r)t.unshift(Ft(i))}else e!==void 0&&t.push(Ft(e));return t}static _$Eu(e,t){let r=t.attribute;return r===!1?void 0:typeof r=="string"?r:typeof e=="string"?e.toLowerCase():void 0}constructor(){super(),this._$Ep=void 0,this.isUpdatePending=!1,this.hasUpdated=!1,this._$Em=null,this._$Ev()}_$Ev(){this._$ES=new Promise(e=>this.enableUpdating=e),this._$AL=new Map,this._$E_(),this.requestUpdate(),this.constructor.l?.forEach(e=>e(this))}addController(e){(this._$EO??(this._$EO=new Set)).add(e),this.renderRoot!==void 0&&this.isConnected&&e.hostConnected?.()}removeController(e){this._$EO?.delete(e)}_$E_(){let e=new Map,t=this.constructor.elementProperties;for(let r of t.keys())this.hasOwnProperty(r)&&(e.set(r,this[r]),delete this[r]);e.size>0&&(this._$Ep=e)}createRenderRoot(){let e=this.shadowRoot??this.attachShadow(this.constructor.shadowRootOptions);return Sr(e,this.constructor.elementStyles),e}connectedCallback(){this.renderRoot??(this.renderRoot=this.createRenderRoot()),this.enableUpdating(!0),this._$EO?.forEach(e=>e.hostConnected?.())}enableUpdating(e){}disconnectedCallback(){this._$EO?.forEach(e=>e.hostDisconnected?.())}attributeChangedCallback(e,t,r){this._$AK(e,r)}_$ET(e,t){let r=this.constructor.elementProperties.get(e),i=this.constructor._$Eu(e,r);if(i!==void 0&&r.reflect===!0){let n=(r.converter?.toAttribute!==void 0?r.converter:Fe).toAttribute(t,r.type);this._$Em=e,n==null?this.removeAttribute(i):this.setAttribute(i,n),this._$Em=null}}_$AK(e,t){let r=this.constructor,i=r._$Eh.get(e);if(i!==void 0&&this._$Em!==i){let n=r.getPropertyOptions(i),a=typeof n.converter=="function"?{fromAttribute:n.converter}:n.converter?.fromAttribute!==void 0?n.converter:Fe;this._$Em=i;let d=a.fromAttribute(t,n.type);this[i]=d??this._$Ej?.get(i)??d,this._$Em=null}}requestUpdate(e,t,r,i=!1,n){if(e!==void 0){let a=this.constructor;if(i===!1&&(n=this[e]),r??(r=a.getPropertyOptions(e)),!((r.hasChanged??tt)(n,t)||r.useDefault&&r.reflect&&n===this._$Ej?.get(e)&&!this.hasAttribute(a._$Eu(e,r))))return;this.C(e,t,r)}this.isUpdatePending===!1&&(this._$ES=this._$EP())}C(e,t,{useDefault:r,reflect:i,wrapped:n},a){r&&!(this._$Ej??(this._$Ej=new Map)).has(e)&&(this._$Ej.set(e,a??t??this[e]),n!==!0||a!==void 0)||(this._$AL.has(e)||(this.hasUpdated||r||(t=void 0),this._$AL.set(e,t)),i===!0&&this._$Em!==e&&(this._$Eq??(this._$Eq=new Set)).add(e))}async _$EP(){this.isUpdatePending=!0;try{await this._$ES}catch(t){Promise.reject(t)}let e=this.scheduleUpdate();return e!=null&&await e,!this.isUpdatePending}scheduleUpdate(){return this.performUpdate()}performUpdate(){if(!this.isUpdatePending)return;if(!this.hasUpdated){if(this.renderRoot??(this.renderRoot=this.createRenderRoot()),this._$Ep){for(let[i,n]of this._$Ep)this[i]=n;this._$Ep=void 0}let r=this.constructor.elementProperties;if(r.size>0)for(let[i,n]of r){let{wrapped:a}=n,d=this[i];a!==!0||this._$AL.has(i)||d===void 0||this.C(i,void 0,n,d)}}let e=!1,t=this._$AL;try{e=this.shouldUpdate(t),e?(this.willUpdate(t),this._$EO?.forEach(r=>r.hostUpdate?.()),this.update(t)):this._$EM()}catch(r){throw e=!1,this._$EM(),r}e&&this._$AE(t)}willUpdate(e){}_$AE(e){this._$EO?.forEach(t=>t.hostUpdated?.()),this.hasUpdated||(this.hasUpdated=!0,this.firstUpdated(e)),this.updated(e)}_$EM(){this._$AL=new Map,this.isUpdatePending=!1}get updateComplete(){return this.getUpdateComplete()}getUpdateComplete(){return this._$ES}shouldUpdate(e){return!0}update(e){this._$Eq&&(this._$Eq=this._$Eq.forEach(t=>this._$ET(t,this[t]))),this._$EM()}updated(e){}firstUpdated(e){}};re.elementStyles=[],re.shadowRootOptions={mode:"open"},re[Be("elementProperties")]=new Map,re[Be("finalized")]=new Map,zo?.({ReactiveElement:re}),(ce.reactiveElementVersions??(ce.reactiveElementVersions=[])).push("2.1.2");var Mo={attribute:!0,type:String,converter:Fe,reflect:!1,hasChanged:tt},No=(o=Mo,e,t)=>{let{kind:r,metadata:i}=t,n=globalThis.litPropertyMetadata.get(i);if(n===void 0&&globalThis.litPropertyMetadata.set(i,n=new Map),r==="setter"&&((o=Object.create(o)).wrapped=!0),n.set(t.name,o),r==="accessor"){let{name:a}=t;return{set(d){let c=e.get.call(this);e.set.call(this,d),this.requestUpdate(a,c,o,!0,d)},init(d){return d!==void 0&&this.C(a,void 0,o,d),d}}}if(r==="setter"){let{name:a}=t;return function(d){let c=this[a];e.call(this,d),this.requestUpdate(a,c,o,!0,d)}}throw Error("Unsupported decorator location: "+r)};function l(o){return(e,t)=>typeof t=="object"?No(o,e,t):((r,i,n)=>{let a=i.hasOwnProperty(n);return i.constructor.createProperty(n,r),a?Object.getOwnPropertyDescriptor(i,n):void 0})(o,e,t)}function k(o){return l({...o,state:!0,attribute:!1})}var Q=(o,e,t)=>(t.configurable=!0,t.enumerable=!0,Reflect.decorate&&typeof e!="object"&&Object.defineProperty(o,e,t),t);function S(o,e){return(t,r,i)=>{let n=a=>a.renderRoot?.querySelector(o)??null;if(e){let{get:a,set:d}=typeof r=="object"?t:i??(()=>{let c=Symbol();return{get(){return this[c]},set(h){this[c]=h}}})();return Q(t,r,{get(){let c=a.call(this);return c===void 0&&(c=n(this),(c!==null||this.hasUpdated)&&d.call(this,c)),c}})}return Q(t,r,{get(){return n(this)}})}}var Bo;function Or(o){return(e,t)=>Q(e,t,{get(){return(this.renderRoot??Bo??(Bo=document.createDocumentFragment())).querySelectorAll(o)}})}function N(o){return(e,t)=>{let{slot:r,selector:i}=o??{},n="slot"+(r?`[name=${r}]`:":not([name])");return Q(e,t,{get(){let a=this.renderRoot?.querySelector(n),d=a?.assignedElements(o)??[];return i===void 0?d:d.filter(c=>c.matches(i))}})}}function rt(o){return(e,t)=>{let{slot:r}=o??{},i="slot"+(r?`[name=${r}]`:":not([name])");return Q(e,t,{get(){return this.renderRoot?.querySelector(i)?.assignedNodes(o)??[]}})}}var qe=globalThis,Rr=o=>o,ot=qe.trustedTypes,Pr=ot?ot.createPolicy("lit-html",{createHTML:o=>o}):void 0,qt="$lit$",oe=`lit$${Math.random().toFixed(9).slice(2)}$`,Vt="?"+oe,Fo=`<${Vt}>`,_e=document,Ve=()=>_e.createComment(""),He=o=>o===null||typeof o!="object"&&typeof o!="function",Ht=Array.isArray,Br=o=>Ht(o)||typeof o?.[Symbol.iterator]=="function",Ut=`[ 	
 \f\r]`,Ue=/<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g,Lr=/-->/g,Dr=/>/g,ye=RegExp(`>|${Ut}(?:([^\\s"'>=/]+)(${Ut}*=${Ut}*(?:[^ 	
@@ -3794,12 +3797,145 @@ if (!customElements.get("lht-page-menu")) {
 
   <script>
 (() => {
+    var _a;
+    var _b;
+    const registry = ((_a = (_b = globalThis).__xlsx2mdModuleRegistryStore) !== null && _a !== void 0 ? _a : (_b.__xlsx2mdModuleRegistryStore = {}));
+    function getModule(name) {
+        return registry[name];
+    }
+    function requireModule(name, errorMessage) {
+        const moduleValue = getModule(name);
+        if (!moduleValue) {
+            throw new Error(errorMessage);
+        }
+        return moduleValue;
+    }
+    function registerModule(name, moduleValue) {
+        registry[name] = moduleValue;
+        return moduleValue;
+    }
+    globalThis.__xlsx2mdModuleRegistry = {
+        getModule,
+        requireModule,
+        registerModule
+    };
+})();
+  </script>
+
+  <script>
+(() => {
+    globalThis.getXlsx2mdModuleRegistry = function getXlsx2mdModuleRegistry() {
+        const moduleRegistry = globalThis.__xlsx2mdModuleRegistry;
+        if (!moduleRegistry) {
+            throw new Error("xlsx2md module registry is not loaded");
+        }
+        return moduleRegistry;
+    };
+    globalThis.requireXlsx2mdRuntimeEnv = function requireXlsx2mdRuntimeEnv() {
+        return globalThis.getXlsx2mdModuleRegistry().requireModule("runtimeEnv", "xlsx2md runtime env module is not loaded");
+    };
+    globalThis.requireXlsx2mdMarkdownNormalize = function requireXlsx2mdMarkdownNormalize() {
+        return globalThis.getXlsx2mdModuleRegistry().requireModule("markdownNormalize", "xlsx2md markdown normalize module is not loaded");
+    };
+    globalThis.requireXlsx2mdZipIo = function requireXlsx2mdZipIo() {
+        return globalThis.getXlsx2mdModuleRegistry().requireModule("zipIo", "xlsx2md zip io module is not loaded");
+    };
+    globalThis.getXlsx2mdDrawingHelperModule = function getXlsx2mdDrawingHelperModule() {
+        return globalThis.getXlsx2mdModuleRegistry().getModule("officeDrawing") || null;
+    };
+    globalThis.requireXlsx2mdNarrativeStructureModule = function requireXlsx2mdNarrativeStructureModule() {
+        return globalThis.getXlsx2mdModuleRegistry().requireModule("narrativeStructure", "xlsx2md narrative structure module is not loaded");
+    };
+    globalThis.requireXlsx2mdTableDetectorModule = function requireXlsx2mdTableDetectorModule() {
+        return globalThis.getXlsx2mdModuleRegistry().requireModule("tableDetector", "xlsx2md table detector module is not loaded");
+    };
+    globalThis.requireXlsx2mdMarkdownExportModule = function requireXlsx2mdMarkdownExportModule() {
+        return globalThis.getXlsx2mdModuleRegistry().requireModule("markdownExport", "xlsx2md markdown export module is not loaded");
+    };
+    globalThis.requireXlsx2mdStylesParserModule = function requireXlsx2mdStylesParserModule() {
+        return globalThis.getXlsx2mdModuleRegistry().requireModule("stylesParser", "xlsx2md styles parser module is not loaded");
+    };
+    globalThis.requireXlsx2mdSharedStringsModule = function requireXlsx2mdSharedStringsModule() {
+        return globalThis.getXlsx2mdModuleRegistry().requireModule("sharedStrings", "xlsx2md shared strings module is not loaded");
+    };
+    globalThis.requireXlsx2mdWorksheetTablesModule = function requireXlsx2mdWorksheetTablesModule() {
+        return globalThis.getXlsx2mdModuleRegistry().requireModule("worksheetTables", "xlsx2md worksheet tables module is not loaded");
+    };
+    globalThis.requireXlsx2mdCellFormatModule = function requireXlsx2mdCellFormatModule() {
+        return globalThis.getXlsx2mdModuleRegistry().requireModule("cellFormat", "xlsx2md cell format module is not loaded");
+    };
+    globalThis.requireXlsx2mdXmlUtilsModule = function requireXlsx2mdXmlUtilsModule() {
+        return globalThis.getXlsx2mdModuleRegistry().requireModule("xmlUtils", "xlsx2md xml utils module is not loaded");
+    };
+    globalThis.requireXlsx2mdAddressUtilsModule = function requireXlsx2mdAddressUtilsModule() {
+        return globalThis.getXlsx2mdModuleRegistry().requireModule("addressUtils", "xlsx2md address utils module is not loaded");
+    };
+    globalThis.requireXlsx2mdRelsParserModule = function requireXlsx2mdRelsParserModule() {
+        return globalThis.getXlsx2mdModuleRegistry().requireModule("relsParser", "xlsx2md rels parser module is not loaded");
+    };
+    globalThis.requireXlsx2mdFormulaReferenceUtilsModule = function requireXlsx2mdFormulaReferenceUtilsModule() {
+        return globalThis.getXlsx2mdModuleRegistry().requireModule("formulaReferenceUtils", "xlsx2md formula reference utils module is not loaded");
+    };
+    globalThis.requireXlsx2mdSheetMarkdownModule = function requireXlsx2mdSheetMarkdownModule() {
+        return globalThis.getXlsx2mdModuleRegistry().requireModule("sheetMarkdown", "xlsx2md sheet markdown module is not loaded");
+    };
+    globalThis.requireXlsx2mdFormulaEngineModule = function requireXlsx2mdFormulaEngineModule() {
+        return globalThis.getXlsx2mdModuleRegistry().requireModule("formulaEngine", "xlsx2md formula engine module is not loaded");
+    };
+    globalThis.requireXlsx2mdSheetAssetsModule = function requireXlsx2mdSheetAssetsModule() {
+        return globalThis.getXlsx2mdModuleRegistry().requireModule("sheetAssets", "xlsx2md sheet assets module is not loaded");
+    };
+    globalThis.requireXlsx2mdWorksheetParserModule = function requireXlsx2mdWorksheetParserModule() {
+        return globalThis.getXlsx2mdModuleRegistry().requireModule("worksheetParser", "xlsx2md worksheet parser module is not loaded");
+    };
+    globalThis.requireXlsx2mdWorkbookLoaderModule = function requireXlsx2mdWorkbookLoaderModule() {
+        return globalThis.getXlsx2mdModuleRegistry().requireModule("workbookLoader", "xlsx2md workbook loader module is not loaded");
+    };
+    globalThis.requireXlsx2mdFormulaResolverModule = function requireXlsx2mdFormulaResolverModule() {
+        return globalThis.getXlsx2mdModuleRegistry().requireModule("formulaResolver", "xlsx2md formula resolver module is not loaded");
+    };
+    globalThis.requireXlsx2mdFormulaLegacyModule = function requireXlsx2mdFormulaLegacyModule() {
+        return globalThis.getXlsx2mdModuleRegistry().requireModule("formulaLegacy", "xlsx2md formula legacy module is not loaded");
+    };
+    globalThis.requireXlsx2mdFormulaAstModule = function requireXlsx2mdFormulaAstModule() {
+        return globalThis.getXlsx2mdModuleRegistry().requireModule("formulaAst", "xlsx2md formula ast module is not loaded");
+    };
+})();
+  </script>
+
+  <script>
+(() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
+    const ELEMENT_NODE = 1;
+    const TEXT_NODE = 3;
+    function createDomParser() {
+        if (typeof DOMParser !== "function") {
+            throw new Error("This environment does not provide DOMParser.");
+        }
+        return new DOMParser();
+    }
+    function xmlToDocument(xmlText) {
+        return createDomParser().parseFromString(xmlText, "application/xml");
+    }
+    const runtimeEnvApi = {
+        ELEMENT_NODE,
+        TEXT_NODE,
+        xmlToDocument
+    };
+    moduleRegistry.registerModule("runtimeEnv", runtimeEnvApi);
+})();
+  </script>
+
+  <script>
+(() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     const textEncoder = new TextEncoder();
+    const runtimeEnv = requireXlsx2mdRuntimeEnv();
     function getDirectChildByLocalName(root, localName) {
         if (!root)
             return null;
         for (const node of Array.from(root.childNodes)) {
-            if (node.nodeType === Node.ELEMENT_NODE && node.localName === localName) {
+            if (node.nodeType === runtimeEnv.ELEMENT_NODE && node.localName === localName) {
                 return node;
             }
         }
@@ -3945,14 +4081,16 @@ if (!customElements.get("lht-page-menu")) {
             data: textEncoder.encode(`${svg}\n`)
         };
     }
-    globalThis.__xlsx2mdOfficeDrawing = {
+    const officeDrawingApi = {
         renderShapeSvg
     };
+    moduleRegistry.registerModule("officeDrawing", officeDrawingApi);
 })();
   </script>
 
   <script>
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     const textDecoder = new TextDecoder("utf-8");
     const textEncoder = new TextEncoder();
     const crcTable = buildCrc32Table();
@@ -4126,15 +4264,17 @@ if (!customElements.get("lht-page-menu")) {
         output.set(eocd, cursor);
         return output;
     }
-    globalThis.__xlsx2mdZipIo = {
+    const zipIoApi = {
         unzipEntries,
         createStoredZip
     };
+    moduleRegistry.registerModule("zipIo", zipIoApi);
 })();
   </script>
 
   <script>
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     function getCellAt(cellMap, row, col) {
         return cellMap.get(`${row}:${col}`);
     }
@@ -4201,18 +4341,20 @@ if (!customElements.get("lht-page-menu")) {
         }
         return count;
     }
-    globalThis.__xlsx2mdBorderGrid = {
+    const borderGridApi = {
         getCellAt,
         hasNormalizedBorderOnSide,
         hasAnyNormalizedBorder,
         collectTableEdgeStats,
         countNormalizedBorderedCells
     };
+    moduleRegistry.registerModule("borderGrid", borderGridApi);
 })();
   </script>
 
   <script>
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     const MARKDOWN_UNSAFE_UNICODE_REGEX = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F\u00AD\u200B-\u200F\u2028\u2029\u202A-\u202E\u2060-\u206F\uFEFF\uFDD0-\uFDEF\uFFFE\uFFFF]/g;
     function normalizeMarkdownText(text) {
         return String(text || "")
@@ -4232,22 +4374,21 @@ if (!customElements.get("lht-page-menu")) {
     function normalizeMarkdownListItemText(text) {
         return normalizeMarkdownText(text).replace(/^([-*+]|\d+\.)\s+/, "");
     }
-    globalThis.__xlsx2mdMarkdownNormalize = {
+    const markdownNormalizeApi = {
         normalizeMarkdownText,
         escapeMarkdownPipes,
         normalizeMarkdownTableCell,
         normalizeMarkdownHeadingText,
         normalizeMarkdownListItemText
     };
+    moduleRegistry.registerModule("markdownNormalize", markdownNormalizeApi);
 })();
   </script>
 
   <script>
 (() => {
-    const markdownNormalizeHelper = globalThis.__xlsx2mdMarkdownNormalize;
-    if (!markdownNormalizeHelper) {
-        throw new Error("xlsx2md markdown normalize module is not loaded");
-    }
+    const moduleRegistry = getXlsx2mdModuleRegistry();
+    const markdownNormalizeHelper = requireXlsx2mdMarkdownNormalize();
     function renderNarrativeBlock(block) {
         if (!block.items || block.items.length === 0) {
             return block.lines.map((line) => markdownNormalizeHelper.normalizeMarkdownText(line)).join("\n");
@@ -4283,15 +4424,17 @@ if (!customElements.get("lht-page-menu")) {
         }
         return block.items[1].startCol > block.items[0].startCol;
     }
-    globalThis.__xlsx2mdNarrativeStructure = {
+    const narrativeStructureApi = {
         renderNarrativeBlock,
         isSectionHeadingNarrativeBlock
     };
+    moduleRegistry.registerModule("narrativeStructure", narrativeStructureApi);
 })();
   </script>
 
   <script>
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     const DEFAULT_TABLE_SCORE_WEIGHTS = {
         minGrid: 2,
         borderPresence: 3,
@@ -4302,7 +4445,7 @@ if (!customElements.get("lht-page-menu")) {
         prosePenalty: -2,
         threshold: 4
     };
-    const borderGridHelper = globalThis.__xlsx2mdBorderGrid;
+    const borderGridHelper = moduleRegistry === null || moduleRegistry === void 0 ? void 0 : moduleRegistry.getModule("borderGrid");
     if (!borderGridHelper) {
         throw new Error("xlsx2md border grid module is not loaded");
     }
@@ -4599,7 +4742,7 @@ if (!customElements.get("lht-page-menu")) {
             }
         }
     }
-    globalThis.__xlsx2mdTableDetector = {
+    const tableDetectorApi = {
         collectTableSeedCells,
         collectBorderSeedCells,
         pruneRedundantCandidates,
@@ -4610,20 +4753,16 @@ if (!customElements.get("lht-page-menu")) {
         applyMergeTokens,
         defaultTableScoreWeights: DEFAULT_TABLE_SCORE_WEIGHTS
     };
+    moduleRegistry.registerModule("tableDetector", tableDetectorApi);
 })();
   </script>
 
   <script>
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     const textEncoder = new TextEncoder();
-    const zipIoHelper = globalThis.__xlsx2mdZipIo;
-    if (!zipIoHelper) {
-        throw new Error("xlsx2md zip io module is not loaded");
-    }
-    const markdownNormalizeHelper = globalThis.__xlsx2mdMarkdownNormalize;
-    if (!markdownNormalizeHelper) {
-        throw new Error("xlsx2md markdown normalize module is not loaded");
-    }
+    const zipIoHelper = requireXlsx2mdZipIo();
+    const markdownNormalizeHelper = requireXlsx2mdMarkdownNormalize();
     function normalizeMarkdownLineBreaks(text) {
         return markdownNormalizeHelper.normalizeMarkdownText(text);
     }
@@ -4725,7 +4864,7 @@ if (!customElements.get("lht-page-menu")) {
     function createWorkbookExportArchive(workbook, markdownFiles) {
         return zipIoHelper.createStoredZip(createExportEntries(workbook, markdownFiles));
     }
-    globalThis.__xlsx2mdMarkdownExport = {
+    const markdownExportApi = {
         escapeMarkdownCell,
         renderMarkdownTable,
         sanitizeFileNameSegment,
@@ -4737,11 +4876,13 @@ if (!customElements.get("lht-page-menu")) {
         normalizeMarkdownLineBreaks,
         textEncoder
     };
+    moduleRegistry.registerModule("markdownExport", markdownExportApi);
 })();
   </script>
 
   <script>
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     function createSheetMarkdownApi(deps) {
         function buildCellMap(sheet) {
             const map = new Map();
@@ -5103,20 +5244,23 @@ if (!customElements.get("lht-page-menu")) {
             convertWorkbookToMarkdownFiles
         };
     }
-    globalThis.__xlsx2mdSheetMarkdown = {
+    const sheetMarkdownApi = {
         createSheetMarkdownApi
     };
+    moduleRegistry.registerModule("sheetMarkdown", sheetMarkdownApi);
 })();
   </script>
 
   <script>
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     const EMPTY_BORDERS = {
         top: false,
         bottom: false,
         left: false,
         right: false
     };
+    const runtimeEnv = requireXlsx2mdRuntimeEnv();
     const textDecoder = new TextDecoder("utf-8");
     const BUILTIN_FORMAT_CODES = {
         0: "General",
@@ -5148,7 +5292,7 @@ if (!customElements.get("lht-page-menu")) {
         return textDecoder.decode(bytes);
     }
     function xmlToDocument(xmlText) {
-        return new DOMParser().parseFromString(xmlText, "application/xml");
+        return runtimeEnv.xmlToDocument(xmlText);
     }
     function hasBorderSide(side) {
         if (!side)
@@ -5213,23 +5357,26 @@ if (!customElements.get("lht-page-menu")) {
                 formatCode: "General"
             }];
     }
-    globalThis.__xlsx2mdStylesParser = {
+    const stylesParserApi = {
         EMPTY_BORDERS,
         BUILTIN_FORMAT_CODES,
         hasBorderSide,
         parseCellStyles
     };
+    moduleRegistry.registerModule("stylesParser", stylesParserApi);
 })();
   </script>
 
   <script>
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     const textDecoder = new TextDecoder("utf-8");
+    const runtimeEnv = requireXlsx2mdRuntimeEnv();
     function decodeXmlText(bytes) {
         return textDecoder.decode(bytes);
     }
     function xmlToDocument(xmlText) {
-        return new DOMParser().parseFromString(xmlText, "application/xml");
+        return runtimeEnv.xmlToDocument(xmlText);
     }
     function getTextContent(node) {
         return ((node === null || node === void 0 ? void 0 : node.textContent) || "").replace(/\r\n/g, "\n");
@@ -5244,7 +5391,7 @@ if (!customElements.get("lht-page-menu")) {
         return items.map((item) => {
             const parts = [];
             const walk = (node) => {
-                if (node.nodeType === Node.ELEMENT_NODE) {
+                if (node.nodeType === runtimeEnv.ELEMENT_NODE) {
                     const element = node;
                     if (element.localName === "rPh" || element.localName === "phoneticPr") {
                         return;
@@ -5262,14 +5409,16 @@ if (!customElements.get("lht-page-menu")) {
             return parts.join("");
         });
     }
-    globalThis.__xlsx2mdSharedStrings = {
+    const sharedStringsApi = {
         parseSharedStrings
     };
+    moduleRegistry.registerModule("sharedStrings", sharedStringsApi);
 })();
   </script>
 
   <script>
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     function colToLetters(col) {
         let current = col;
         let result = "";
@@ -5325,7 +5474,7 @@ if (!customElements.get("lht-page-menu")) {
             end: normalizeFormulaAddress(match[2])
         };
     }
-    globalThis.__xlsx2mdAddressUtils = {
+    const addressUtilsApi = {
         colToLetters,
         lettersToCol,
         parseCellAddress,
@@ -5334,11 +5483,13 @@ if (!customElements.get("lht-page-menu")) {
         parseRangeRef,
         parseRangeAddress
     };
+    moduleRegistry.registerModule("addressUtils", addressUtilsApi);
 })();
   </script>
 
   <script>
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     function createRelsParserApi(deps) {
         function normalizeZipPath(baseFilePath, targetPath) {
             const baseDirParts = baseFilePath.split("/").slice(0, -1);
@@ -5385,20 +5536,23 @@ if (!customElements.get("lht-page-menu")) {
             buildRelsPath
         };
     }
-    globalThis.__xlsx2mdRelsParser = {
+    const relsParserApi = {
         createRelsParserApi
     };
+    moduleRegistry.registerModule("relsParser", relsParserApi);
 })();
   </script>
 
   <script>
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     const textDecoder = new TextDecoder("utf-8");
+    const runtimeEnv = requireXlsx2mdRuntimeEnv();
     function decodeXmlText(bytes) {
         return textDecoder.decode(bytes);
     }
     function xmlToDocument(xmlText) {
-        return new DOMParser().parseFromString(xmlText, "application/xml");
+        return runtimeEnv.xmlToDocument(xmlText);
     }
     function getElementsByLocalName(root, localName) {
         const elements = Array.from(root.getElementsByTagName("*"));
@@ -5496,15 +5650,17 @@ if (!customElements.get("lht-page-menu")) {
         }
         return tables;
     }
-    globalThis.__xlsx2mdWorksheetTables = {
+    const worksheetTablesApi = {
         normalizeStructuredTableKey,
         parseWorksheetTables
     };
+    moduleRegistry.registerModule("worksheetTables", worksheetTablesApi);
 })();
   </script>
 
   <script>
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     function isDateFormatCode(formatCode) {
         const normalized = String(formatCode || "")
             .toLowerCase()
@@ -5870,7 +6026,7 @@ if (!customElements.get("lht-page-menu")) {
             return null;
         return datePartsToExcelSerial(Number(parts.yyyy), Number(parts.mm), Number(parts.dd), Number(parts.hh), Number(parts.mi), Number(parts.ss));
     }
-    globalThis.__xlsx2mdCellFormat = {
+    const cellFormatApi = {
         isDateFormatCode,
         normalizeNumericFormatCode,
         excelSerialToIsoText,
@@ -5888,14 +6044,17 @@ if (!customElements.get("lht-page-menu")) {
         datePartsToExcelSerial,
         parseValueFunctionText
     };
+    moduleRegistry.registerModule("cellFormat", cellFormatApi);
 })();
   </script>
 
   <script>
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     const textDecoder = new TextDecoder("utf-8");
+    const runtimeEnv = requireXlsx2mdRuntimeEnv();
     function xmlToDocument(xmlText) {
-        return new DOMParser().parseFromString(xmlText, "application/xml");
+        return runtimeEnv.xmlToDocument(xmlText);
     }
     function getElementsByLocalName(root, localName) {
         const elements = Array.from(root.getElementsByTagName("*"));
@@ -5908,7 +6067,7 @@ if (!customElements.get("lht-page-menu")) {
         if (!root)
             return null;
         for (const node of Array.from(root.childNodes)) {
-            if (node.nodeType === Node.ELEMENT_NODE && node.localName === localName) {
+            if (node.nodeType === runtimeEnv.ELEMENT_NODE && node.localName === localName) {
                 return node;
             }
         }
@@ -5920,7 +6079,7 @@ if (!customElements.get("lht-page-menu")) {
     function getTextContent(node) {
         return ((node === null || node === void 0 ? void 0 : node.textContent) || "").replace(/\r\n/g, "\n");
     }
-    globalThis.__xlsx2mdXmlUtils = {
+    const xmlUtilsApi = {
         xmlToDocument,
         getElementsByLocalName,
         getFirstChildByLocalName,
@@ -5928,11 +6087,17 @@ if (!customElements.get("lht-page-menu")) {
         decodeXmlText,
         getTextContent
     };
+    moduleRegistry.registerModule("xmlUtils", xmlUtilsApi);
 })();
   </script>
 
   <script>
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
+    const runtimeEnv = moduleRegistry === null || moduleRegistry === void 0 ? void 0 : moduleRegistry.getModule("runtimeEnv");
+    if (!runtimeEnv) {
+        throw new Error("xlsx2md runtime env module is not loaded");
+    }
     function createSafeSheetAssetDir(sheetName) {
         return sheetName.replace(/[\\/:*?"<>|]+/g, "_").trim() || "Sheet";
     }
@@ -6137,7 +6302,9 @@ if (!customElements.get("lht-page-menu")) {
         return prst ? `Shape (${prst})` : "Shape";
     }
     function parseShapeText(shapeNode, deps) {
-        return deps.getElementsByLocalName(shapeNode || document, "t")
+        if (!shapeNode)
+            return "";
+        return deps.getElementsByLocalName(shapeNode, "t")
             .map((node) => deps.getTextContent(node))
             .filter(Boolean)
             .join("")
@@ -6165,7 +6332,7 @@ if (!customElements.get("lht-page-menu")) {
             });
         }
         const directText = Array.from(node.childNodes)
-            .filter((child) => child.nodeType === Node.TEXT_NODE)
+            .filter((child) => child.nodeType === runtimeEnv.TEXT_NODE)
             .map((child) => (child.textContent || "").trim())
             .filter(Boolean)
             .join(" ");
@@ -6176,7 +6343,7 @@ if (!customElements.get("lht-page-menu")) {
             });
         }
         for (const child of Array.from(node.childNodes)) {
-            if (child.nodeType === Node.ELEMENT_NODE) {
+            if (child.nodeType === runtimeEnv.ELEMENT_NODE) {
                 flattenXmlNodeEntries(child, deps, currentPath, entries);
             }
         }
@@ -6222,8 +6389,10 @@ if (!customElements.get("lht-page-menu")) {
         return lines;
     }
     function parseAnchorInt(anchor, parentName, childName, deps) {
-        const parent = deps.getFirstChildByLocalName(anchor || document, parentName);
-        const child = deps.getFirstChildByLocalName(parent || anchor || document, childName);
+        if (!anchor)
+            return null;
+        const parent = deps.getFirstChildByLocalName(anchor, parentName);
+        const child = deps.getFirstChildByLocalName(parent || anchor, childName);
         const value = Number(deps.getTextContent(child));
         return Number.isFinite(value) ? value : null;
     }
@@ -6367,7 +6536,7 @@ if (!customElements.get("lht-page-menu")) {
         }
         return shapes;
     }
-    globalThis.__xlsx2mdSheetAssets = {
+    const sheetAssetsApi = {
         createSafeSheetAssetDir,
         parseDrawingImages,
         parseDrawingCharts,
@@ -6375,11 +6544,13 @@ if (!customElements.get("lht-page-menu")) {
         extractShapeBlocks,
         renderHierarchicalRawEntries
     };
+    moduleRegistry.registerModule("sheetAssets", sheetAssetsApi);
 })();
   </script>
 
   <script>
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     function extractCellOutputValue(cellElement, sharedStrings, cellStyle, deps, formulaOverride = "") {
         const type = (cellElement.getAttribute("t") || "").trim();
         const valueNode = cellElement.getElementsByTagName("v")[0] || null;
@@ -6622,17 +6793,19 @@ if (!customElements.get("lht-page-menu")) {
             maxCol
         };
     }
-    globalThis.__xlsx2mdWorksheetParser = {
+    const worksheetParserApi = {
         extractCellOutputValue,
         shiftReferenceAddress,
         translateSharedFormula,
         parseWorksheet
     };
+    moduleRegistry.registerModule("worksheetParser", worksheetParserApi);
 })();
   </script>
 
   <script>
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     function parseDefinedNames(workbookDoc, sheetNames, getTextContent) {
         const result = [];
         const definedNameElements = Array.from(workbookDoc.getElementsByTagName("definedName"));
@@ -6682,15 +6855,17 @@ if (!customElements.get("lht-page-menu")) {
         (_a = deps.postProcessWorkbook) === null || _a === void 0 ? void 0 : _a.call(deps, workbook);
         return workbook;
     }
-    globalThis.__xlsx2mdWorkbookLoader = {
+    const workbookLoaderApi = {
         parseDefinedNames,
         parseWorkbook
     };
+    moduleRegistry.registerModule("workbookLoader", workbookLoaderApi);
 })();
   </script>
 
   <script>
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     function createFormulaReferenceUtilsApi(deps) {
         function parseSimpleFormulaReference(formulaText, currentSheetName) {
             const normalizedFormula = String(formulaText || "").trim().replace(/^=/, "");
@@ -6751,14 +6926,16 @@ if (!customElements.get("lht-page-menu")) {
             normalizeDefinedNameKey
         };
     }
-    globalThis.__xlsx2mdFormulaReferenceUtils = {
+    const formulaReferenceUtilsApi = {
         createFormulaReferenceUtilsApi
     };
+    moduleRegistry.registerModule("formulaReferenceUtils", formulaReferenceUtilsApi);
 })();
   </script>
 
   <script>
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     function createFormulaEngineApi(deps) {
         function tryResolveFormulaExpressionDetailed(formulaText, currentSheetName, resolveCellValue, resolveRangeValues, resolveRangeEntries, currentAddress) {
             var _a;
@@ -6797,14 +6974,16 @@ if (!customElements.get("lht-page-menu")) {
             tryResolveFormulaExpression
         };
     }
-    globalThis.__xlsx2mdFormulaEngine = {
+    const formulaEngineApi = {
         createFormulaEngineApi
     };
+    moduleRegistry.registerModule("formulaEngine", formulaEngineApi);
 })();
   </script>
 
   <script>
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     function createFormulaLegacyApi(deps) {
         function tryResolveFormulaExpressionLegacy(normalized, currentSheetName, resolveCellValue, resolveRangeValues, resolveRangeEntries) {
             const ifResult = tryResolveIfFunction(normalized, currentSheetName, resolveCellValue, resolveRangeValues, resolveRangeEntries);
@@ -8127,17 +8306,19 @@ if (!customElements.get("lht-page-menu")) {
             resolveScalarFormulaValue
         };
     }
-    globalThis.__xlsx2mdFormulaLegacy = {
+    const formulaLegacyApi = {
         createFormulaLegacyApi
     };
+    moduleRegistry.registerModule("formulaLegacy", formulaLegacyApi);
 })();
   </script>
 
   <script>
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     function createFormulaAstApi(deps) {
         function tryResolveFormulaExpressionWithAst(expression, currentSheetName, resolveCellValue, resolveDefinedNameScalarValue, resolveDefinedNameRangeRef, resolveStructuredRangeRef, resolveSpillRange, resolveRangeEntries, currentAddress) {
-            const formulaApi = globalThis.__xlsx2mdFormula;
+            const formulaApi = moduleRegistry.getModule("formulaRuntime");
             if (!(formulaApi === null || formulaApi === void 0 ? void 0 : formulaApi.parseFormula) || !(formulaApi === null || formulaApi === void 0 ? void 0 : formulaApi.evaluateFormulaAst)) {
                 return null;
             }
@@ -8273,14 +8454,16 @@ if (!customElements.get("lht-page-menu")) {
             serializeFormulaAstResult
         };
     }
-    globalThis.__xlsx2mdFormulaAst = {
+    const formulaAstApi = {
         createFormulaAstApi
     };
+    moduleRegistry.registerModule("formulaAst", formulaAstApi);
 })();
   </script>
 
   <script>
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     function buildFormulaResolver(workbook, deps) {
         const sheetMap = new Map();
         const cellMaps = new Map();
@@ -8547,18 +8730,18 @@ if (!customElements.get("lht-page-menu")) {
             (_d = deps.setDefinedNameResolvers) === null || _d === void 0 ? void 0 : _d.call(deps, null, null, null);
         }
     }
-    globalThis.__xlsx2mdFormulaResolver = {
+    const formulaResolverApi = {
         buildFormulaResolver,
         resolveSimpleFormulaReferences
     };
+    moduleRegistry.registerModule("formulaResolver", formulaResolverApi);
 })();
   </script>
 
   <script>
 (function initXlsx2mdFormulaTokenizer(global) {
-    var _a;
-    var _b;
-    const api = ((_a = (_b = global).__xlsx2mdFormula) !== null && _a !== void 0 ? _a : (_b.__xlsx2mdFormula = {}));
+    const moduleRegistry = getXlsx2mdModuleRegistry();
+    const api = moduleRegistry.getModule("formulaRuntime") || {};
     const CELL_REF_RE = /^\$?[A-Za-z]{1,3}\$?\d+$/;
     const IDENTIFIER_START_RE = /[\p{L}_\\$]/u;
     const IDENTIFIER_PART_RE = /[\p{L}\p{N}_.\\$?]/u;
@@ -8817,14 +9000,17 @@ if (!customElements.get("lht-page-menu")) {
     api.tokenizeFormula = tokenizeFormula;
     api.normalizeFormulaInput = normalizeFormulaInput;
     api.isCellReference = isCellReference;
+    moduleRegistry.registerModule("formulaRuntime", api);
 })(globalThis);
   </script>
 
   <script>
 (function initXlsx2mdFormulaParser(global) {
-    var _a;
-    var _b;
-    const api = ((_a = (_b = global).__xlsx2mdFormula) !== null && _a !== void 0 ? _a : (_b.__xlsx2mdFormula = {}));
+    const moduleRegistry = getXlsx2mdModuleRegistry();
+    const api = moduleRegistry.getModule("formulaRuntime");
+    if (!api) {
+        throw new Error("xlsx2md formula runtime module is not loaded");
+    }
     function parseFormula(input) {
         var _a;
         const tokens = api.tokenizeFormula(input);
@@ -9125,14 +9311,17 @@ if (!customElements.get("lht-page-menu")) {
         return false;
     }
     api.parseFormula = parseFormula;
+    moduleRegistry.registerModule("formulaRuntime", api);
 })(globalThis);
   </script>
 
   <script>
 (function initXlsx2mdFormulaEvaluator(global) {
-    var _a;
-    var _b;
-    const api = ((_a = (_b = global).__xlsx2mdFormula) !== null && _a !== void 0 ? _a : (_b.__xlsx2mdFormula = {}));
+    const moduleRegistry = getXlsx2mdModuleRegistry();
+    const api = moduleRegistry.getModule("formulaRuntime");
+    if (!api) {
+        throw new Error("xlsx2md formula runtime module is not loaded");
+    }
     function evaluateFormulaAst(ast, context = {}) {
         switch (ast.type) {
             case "number":
@@ -10341,6 +10530,7 @@ if (!customElements.get("lht-page-menu")) {
         return leftText < rightText ? -1 : 1;
     }
     api.evaluateFormulaAst = evaluateFormulaAst;
+    moduleRegistry.registerModule("formulaRuntime", api);
 })(globalThis);
   </script>
 
@@ -10352,91 +10542,68 @@ if (!customElements.get("lht-page-menu")) {
         left: false,
         right: false
     };
-    const drawingHelper = globalThis.__xlsx2mdOfficeDrawing || null;
-    const markdownNormalizeHelper = globalThis.__xlsx2mdMarkdownNormalize;
-    if (!markdownNormalizeHelper) {
-        throw new Error("xlsx2md markdown normalize module is not loaded");
+    const moduleRegistry = getXlsx2mdModuleRegistry();
+    function requireCoreNarrativeStructure() {
+        return requireXlsx2mdNarrativeStructureModule();
     }
-    const narrativeStructureHelper = globalThis.__xlsx2mdNarrativeStructure;
-    if (!narrativeStructureHelper) {
-        throw new Error("xlsx2md narrative structure module is not loaded");
+    function requireCoreTableDetector() {
+        return requireXlsx2mdTableDetectorModule();
     }
-    const tableDetectorHelper = globalThis.__xlsx2mdTableDetector;
-    if (!tableDetectorHelper) {
-        throw new Error("xlsx2md table detector module is not loaded");
+    function requireCoreMarkdownExport() {
+        return requireXlsx2mdMarkdownExportModule();
     }
-    const markdownExportHelper = globalThis.__xlsx2mdMarkdownExport;
-    if (!markdownExportHelper) {
-        throw new Error("xlsx2md markdown export module is not loaded");
+    function requireCoreStylesParser() {
+        return requireXlsx2mdStylesParserModule();
     }
-    const stylesParserHelper = globalThis.__xlsx2mdStylesParser;
-    if (!stylesParserHelper) {
-        throw new Error("xlsx2md styles parser module is not loaded");
+    function requireCoreWorksheetTables() {
+        return requireXlsx2mdWorksheetTablesModule();
     }
-    const sharedStringsHelper = globalThis.__xlsx2mdSharedStrings;
-    if (!sharedStringsHelper) {
-        throw new Error("xlsx2md shared strings module is not loaded");
+    function requireCoreCellFormat() {
+        return requireXlsx2mdCellFormatModule();
     }
-    const worksheetTablesHelper = globalThis.__xlsx2mdWorksheetTables;
-    if (!worksheetTablesHelper) {
-        throw new Error("xlsx2md worksheet tables module is not loaded");
+    function requireCoreAddressUtils() {
+        return requireXlsx2mdAddressUtilsModule();
     }
-    const cellFormatHelper = globalThis.__xlsx2mdCellFormat;
-    if (!cellFormatHelper) {
-        throw new Error("xlsx2md cell format module is not loaded");
+    function requireCoreSheetMarkdown() {
+        return requireXlsx2mdSheetMarkdownModule();
     }
-    const xmlUtilsHelper = globalThis.__xlsx2mdXmlUtils;
-    if (!xmlUtilsHelper) {
-        throw new Error("xlsx2md xml utils module is not loaded");
+    function requireCoreFormulaEngine() {
+        return requireXlsx2mdFormulaEngineModule();
     }
-    const addressUtilsHelper = globalThis.__xlsx2mdAddressUtils;
-    if (!addressUtilsHelper) {
-        throw new Error("xlsx2md address utils module is not loaded");
+    function requireCoreSheetAssets() {
+        return requireXlsx2mdSheetAssetsModule();
     }
-    const relsParserModule = globalThis.__xlsx2mdRelsParser;
-    if (!relsParserModule) {
-        throw new Error("xlsx2md rels parser module is not loaded");
+    function requireCoreWorksheetParser() {
+        return requireXlsx2mdWorksheetParserModule();
     }
-    const formulaReferenceUtilsModule = globalThis.__xlsx2mdFormulaReferenceUtils;
-    if (!formulaReferenceUtilsModule) {
-        throw new Error("xlsx2md formula reference utils module is not loaded");
+    function requireCoreWorkbookLoader() {
+        return requireXlsx2mdWorkbookLoaderModule();
     }
-    const sheetMarkdownModule = globalThis.__xlsx2mdSheetMarkdown;
-    if (!sheetMarkdownModule) {
-        throw new Error("xlsx2md sheet markdown module is not loaded");
+    function requireCoreFormulaResolver() {
+        return requireXlsx2mdFormulaResolverModule();
     }
-    const formulaEngineModule = globalThis.__xlsx2mdFormulaEngine;
-    if (!formulaEngineModule) {
-        throw new Error("xlsx2md formula engine module is not loaded");
-    }
-    const sheetAssetsHelper = globalThis.__xlsx2mdSheetAssets;
-    if (!sheetAssetsHelper) {
-        throw new Error("xlsx2md sheet assets module is not loaded");
-    }
-    const worksheetParserHelper = globalThis.__xlsx2mdWorksheetParser;
-    if (!worksheetParserHelper) {
-        throw new Error("xlsx2md worksheet parser module is not loaded");
-    }
-    const workbookLoaderHelper = globalThis.__xlsx2mdWorkbookLoader;
-    if (!workbookLoaderHelper) {
-        throw new Error("xlsx2md workbook loader module is not loaded");
-    }
-    const formulaResolverHelper = globalThis.__xlsx2mdFormulaResolver;
-    if (!formulaResolverHelper) {
-        throw new Error("xlsx2md formula resolver module is not loaded");
-    }
-    const formulaLegacyModule = globalThis.__xlsx2mdFormulaLegacy;
-    if (!formulaLegacyModule) {
-        throw new Error("xlsx2md formula legacy module is not loaded");
-    }
-    const formulaAstModule = globalThis.__xlsx2mdFormulaAst;
-    if (!formulaAstModule) {
-        throw new Error("xlsx2md formula ast module is not loaded");
-    }
-    const zipIoHelper = globalThis.__xlsx2mdZipIo;
-    if (!zipIoHelper) {
-        throw new Error("xlsx2md zip io module is not loaded");
-    }
+    const drawingHelper = getXlsx2mdDrawingHelperModule();
+    const markdownNormalizeHelper = requireXlsx2mdMarkdownNormalize();
+    const narrativeStructureHelper = requireCoreNarrativeStructure();
+    const tableDetectorHelper = requireCoreTableDetector();
+    const markdownExportHelper = requireCoreMarkdownExport();
+    const stylesParserHelper = requireCoreStylesParser();
+    const sharedStringsHelper = requireXlsx2mdSharedStringsModule();
+    const worksheetTablesHelper = requireCoreWorksheetTables();
+    const cellFormatHelper = requireCoreCellFormat();
+    const xmlUtilsHelper = requireXlsx2mdXmlUtilsModule();
+    const addressUtilsHelper = requireCoreAddressUtils();
+    const relsParserModule = requireXlsx2mdRelsParserModule();
+    const formulaReferenceUtilsModule = requireXlsx2mdFormulaReferenceUtilsModule();
+    const sheetMarkdownModule = requireCoreSheetMarkdown();
+    const formulaEngineModule = requireCoreFormulaEngine();
+    const sheetAssetsHelper = requireCoreSheetAssets();
+    const worksheetParserHelper = requireCoreWorksheetParser();
+    const workbookLoaderHelper = requireCoreWorkbookLoader();
+    const formulaResolverHelper = requireCoreFormulaResolver();
+    const formulaLegacyModule = requireXlsx2mdFormulaLegacyModule();
+    const formulaAstModule = requireXlsx2mdFormulaAstModule();
+    const zipIoHelper = moduleRegistry.requireModule("zipIo", "xlsx2md zip io module is not loaded");
     let resolveDefinedNameScalarValue = null;
     let resolveDefinedNameRangeRef = null;
     let resolveStructuredRangeRef = null;
@@ -10580,7 +10747,7 @@ if (!customElements.get("lht-page-menu")) {
             }
         });
     }
-    globalThis.__xlsx2md = {
+    const xlsx2mdApi = {
         parseWorkbook,
         unzipEntries: zipIoHelper.unzipEntries,
         parseRangeRef,
@@ -10598,12 +10765,14 @@ if (!customElements.get("lht-page-menu")) {
         lettersToCol,
         textEncoder: markdownExportHelper.textEncoder
     };
+    moduleRegistry.registerModule("xlsx2md", xlsx2mdApi);
 })();
   </script>
 
   <script>
 (() => {
-    const xlsx2md = globalThis.__xlsx2md;
+    const moduleRegistry = getXlsx2mdModuleRegistry();
+    const xlsx2md = moduleRegistry.getModule("xlsx2md");
     if (!xlsx2md) {
         throw new Error("xlsx2md core module is not loaded");
     }

@@ -1,4 +1,5 @@
 (() => {
+  const moduleRegistry = getXlsx2mdModuleRegistry();
   type BorderFlags = {
     top: boolean;
     bottom: boolean;
@@ -63,19 +64,17 @@
     threshold: 4
   };
 
-  const borderGridHelper = (globalThis as typeof globalThis & {
-    __xlsx2mdBorderGrid?: {
-      collectTableEdgeStats: <T extends { borders: BorderFlags; outputValue?: string }>(cellMap: Map<string, T>, row: number, startCol: number, endCol: number) => {
-        nonEmptyCount: number;
-        borderCount: number;
-        rawBorderCount: number;
-        topCount: number;
-        bottomCount: number;
-        maxTextLength: number;
+  const borderGridHelper = moduleRegistry?.getModule<{
+    collectTableEdgeStats: <T extends { borders: BorderFlags; outputValue?: string }>(cellMap: Map<string, T>, row: number, startCol: number, endCol: number) => {
+      nonEmptyCount: number;
+      borderCount: number;
+      rawBorderCount: number;
+      topCount: number;
+      bottomCount: number;
+      maxTextLength: number;
       };
       countNormalizedBorderedCells: <T extends { borders: BorderFlags }>(cellMap: Map<string, T>, startRow: number, startCol: number, endRow: number, endCol: number) => number;
-    };
-  }).__xlsx2mdBorderGrid;
+  }>("borderGrid");
   if (!borderGridHelper) {
     throw new Error("xlsx2md border grid module is not loaded");
   }
@@ -429,19 +428,7 @@
     }
   }
 
-  (globalThis as typeof globalThis & {
-    __xlsx2mdTableDetector?: {
-      collectTableSeedCells: typeof collectTableSeedCells;
-      collectBorderSeedCells: typeof collectBorderSeedCells;
-      pruneRedundantCandidates: typeof pruneRedundantCandidates;
-      detectTableCandidates: typeof detectTableCandidates;
-      trimTableCandidateBounds: typeof trimTableCandidateBounds;
-      matrixFromCandidate: typeof matrixFromCandidate;
-      isMeaningfulMarkdownCell: typeof isMeaningfulMarkdownCell;
-      applyMergeTokens: typeof applyMergeTokens;
-      defaultTableScoreWeights: typeof DEFAULT_TABLE_SCORE_WEIGHTS;
-    };
-  }).__xlsx2mdTableDetector = {
+  const tableDetectorApi = {
     collectTableSeedCells,
     collectBorderSeedCells,
     pruneRedundantCandidates,
@@ -452,4 +439,6 @@
     applyMergeTokens,
     defaultTableScoreWeights: DEFAULT_TABLE_SCORE_WEIGHTS
   };
+
+  moduleRegistry.registerModule("tableDetector", tableDetectorApi);
 })();

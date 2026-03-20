@@ -5,91 +5,68 @@
         left: false,
         right: false
     };
-    const drawingHelper = globalThis.__xlsx2mdOfficeDrawing || null;
-    const markdownNormalizeHelper = globalThis.__xlsx2mdMarkdownNormalize;
-    if (!markdownNormalizeHelper) {
-        throw new Error("xlsx2md markdown normalize module is not loaded");
+    const moduleRegistry = getXlsx2mdModuleRegistry();
+    function requireCoreNarrativeStructure() {
+        return requireXlsx2mdNarrativeStructureModule();
     }
-    const narrativeStructureHelper = globalThis.__xlsx2mdNarrativeStructure;
-    if (!narrativeStructureHelper) {
-        throw new Error("xlsx2md narrative structure module is not loaded");
+    function requireCoreTableDetector() {
+        return requireXlsx2mdTableDetectorModule();
     }
-    const tableDetectorHelper = globalThis.__xlsx2mdTableDetector;
-    if (!tableDetectorHelper) {
-        throw new Error("xlsx2md table detector module is not loaded");
+    function requireCoreMarkdownExport() {
+        return requireXlsx2mdMarkdownExportModule();
     }
-    const markdownExportHelper = globalThis.__xlsx2mdMarkdownExport;
-    if (!markdownExportHelper) {
-        throw new Error("xlsx2md markdown export module is not loaded");
+    function requireCoreStylesParser() {
+        return requireXlsx2mdStylesParserModule();
     }
-    const stylesParserHelper = globalThis.__xlsx2mdStylesParser;
-    if (!stylesParserHelper) {
-        throw new Error("xlsx2md styles parser module is not loaded");
+    function requireCoreWorksheetTables() {
+        return requireXlsx2mdWorksheetTablesModule();
     }
-    const sharedStringsHelper = globalThis.__xlsx2mdSharedStrings;
-    if (!sharedStringsHelper) {
-        throw new Error("xlsx2md shared strings module is not loaded");
+    function requireCoreCellFormat() {
+        return requireXlsx2mdCellFormatModule();
     }
-    const worksheetTablesHelper = globalThis.__xlsx2mdWorksheetTables;
-    if (!worksheetTablesHelper) {
-        throw new Error("xlsx2md worksheet tables module is not loaded");
+    function requireCoreAddressUtils() {
+        return requireXlsx2mdAddressUtilsModule();
     }
-    const cellFormatHelper = globalThis.__xlsx2mdCellFormat;
-    if (!cellFormatHelper) {
-        throw new Error("xlsx2md cell format module is not loaded");
+    function requireCoreSheetMarkdown() {
+        return requireXlsx2mdSheetMarkdownModule();
     }
-    const xmlUtilsHelper = globalThis.__xlsx2mdXmlUtils;
-    if (!xmlUtilsHelper) {
-        throw new Error("xlsx2md xml utils module is not loaded");
+    function requireCoreFormulaEngine() {
+        return requireXlsx2mdFormulaEngineModule();
     }
-    const addressUtilsHelper = globalThis.__xlsx2mdAddressUtils;
-    if (!addressUtilsHelper) {
-        throw new Error("xlsx2md address utils module is not loaded");
+    function requireCoreSheetAssets() {
+        return requireXlsx2mdSheetAssetsModule();
     }
-    const relsParserModule = globalThis.__xlsx2mdRelsParser;
-    if (!relsParserModule) {
-        throw new Error("xlsx2md rels parser module is not loaded");
+    function requireCoreWorksheetParser() {
+        return requireXlsx2mdWorksheetParserModule();
     }
-    const formulaReferenceUtilsModule = globalThis.__xlsx2mdFormulaReferenceUtils;
-    if (!formulaReferenceUtilsModule) {
-        throw new Error("xlsx2md formula reference utils module is not loaded");
+    function requireCoreWorkbookLoader() {
+        return requireXlsx2mdWorkbookLoaderModule();
     }
-    const sheetMarkdownModule = globalThis.__xlsx2mdSheetMarkdown;
-    if (!sheetMarkdownModule) {
-        throw new Error("xlsx2md sheet markdown module is not loaded");
+    function requireCoreFormulaResolver() {
+        return requireXlsx2mdFormulaResolverModule();
     }
-    const formulaEngineModule = globalThis.__xlsx2mdFormulaEngine;
-    if (!formulaEngineModule) {
-        throw new Error("xlsx2md formula engine module is not loaded");
-    }
-    const sheetAssetsHelper = globalThis.__xlsx2mdSheetAssets;
-    if (!sheetAssetsHelper) {
-        throw new Error("xlsx2md sheet assets module is not loaded");
-    }
-    const worksheetParserHelper = globalThis.__xlsx2mdWorksheetParser;
-    if (!worksheetParserHelper) {
-        throw new Error("xlsx2md worksheet parser module is not loaded");
-    }
-    const workbookLoaderHelper = globalThis.__xlsx2mdWorkbookLoader;
-    if (!workbookLoaderHelper) {
-        throw new Error("xlsx2md workbook loader module is not loaded");
-    }
-    const formulaResolverHelper = globalThis.__xlsx2mdFormulaResolver;
-    if (!formulaResolverHelper) {
-        throw new Error("xlsx2md formula resolver module is not loaded");
-    }
-    const formulaLegacyModule = globalThis.__xlsx2mdFormulaLegacy;
-    if (!formulaLegacyModule) {
-        throw new Error("xlsx2md formula legacy module is not loaded");
-    }
-    const formulaAstModule = globalThis.__xlsx2mdFormulaAst;
-    if (!formulaAstModule) {
-        throw new Error("xlsx2md formula ast module is not loaded");
-    }
-    const zipIoHelper = globalThis.__xlsx2mdZipIo;
-    if (!zipIoHelper) {
-        throw new Error("xlsx2md zip io module is not loaded");
-    }
+    const drawingHelper = getXlsx2mdDrawingHelperModule();
+    const markdownNormalizeHelper = requireXlsx2mdMarkdownNormalize();
+    const narrativeStructureHelper = requireCoreNarrativeStructure();
+    const tableDetectorHelper = requireCoreTableDetector();
+    const markdownExportHelper = requireCoreMarkdownExport();
+    const stylesParserHelper = requireCoreStylesParser();
+    const sharedStringsHelper = requireXlsx2mdSharedStringsModule();
+    const worksheetTablesHelper = requireCoreWorksheetTables();
+    const cellFormatHelper = requireCoreCellFormat();
+    const xmlUtilsHelper = requireXlsx2mdXmlUtilsModule();
+    const addressUtilsHelper = requireCoreAddressUtils();
+    const relsParserModule = requireXlsx2mdRelsParserModule();
+    const formulaReferenceUtilsModule = requireXlsx2mdFormulaReferenceUtilsModule();
+    const sheetMarkdownModule = requireCoreSheetMarkdown();
+    const formulaEngineModule = requireCoreFormulaEngine();
+    const sheetAssetsHelper = requireCoreSheetAssets();
+    const worksheetParserHelper = requireCoreWorksheetParser();
+    const workbookLoaderHelper = requireCoreWorkbookLoader();
+    const formulaResolverHelper = requireCoreFormulaResolver();
+    const formulaLegacyModule = requireXlsx2mdFormulaLegacyModule();
+    const formulaAstModule = requireXlsx2mdFormulaAstModule();
+    const zipIoHelper = moduleRegistry.requireModule("zipIo", "xlsx2md zip io module is not loaded");
     let resolveDefinedNameScalarValue = null;
     let resolveDefinedNameRangeRef = null;
     let resolveStructuredRangeRef = null;
@@ -233,7 +210,7 @@
             }
         });
     }
-    globalThis.__xlsx2md = {
+    const xlsx2mdApi = {
         parseWorkbook,
         unzipEntries: zipIoHelper.unzipEntries,
         parseRangeRef,
@@ -251,4 +228,5 @@
         lettersToCol,
         textEncoder: markdownExportHelper.textEncoder
     };
+    moduleRegistry.registerModule("xlsx2md", xlsx2mdApi);
 })();

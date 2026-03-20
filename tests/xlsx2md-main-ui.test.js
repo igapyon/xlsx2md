@@ -5,6 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { describe, expect, it, vi } from "vitest";
+import { loadModuleRegistry } from "./helpers/module-registry.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -98,6 +99,7 @@ function createWorkbookFile() {
 
 function bootMain(overrides = {}) {
   createDomFixture();
+  const registry = loadModuleRegistry(__dirname);
   const api = {
     parseWorkbook: vi.fn(async () => ({ name: "book.xlsx", sheets: [{ name: "Sheet1", index: 1 }] })),
     convertWorkbookToMarkdownFiles: vi.fn(() => [createWorkbookFile()]),
@@ -106,7 +108,7 @@ function bootMain(overrides = {}) {
     createWorkbookExportArchive: vi.fn(() => new Uint8Array([1, 2, 3])),
     ...overrides
   };
-  globalThis.__xlsx2md = api;
+  registry.registerModule("xlsx2md", api);
   new Function(mainCode)();
   document.dispatchEvent(new Event("DOMContentLoaded"));
   return api;

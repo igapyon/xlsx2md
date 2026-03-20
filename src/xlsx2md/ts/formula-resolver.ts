@@ -1,4 +1,5 @@
 (() => {
+  const moduleRegistry = getXlsx2mdModuleRegistry();
   type FormulaResolutionStatus = "resolved" | "fallback_formula" | "unsupported_external" | null;
   type FormulaResolutionSource = "cached_value" | "ast_evaluator" | "legacy_resolver" | "formula_text" | "external_unsupported" | null;
 
@@ -351,13 +352,10 @@
     }
   }
 
-  (globalThis as typeof globalThis & {
-    __xlsx2mdFormulaResolver?: {
-      buildFormulaResolver: typeof buildFormulaResolver;
-      resolveSimpleFormulaReferences: typeof resolveSimpleFormulaReferences;
-    };
-  }).__xlsx2mdFormulaResolver = {
+  const formulaResolverApi = {
     buildFormulaResolver,
     resolveSimpleFormulaReferences
   };
+
+  moduleRegistry.registerModule("formulaResolver", formulaResolverApi);
 })();

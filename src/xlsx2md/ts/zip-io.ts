@@ -1,4 +1,5 @@
 (() => {
+  const moduleRegistry = getXlsx2mdModuleRegistry();
   type ZipEntryRecord = {
     name: string;
     compressionMethod: number;
@@ -204,13 +205,10 @@
     return output;
   }
 
-  (globalThis as typeof globalThis & {
-    __xlsx2mdZipIo?: {
-      unzipEntries: typeof unzipEntries;
-      createStoredZip: typeof createStoredZip;
-    };
-  }).__xlsx2mdZipIo = {
+  const zipIoApi = {
     unzipEntries,
     createStoredZip
   };
+
+  moduleRegistry.registerModule("zipIo", zipIoApi);
 })();

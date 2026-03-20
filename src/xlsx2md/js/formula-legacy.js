@@ -1,4 +1,5 @@
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     function createFormulaLegacyApi(deps) {
         function tryResolveFormulaExpressionLegacy(normalized, currentSheetName, resolveCellValue, resolveRangeValues, resolveRangeEntries) {
             const ifResult = tryResolveIfFunction(normalized, currentSheetName, resolveCellValue, resolveRangeValues, resolveRangeEntries);
@@ -1321,7 +1322,8 @@
             resolveScalarFormulaValue
         };
     }
-    globalThis.__xlsx2mdFormulaLegacy = {
+    const formulaLegacyApi = {
         createFormulaLegacyApi
     };
+    moduleRegistry.registerModule("formulaLegacy", formulaLegacyApi);
 })();

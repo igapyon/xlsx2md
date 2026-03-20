@@ -1,4 +1,5 @@
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     function isDateFormatCode(formatCode) {
         const normalized = String(formatCode || "")
             .toLowerCase()
@@ -364,7 +365,7 @@
             return null;
         return datePartsToExcelSerial(Number(parts.yyyy), Number(parts.mm), Number(parts.dd), Number(parts.hh), Number(parts.mi), Number(parts.ss));
     }
-    globalThis.__xlsx2mdCellFormat = {
+    const cellFormatApi = {
         isDateFormatCode,
         normalizeNumericFormatCode,
         excelSerialToIsoText,
@@ -382,4 +383,5 @@
         datePartsToExcelSerial,
         parseValueFunctionText
     };
+    moduleRegistry.registerModule("cellFormat", cellFormatApi);
 })();

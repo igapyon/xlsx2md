@@ -1,7 +1,6 @@
 (function initXlsx2mdFormulaTokenizer(global) {
-    var _a;
-    var _b;
-    const api = ((_a = (_b = global).__xlsx2mdFormula) !== null && _a !== void 0 ? _a : (_b.__xlsx2mdFormula = {}));
+    const moduleRegistry = getXlsx2mdModuleRegistry();
+    const api = moduleRegistry.getModule("formulaRuntime") || {};
     const CELL_REF_RE = /^\$?[A-Za-z]{1,3}\$?\d+$/;
     const IDENTIFIER_START_RE = /[\p{L}_\\$]/u;
     const IDENTIFIER_PART_RE = /[\p{L}\p{N}_.\\$?]/u;
@@ -260,4 +259,5 @@
     api.tokenizeFormula = tokenizeFormula;
     api.normalizeFormulaInput = normalizeFormulaInput;
     api.isCellReference = isCellReference;
+    moduleRegistry.registerModule("formulaRuntime", api);
 })(globalThis);

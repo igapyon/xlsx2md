@@ -1,4 +1,5 @@
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     const DEFAULT_TABLE_SCORE_WEIGHTS = {
         minGrid: 2,
         borderPresence: 3,
@@ -9,7 +10,7 @@
         prosePenalty: -2,
         threshold: 4
     };
-    const borderGridHelper = globalThis.__xlsx2mdBorderGrid;
+    const borderGridHelper = moduleRegistry === null || moduleRegistry === void 0 ? void 0 : moduleRegistry.getModule("borderGrid");
     if (!borderGridHelper) {
         throw new Error("xlsx2md border grid module is not loaded");
     }
@@ -306,7 +307,7 @@
             }
         }
     }
-    globalThis.__xlsx2mdTableDetector = {
+    const tableDetectorApi = {
         collectTableSeedCells,
         collectBorderSeedCells,
         pruneRedundantCandidates,
@@ -317,4 +318,5 @@
         applyMergeTokens,
         defaultTableScoreWeights: DEFAULT_TABLE_SCORE_WEIGHTS
     };
+    moduleRegistry.registerModule("tableDetector", tableDetectorApi);
 })();

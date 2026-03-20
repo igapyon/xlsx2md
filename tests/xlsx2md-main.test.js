@@ -20,6 +20,18 @@ const officeDrawingCode = readFileSync(
   path.resolve(__dirname, "../src/xlsx2md/js/office-drawing.js"),
   "utf8"
 );
+const moduleRegistryCode = readFileSync(
+  path.resolve(__dirname, "../src/xlsx2md/js/module-registry.js"),
+  "utf8"
+);
+const moduleRegistryAccessCode = readFileSync(
+  path.resolve(__dirname, "../src/xlsx2md/js/module-registry-access.js"),
+  "utf8"
+);
+const runtimeEnvCode = readFileSync(
+  path.resolve(__dirname, "../src/xlsx2md/js/runtime-env.js"),
+  "utf8"
+);
 const zipIoCode = readFileSync(
   path.resolve(__dirname, "../src/xlsx2md/js/zip-io.js"),
   "utf8"
@@ -115,6 +127,9 @@ const coreCode = readFileSync(
 
 function bootCore() {
   document.body.innerHTML = "";
+  new Function(moduleRegistryCode)();
+  new Function(moduleRegistryAccessCode)();
+  new Function(runtimeEnvCode)();
   new Function(officeDrawingCode)();
   new Function(zipIoCode)();
   new Function(borderGridCode)();
@@ -139,7 +154,7 @@ function bootCore() {
   new Function(formulaAstCode)();
   new Function(formulaResolverCode)();
   new Function(coreCode)();
-  return globalThis.__xlsx2md;
+  return globalThis.__xlsx2mdModuleRegistry.getModule("xlsx2md");
 }
 
 function createStoredZip(entries) {

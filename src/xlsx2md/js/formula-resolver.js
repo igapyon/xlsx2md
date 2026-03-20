@@ -1,4 +1,5 @@
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     function buildFormulaResolver(workbook, deps) {
         const sheetMap = new Map();
         const cellMaps = new Map();
@@ -265,8 +266,9 @@
             (_d = deps.setDefinedNameResolvers) === null || _d === void 0 ? void 0 : _d.call(deps, null, null, null);
         }
     }
-    globalThis.__xlsx2mdFormulaResolver = {
+    const formulaResolverApi = {
         buildFormulaResolver,
         resolveSimpleFormulaReferences
     };
+    moduleRegistry.registerModule("formulaResolver", formulaResolverApi);
 })();

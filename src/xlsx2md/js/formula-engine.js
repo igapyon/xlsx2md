@@ -1,4 +1,5 @@
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     function createFormulaEngineApi(deps) {
         function tryResolveFormulaExpressionDetailed(formulaText, currentSheetName, resolveCellValue, resolveRangeValues, resolveRangeEntries, currentAddress) {
             var _a;
@@ -37,7 +38,8 @@
             tryResolveFormulaExpression
         };
     }
-    globalThis.__xlsx2mdFormulaEngine = {
+    const formulaEngineApi = {
         createFormulaEngineApi
     };
+    moduleRegistry.registerModule("formulaEngine", formulaEngineApi);
 })();

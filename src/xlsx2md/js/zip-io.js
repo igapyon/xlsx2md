@@ -1,4 +1,5 @@
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     const textDecoder = new TextDecoder("utf-8");
     const textEncoder = new TextEncoder();
     const crcTable = buildCrc32Table();
@@ -172,8 +173,9 @@
         output.set(eocd, cursor);
         return output;
     }
-    globalThis.__xlsx2mdZipIo = {
+    const zipIoApi = {
         unzipEntries,
         createStoredZip
     };
+    moduleRegistry.registerModule("zipIo", zipIoApi);
 })();

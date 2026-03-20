@@ -1,14 +1,6 @@
 (() => {
-  const markdownNormalizeHelper = (globalThis as typeof globalThis & {
-    __xlsx2mdMarkdownNormalize?: {
-      normalizeMarkdownText: (text: string) => string;
-      normalizeMarkdownHeadingText: (text: string) => string;
-      normalizeMarkdownListItemText: (text: string) => string;
-    };
-  }).__xlsx2mdMarkdownNormalize;
-  if (!markdownNormalizeHelper) {
-    throw new Error("xlsx2md markdown normalize module is not loaded");
-  }
+  const moduleRegistry = getXlsx2mdModuleRegistry();
+  const markdownNormalizeHelper = requireXlsx2mdMarkdownNormalize();
 
   type NarrativeItem = {
     row: number;
@@ -62,13 +54,10 @@
     return block.items[1].startCol > block.items[0].startCol;
   }
 
-  (globalThis as typeof globalThis & {
-    __xlsx2mdNarrativeStructure?: {
-      renderNarrativeBlock: typeof renderNarrativeBlock;
-      isSectionHeadingNarrativeBlock: typeof isSectionHeadingNarrativeBlock;
-    };
-  }).__xlsx2mdNarrativeStructure = {
+  const narrativeStructureApi = {
     renderNarrativeBlock,
     isSectionHeadingNarrativeBlock
   };
+
+  moduleRegistry.registerModule("narrativeStructure", narrativeStructureApi);
 })();

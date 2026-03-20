@@ -1,10 +1,12 @@
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     const textDecoder = new TextDecoder("utf-8");
+    const runtimeEnv = requireXlsx2mdRuntimeEnv();
     function decodeXmlText(bytes) {
         return textDecoder.decode(bytes);
     }
     function xmlToDocument(xmlText) {
-        return new DOMParser().parseFromString(xmlText, "application/xml");
+        return runtimeEnv.xmlToDocument(xmlText);
     }
     function getTextContent(node) {
         return ((node === null || node === void 0 ? void 0 : node.textContent) || "").replace(/\r\n/g, "\n");
@@ -19,7 +21,7 @@
         return items.map((item) => {
             const parts = [];
             const walk = (node) => {
-                if (node.nodeType === Node.ELEMENT_NODE) {
+                if (node.nodeType === runtimeEnv.ELEMENT_NODE) {
                     const element = node;
                     if (element.localName === "rPh" || element.localName === "phoneticPr") {
                         return;
@@ -37,7 +39,8 @@
             return parts.join("");
         });
     }
-    globalThis.__xlsx2mdSharedStrings = {
+    const sharedStringsApi = {
         parseSharedStrings
     };
+    moduleRegistry.registerModule("sharedStrings", sharedStringsApi);
 })();
