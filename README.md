@@ -82,6 +82,8 @@ npm run cli -- ./tests/fixtures/shape/shape-basic-sample01.xlsx --output-mode bo
 - Testing: Vitest and jsdom
 - UI dependency: `@material/web`
 
+`index.html` and `xlsx2md.html` are generated files. Edit `index-src.html` and `xlsx2md-src.html` instead.
+
 ## How it works
 
 - Read `.xlsx` files in the browser
@@ -208,6 +210,8 @@ npm run cli -- ./tests/fixtures/shape/shape-basic-sample01.xlsx --output-mode bo
 - ビルドツール: Node.js / esbuild
 - テスト: Vitest / jsdom
 - UI 依存: `@material/web`
+
+`index.html` と `xlsx2md.html` は生成物です。編集は `index-src.html` と `xlsx2md-src.html` に対して行ってください。
 
 ## How it works
 

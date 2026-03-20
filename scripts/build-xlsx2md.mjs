@@ -4,8 +4,14 @@ import { buildSingleHtmlFromSource } from "./lib/single-html.mjs";
 import { XLSX2MD_APP_TS_ORDER } from "./lib/xlsx2md-module-order.mjs";
 
 const ROOT = process.cwd();
+const BUILD_DATE_PLACEHOLDER = "{{BUILD_DATE}}";
 
 const TARGETS = [
+  {
+    id: "index",
+    srcHtml: "index-src.html",
+    outHtml: "index.html"
+  },
   {
     id: "xlsx2md",
     srcHtml: "xlsx2md-src.html",
@@ -21,10 +27,18 @@ for (const target of TARGETS) {
   const srcPath = path.resolve(ROOT, target.srcHtml);
   const outPath = path.resolve(ROOT, target.outHtml);
   const source = fs.readFileSync(srcPath, "utf8");
-  const output = buildSingleHtmlFromSource(source, srcPath, ROOT);
+  const sourceWithBuildDate = source.replaceAll(BUILD_DATE_PLACEHOLDER, formatBuildDate());
+  const output = buildSingleHtmlFromSource(sourceWithBuildDate, srcPath, ROOT);
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
   fs.writeFileSync(outPath, output, "utf8");
   console.log(`[build:xlsx2md] generated ${target.outHtml}`);
+}
+
+function formatBuildDate(date = new Date()) {
+  const yyyy = String(date.getFullYear());
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
 }
 
 async function loadTypeScriptModule() {
