@@ -1,4 +1,5 @@
 (() => {
+  const moduleRegistry = getXlsx2mdModuleRegistry();
   type ParsedTable = {
     sheetName: string;
     name: string;
@@ -11,13 +12,14 @@
   };
 
   const textDecoder = new TextDecoder("utf-8");
+  const runtimeEnv = requireXlsx2mdRuntimeEnv();
 
   function decodeXmlText(bytes: Uint8Array): string {
     return textDecoder.decode(bytes);
   }
 
   function xmlToDocument(xmlText: string): Document {
-    return new DOMParser().parseFromString(xmlText, "application/xml");
+    return runtimeEnv.xmlToDocument(xmlText);
   }
 
   function getElementsByLocalName(root: ParentNode, localName: string): Element[] {
@@ -122,13 +124,10 @@
     return tables;
   }
 
-  (globalThis as typeof globalThis & {
-    __xlsx2mdWorksheetTables?: {
-      normalizeStructuredTableKey: typeof normalizeStructuredTableKey;
-      parseWorksheetTables: typeof parseWorksheetTables;
-    };
-  }).__xlsx2mdWorksheetTables = {
+  const worksheetTablesApi = {
     normalizeStructuredTableKey,
     parseWorksheetTables
   };
+
+  moduleRegistry.registerModule("worksheetTables", worksheetTablesApi);
 })();

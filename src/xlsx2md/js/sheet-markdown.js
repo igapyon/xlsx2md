@@ -1,4 +1,5 @@
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     function createSheetMarkdownApi(deps) {
         function buildCellMap(sheet) {
             const map = new Map();
@@ -360,7 +361,8 @@
             convertWorkbookToMarkdownFiles
         };
     }
-    globalThis.__xlsx2mdSheetMarkdown = {
+    const sheetMarkdownApi = {
         createSheetMarkdownApi
     };
+    moduleRegistry.registerModule("sheetMarkdown", sheetMarkdownApi);
 })();

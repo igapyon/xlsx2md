@@ -1,4 +1,5 @@
 (() => {
+  const moduleRegistry = getXlsx2mdModuleRegistry();
   type ParsedWorkbook = {
     name: string;
     sheets: unknown[];
@@ -99,13 +100,10 @@
     return workbook;
   }
 
-  (globalThis as typeof globalThis & {
-    __xlsx2mdWorkbookLoader?: {
-      parseDefinedNames: typeof parseDefinedNames;
-      parseWorkbook: typeof parseWorkbook;
-    };
-  }).__xlsx2mdWorkbookLoader = {
+  const workbookLoaderApi = {
     parseDefinedNames,
     parseWorkbook
   };
+
+  moduleRegistry.registerModule("workbookLoader", workbookLoaderApi);
 })();

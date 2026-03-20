@@ -1,4 +1,5 @@
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     function createFormulaReferenceUtilsApi(deps) {
         function parseSimpleFormulaReference(formulaText, currentSheetName) {
             const normalizedFormula = String(formulaText || "").trim().replace(/^=/, "");
@@ -59,7 +60,8 @@
             normalizeDefinedNameKey
         };
     }
-    globalThis.__xlsx2mdFormulaReferenceUtils = {
+    const formulaReferenceUtilsApi = {
         createFormulaReferenceUtilsApi
     };
+    moduleRegistry.registerModule("formulaReferenceUtils", formulaReferenceUtilsApi);
 })();

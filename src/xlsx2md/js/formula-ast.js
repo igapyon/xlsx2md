@@ -1,7 +1,8 @@
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     function createFormulaAstApi(deps) {
         function tryResolveFormulaExpressionWithAst(expression, currentSheetName, resolveCellValue, resolveDefinedNameScalarValue, resolveDefinedNameRangeRef, resolveStructuredRangeRef, resolveSpillRange, resolveRangeEntries, currentAddress) {
-            const formulaApi = globalThis.__xlsx2mdFormula;
+            const formulaApi = moduleRegistry.getModule("formulaRuntime");
             if (!(formulaApi === null || formulaApi === void 0 ? void 0 : formulaApi.parseFormula) || !(formulaApi === null || formulaApi === void 0 ? void 0 : formulaApi.evaluateFormulaAst)) {
                 return null;
             }
@@ -137,7 +138,8 @@
             serializeFormulaAstResult
         };
     }
-    globalThis.__xlsx2mdFormulaAst = {
+    const formulaAstApi = {
         createFormulaAstApi
     };
+    moduleRegistry.registerModule("formulaAst", formulaAstApi);
 })();

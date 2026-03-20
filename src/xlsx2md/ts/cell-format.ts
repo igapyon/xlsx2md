@@ -1,4 +1,5 @@
 (() => {
+  const moduleRegistry = getXlsx2mdModuleRegistry();
   type BorderFlags = {
     top: boolean;
     bottom: boolean;
@@ -434,26 +435,7 @@
     );
   }
 
-  (globalThis as typeof globalThis & {
-    __xlsx2mdCellFormat?: {
-      isDateFormatCode: typeof isDateFormatCode;
-      normalizeNumericFormatCode: typeof normalizeNumericFormatCode;
-      excelSerialToIsoText: typeof excelSerialToIsoText;
-      excelSerialToDateParts: typeof excelSerialToDateParts;
-      formatTextFunctionValue: typeof formatTextFunctionValue;
-      formatNumberByPattern: typeof formatNumberByPattern;
-      formatDateByPattern: typeof formatDateByPattern;
-      formatFractionPattern: typeof formatFractionPattern;
-      formatDbNum3Pattern: typeof formatDbNum3Pattern;
-      splitFormatSections: typeof splitFormatSections;
-      formatZeroSection: typeof formatZeroSection;
-      formatCellDisplayValue: typeof formatCellDisplayValue;
-      applyResolvedFormulaValue: typeof applyResolvedFormulaValue;
-      parseDateLikeParts: typeof parseDateLikeParts;
-      datePartsToExcelSerial: typeof datePartsToExcelSerial;
-      parseValueFunctionText: typeof parseValueFunctionText;
-    };
-  }).__xlsx2mdCellFormat = {
+  const cellFormatApi = {
     isDateFormatCode,
     normalizeNumericFormatCode,
     excelSerialToIsoText,
@@ -471,4 +453,6 @@
     datePartsToExcelSerial,
     parseValueFunctionText
   };
+
+  moduleRegistry.registerModule("cellFormat", cellFormatApi);
 })();

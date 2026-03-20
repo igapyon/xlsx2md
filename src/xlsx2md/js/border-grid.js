@@ -1,4 +1,5 @@
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     function getCellAt(cellMap, row, col) {
         return cellMap.get(`${row}:${col}`);
     }
@@ -65,11 +66,12 @@
         }
         return count;
     }
-    globalThis.__xlsx2mdBorderGrid = {
+    const borderGridApi = {
         getCellAt,
         hasNormalizedBorderOnSide,
         hasAnyNormalizedBorder,
         collectTableEdgeStats,
         countNormalizedBorderedCells
     };
+    moduleRegistry.registerModule("borderGrid", borderGridApi);
 })();

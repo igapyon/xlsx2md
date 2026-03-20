@@ -1,13 +1,8 @@
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     const textEncoder = new TextEncoder();
-    const zipIoHelper = globalThis.__xlsx2mdZipIo;
-    if (!zipIoHelper) {
-        throw new Error("xlsx2md zip io module is not loaded");
-    }
-    const markdownNormalizeHelper = globalThis.__xlsx2mdMarkdownNormalize;
-    if (!markdownNormalizeHelper) {
-        throw new Error("xlsx2md markdown normalize module is not loaded");
-    }
+    const zipIoHelper = requireXlsx2mdZipIo();
+    const markdownNormalizeHelper = requireXlsx2mdMarkdownNormalize();
     function normalizeMarkdownLineBreaks(text) {
         return markdownNormalizeHelper.normalizeMarkdownText(text);
     }
@@ -109,7 +104,7 @@
     function createWorkbookExportArchive(workbook, markdownFiles) {
         return zipIoHelper.createStoredZip(createExportEntries(workbook, markdownFiles));
     }
-    globalThis.__xlsx2mdMarkdownExport = {
+    const markdownExportApi = {
         escapeMarkdownCell,
         renderMarkdownTable,
         sanitizeFileNameSegment,
@@ -121,4 +116,5 @@
         normalizeMarkdownLineBreaks,
         textEncoder
     };
+    moduleRegistry.registerModule("markdownExport", markdownExportApi);
 })();

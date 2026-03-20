@@ -1,4 +1,5 @@
 (() => {
+  const moduleRegistry = getXlsx2mdModuleRegistry();
   type BorderFlags = {
     top: boolean;
     bottom: boolean;
@@ -427,17 +428,12 @@
     };
   }
 
-  (globalThis as typeof globalThis & {
-    __xlsx2mdWorksheetParser?: {
-      extractCellOutputValue: typeof extractCellOutputValue;
-      shiftReferenceAddress: typeof shiftReferenceAddress;
-      translateSharedFormula: typeof translateSharedFormula;
-      parseWorksheet: typeof parseWorksheet;
-    };
-  }).__xlsx2mdWorksheetParser = {
+  const worksheetParserApi = {
     extractCellOutputValue,
     shiftReferenceAddress,
     translateSharedFormula,
     parseWorksheet
   };
+
+  moduleRegistry.registerModule("worksheetParser", worksheetParserApi);
 })();

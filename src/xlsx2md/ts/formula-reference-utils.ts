@@ -1,4 +1,5 @@
 (() => {
+  const moduleRegistry = getXlsx2mdModuleRegistry();
   type FormulaReferenceUtilsDeps = {
     normalizeFormulaAddress: (address: string) => string;
   };
@@ -74,11 +75,9 @@
     };
   }
 
-  (globalThis as typeof globalThis & {
-    __xlsx2mdFormulaReferenceUtils?: {
-      createFormulaReferenceUtilsApi: typeof createFormulaReferenceUtilsApi;
-    };
-  }).__xlsx2mdFormulaReferenceUtils = {
+  const formulaReferenceUtilsApi = {
     createFormulaReferenceUtilsApi
   };
+
+  moduleRegistry.registerModule("formulaReferenceUtils", formulaReferenceUtilsApi);
 })();

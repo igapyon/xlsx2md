@@ -213,380 +213,94 @@
     left: false,
     right: false
   };
+  const moduleRegistry = getXlsx2mdModuleRegistry();
 
-  const drawingHelper = (globalThis as typeof globalThis & {
-    __xlsx2mdOfficeDrawing?: {
-      renderShapeSvg?: (shapeNode: Element, anchor: Element, sheetName: string, shapeIndex: number) => {
-        filename: string;
-        path: string;
-        data: Uint8Array;
-      } | null;
-    };
-  }).__xlsx2mdOfficeDrawing || null;
-  const markdownNormalizeHelper = (globalThis as typeof globalThis & {
-    __xlsx2mdMarkdownNormalize?: {
-      normalizeMarkdownText: (text: string) => string;
-    };
-  }).__xlsx2mdMarkdownNormalize;
-  if (!markdownNormalizeHelper) {
-    throw new Error("xlsx2md markdown normalize module is not loaded");
+  function requireCoreNarrativeStructure() {
+    return requireXlsx2mdNarrativeStructureModule<NarrativeBlock>();
   }
-  const narrativeStructureHelper = (globalThis as typeof globalThis & {
-    __xlsx2mdNarrativeStructure?: {
-      renderNarrativeBlock: (block: NarrativeBlock) => string;
-      isSectionHeadingNarrativeBlock: (block: NarrativeBlock | null | undefined) => boolean;
-    };
-  }).__xlsx2mdNarrativeStructure;
-  if (!narrativeStructureHelper) {
-    throw new Error("xlsx2md narrative structure module is not loaded");
+
+  function requireCoreTableDetector() {
+    return requireXlsx2mdTableDetectorModule<ParsedSheet, ParsedCell, MergeRange, TableCandidate, MarkdownOptions>();
   }
-  const tableDetectorHelper = (globalThis as typeof globalThis & {
-    __xlsx2mdTableDetector?: {
-      detectTableCandidates: (
-        sheet: ParsedSheet,
-        buildCellMap: (sheet: ParsedSheet) => Map<string, ParsedCell>,
-        scoreWeights?: {
-          minGrid: number;
-          borderPresence: number;
-          densityHigh: number;
-          densityVeryHigh: number;
-          headerish: number;
-          mergeHeavyPenalty: number;
-          prosePenalty: number;
-          threshold: number;
-        }
-      ) => TableCandidate[];
-      matrixFromCandidate: (
-        sheet: ParsedSheet,
-        candidate: TableCandidate,
-        options: MarkdownOptions,
-        buildCellMap: (sheet: ParsedSheet) => Map<string, ParsedCell>,
-        formatCellForMarkdown: (cell: ParsedCell | undefined, options: MarkdownOptions) => string
-      ) => string[][];
-      applyMergeTokens: (
-        matrix: string[][],
-        merges: MergeRange[],
-        startRow: number,
-        startCol: number,
-        endRow: number,
-        endCol: number
-      ) => void;
-    };
-  }).__xlsx2mdTableDetector;
-  if (!tableDetectorHelper) {
-    throw new Error("xlsx2md table detector module is not loaded");
+
+  function requireCoreMarkdownExport() {
+    return requireXlsx2mdMarkdownExportModule<ParsedWorkbook, MarkdownFile, ExportEntry>();
   }
-  const markdownExportHelper = (globalThis as typeof globalThis & {
-    __xlsx2mdMarkdownExport?: {
-      renderMarkdownTable: (rows: string[][], treatFirstRowAsHeader: boolean) => string;
-      createOutputFileName: (
-        workbookName: string,
-        sheetIndex: number,
-        sheetName: string,
-        outputMode?: "display" | "raw" | "both"
-      ) => string;
-      createSummaryText: (markdownFile: MarkdownFile) => string;
-      createCombinedMarkdownExportFile: (workbook: ParsedWorkbook, markdownFiles: MarkdownFile[]) => { fileName: string; content: string };
-      createExportEntries: (workbook: ParsedWorkbook, markdownFiles: MarkdownFile[]) => ExportEntry[];
-      createWorkbookExportArchive: (workbook: ParsedWorkbook, markdownFiles: MarkdownFile[]) => Uint8Array;
-      normalizeMarkdownLineBreaks: (text: string) => string;
-      textEncoder: TextEncoder;
-    };
-  }).__xlsx2mdMarkdownExport;
-  if (!markdownExportHelper) {
-    throw new Error("xlsx2md markdown export module is not loaded");
+
+  function requireCoreStylesParser() {
+    return requireXlsx2mdStylesParserModule<CellStyleInfo>();
   }
-  const stylesParserHelper = (globalThis as typeof globalThis & {
-    __xlsx2mdStylesParser?: {
-      BUILTIN_FORMAT_CODES: Record<number, string>;
-      hasBorderSide: (side: Element | null) => boolean;
-      parseCellStyles: (files: Map<string, Uint8Array>) => CellStyleInfo[];
-    };
-  }).__xlsx2mdStylesParser;
-  if (!stylesParserHelper) {
-    throw new Error("xlsx2md styles parser module is not loaded");
+
+  function requireCoreWorksheetTables() {
+    return requireXlsx2mdWorksheetTablesModule<ParsedTable>();
   }
-  const sharedStringsHelper = (globalThis as typeof globalThis & {
-    __xlsx2mdSharedStrings?: {
-      parseSharedStrings: (files: Map<string, Uint8Array>) => string[];
-    };
-  }).__xlsx2mdSharedStrings;
-  if (!sharedStringsHelper) {
-    throw new Error("xlsx2md shared strings module is not loaded");
+
+  function requireCoreCellFormat() {
+    return requireXlsx2mdCellFormatModule<ParsedCell, CellStyleInfo, FormulaResolutionSource>();
   }
-  const worksheetTablesHelper = (globalThis as typeof globalThis & {
-    __xlsx2mdWorksheetTables?: {
-      normalizeStructuredTableKey: (value: string) => string;
-      parseWorksheetTables: (
-        files: Map<string, Uint8Array>,
-        worksheetDoc: Document,
-        sheetName: string,
-        sheetPath: string
-      ) => ParsedTable[];
-    };
-  }).__xlsx2mdWorksheetTables;
-  if (!worksheetTablesHelper) {
-    throw new Error("xlsx2md worksheet tables module is not loaded");
+
+  function requireCoreAddressUtils() {
+    return requireXlsx2mdAddressUtilsModule<MergeRange>();
   }
-  const cellFormatHelper = (globalThis as typeof globalThis & {
-    __xlsx2mdCellFormat?: {
-      formatTextFunctionValue: (value: string, formatText: string) => string | null;
-      excelSerialToIsoText: (serial: number) => string;
-      formatCellDisplayValue: (rawValue: string, cellStyle: CellStyleInfo) => string | null;
-      applyResolvedFormulaValue: (
-        cell: ParsedCell,
-        resolvedValue: string,
-        resolutionSource?: FormulaResolutionSource
-      ) => void;
-      parseDateLikeParts: (value: string) => {
-        yyyy: string;
-        mm: string;
-        dd: string;
-        hh: string;
-        mi: string;
-        ss: string;
-      } | null;
-      datePartsToExcelSerial: (
-        year: number,
-        month: number,
-        day: number,
-        hour?: number,
-        minute?: number,
-        second?: number
-      ) => number | null;
-      parseValueFunctionText: (value: string) => number | null;
-    };
-  }).__xlsx2mdCellFormat;
-  if (!cellFormatHelper) {
-    throw new Error("xlsx2md cell format module is not loaded");
+
+  function requireCoreSheetMarkdown() {
+    return requireXlsx2mdSheetMarkdownModule<
+      ParsedSheet,
+      ParsedCell,
+      TableCandidate,
+      NarrativeBlock,
+      SectionBlock,
+      ParsedWorkbook,
+      MarkdownOptions,
+      MarkdownFile
+    >();
   }
-  const xmlUtilsHelper = (globalThis as typeof globalThis & {
-    __xlsx2mdXmlUtils?: {
-      xmlToDocument: (xmlText: string) => Document;
-      getElementsByLocalName: (root: ParentNode, localName: string) => Element[];
-      getFirstChildByLocalName: (root: ParentNode, localName: string) => Element | null;
-      getDirectChildByLocalName: (root: ParentNode | null, localName: string) => Element | null;
-      decodeXmlText: (bytes: Uint8Array) => string;
-      getTextContent: (node: Element | null | undefined) => string;
-    };
-  }).__xlsx2mdXmlUtils;
-  if (!xmlUtilsHelper) {
-    throw new Error("xlsx2md xml utils module is not loaded");
+
+  function requireCoreFormulaEngine() {
+    return requireXlsx2mdFormulaEngineModule<FormulaResolutionSource>();
   }
-  const addressUtilsHelper = (globalThis as typeof globalThis & {
-    __xlsx2mdAddressUtils?: {
-      colToLetters: (col: number) => string;
-      lettersToCol: (letters: string) => number;
-      parseCellAddress: (address: string) => { row: number; col: number };
-      normalizeFormulaAddress: (address: string) => string;
-      formatRange: (startRow: number, startCol: number, endRow: number, endCol: number) => string;
-      parseRangeRef: (ref: string) => MergeRange;
-      parseRangeAddress: (rawRange: string) => { start: string; end: string } | null;
-    };
-  }).__xlsx2mdAddressUtils;
-  if (!addressUtilsHelper) {
-    throw new Error("xlsx2md address utils module is not loaded");
+
+  function requireCoreSheetAssets() {
+    return requireXlsx2mdSheetAssetsModule<ParsedImageAsset, ParsedChartAsset, ParsedShapeAsset, ShapeBlock>();
   }
-  const relsParserModule = (globalThis as typeof globalThis & {
-    __xlsx2mdRelsParser?: {
-      createRelsParserApi: (deps: Record<string, unknown>) => {
-        normalizeZipPath: (baseFilePath: string, targetPath: string) => string;
-        parseRelationships: (files: Map<string, Uint8Array>, relsPath: string, sourcePath: string) => Map<string, string>;
-        buildRelsPath: (sourcePath: string) => string;
-      };
-    };
-  }).__xlsx2mdRelsParser;
-  if (!relsParserModule) {
-    throw new Error("xlsx2md rels parser module is not loaded");
+
+  function requireCoreWorksheetParser() {
+    return requireXlsx2mdWorksheetParserModule<CellStyleInfo, ParsedSheet>();
   }
-  const formulaReferenceUtilsModule = (globalThis as typeof globalThis & {
-    __xlsx2mdFormulaReferenceUtils?: {
-      createFormulaReferenceUtilsApi: (deps: Record<string, unknown>) => {
-        parseSimpleFormulaReference: (
-          formulaText: string,
-          currentSheetName: string
-        ) => { sheetName: string; address: string } | null;
-        parseSheetScopedDefinedNameReference: (
-          expression: string,
-          currentSheetName: string
-        ) => { sheetName: string; name: string } | null;
-        normalizeFormulaSheetName: (rawName: string) => string;
-        normalizeDefinedNameKey: (name: string) => string;
-      };
-    };
-  }).__xlsx2mdFormulaReferenceUtils;
-  if (!formulaReferenceUtilsModule) {
-    throw new Error("xlsx2md formula reference utils module is not loaded");
+
+  function requireCoreWorkbookLoader() {
+    return requireXlsx2mdWorkbookLoaderModule<ParsedWorkbook>();
   }
-  const sheetMarkdownModule = (globalThis as typeof globalThis & {
-    __xlsx2mdSheetMarkdown?: {
-      createSheetMarkdownApi: (deps: Record<string, unknown>) => {
-        buildCellMap: (sheet: ParsedSheet) => Map<string, ParsedCell>;
-        formatCellForMarkdown: (cell: ParsedCell | undefined, options: MarkdownOptions) => string;
-        isCellInAnyTable: (row: number, col: number, tables: TableCandidate[]) => boolean;
-        splitNarrativeRowSegments: (cells: ParsedCell[], options: MarkdownOptions) => Array<{ startCol: number; values: string[] }>;
-        extractNarrativeBlocks: (sheet: ParsedSheet, tables: TableCandidate[], options?: MarkdownOptions) => NarrativeBlock[];
-        extractSectionBlocks: (sheet: ParsedSheet, tables: TableCandidate[], narrativeBlocks: NarrativeBlock[]) => SectionBlock[];
-        convertSheetToMarkdown: (workbook: ParsedWorkbook, sheet: ParsedSheet, options?: MarkdownOptions) => MarkdownFile;
-        convertWorkbookToMarkdownFiles: (workbook: ParsedWorkbook, options?: MarkdownOptions) => MarkdownFile[];
-      };
-    };
-  }).__xlsx2mdSheetMarkdown;
-  if (!sheetMarkdownModule) {
-    throw new Error("xlsx2md sheet markdown module is not loaded");
+
+  function requireCoreFormulaResolver() {
+    return requireXlsx2mdFormulaResolverModule<ParsedWorkbook>();
   }
-  const formulaEngineModule = (globalThis as typeof globalThis & {
-    __xlsx2mdFormulaEngine?: {
-      createFormulaEngineApi: (deps: Record<string, unknown>) => {
-        tryResolveFormulaExpressionDetailed: (
-          formulaText: string,
-          currentSheetName: string,
-          resolveCellValue: (sheetName: string, address: string) => string,
-          resolveRangeValues?: (sheetName: string, rangeText: string) => number[],
-          resolveRangeEntries?: (sheetName: string, rangeText: string) => { rawValues: string[]; numericValues: number[] },
-          currentAddress?: string
-        ) => { value: string; source: FormulaResolutionSource } | null;
-        tryResolveFormulaExpression: (
-          formulaText: string,
-          currentSheetName: string,
-          resolveCellValue: (sheetName: string, address: string) => string,
-          resolveRangeValues?: (sheetName: string, rangeText: string) => number[],
-          resolveRangeEntries?: (sheetName: string, rangeText: string) => { rawValues: string[]; numericValues: number[] },
-          currentAddress?: string
-        ) => string | null;
-      };
-    };
-  }).__xlsx2mdFormulaEngine;
-  if (!formulaEngineModule) {
-    throw new Error("xlsx2md formula engine module is not loaded");
-  }
-  const sheetAssetsHelper = (globalThis as typeof globalThis & {
-    __xlsx2mdSheetAssets?: {
-      parseDrawingImages: (
-        files: Map<string, Uint8Array>,
-        sheetName: string,
-        sheetPath: string,
-        deps: Record<string, unknown>
-      ) => ParsedImageAsset[];
-      parseDrawingCharts: (
-        files: Map<string, Uint8Array>,
-        sheetName: string,
-        sheetPath: string,
-        deps: Record<string, unknown>
-      ) => ParsedChartAsset[];
-      parseDrawingShapes: (
-        files: Map<string, Uint8Array>,
-        sheetName: string,
-        sheetPath: string,
-        deps: Record<string, unknown>
-      ) => ParsedShapeAsset[];
-      extractShapeBlocks: (
-        shapes: ParsedShapeAsset[],
-        deps: {
-          defaultCellWidthEmu: number;
-          defaultCellHeightEmu: number;
-          shapeBlockGapXEmu: number;
-          shapeBlockGapYEmu: number;
-        }
-      ) => ShapeBlock[];
-      renderHierarchicalRawEntries: (entries: { key: string; value: string }[]) => string[];
-    };
-  }).__xlsx2mdSheetAssets;
-  if (!sheetAssetsHelper) {
-    throw new Error("xlsx2md sheet assets module is not loaded");
-  }
-  const worksheetParserHelper = (globalThis as typeof globalThis & {
-    __xlsx2mdWorksheetParser?: {
-      parseWorksheet: (
-        files: Map<string, Uint8Array>,
-        sheetName: string,
-        sheetPath: string,
-        sheetIndex: number,
-        sharedStrings: string[],
-        cellStyles: CellStyleInfo[],
-        deps: Record<string, unknown>
-      ) => ParsedSheet;
-    };
-  }).__xlsx2mdWorksheetParser;
-  if (!worksheetParserHelper) {
-    throw new Error("xlsx2md worksheet parser module is not loaded");
-  }
-  const workbookLoaderHelper = (globalThis as typeof globalThis & {
-    __xlsx2mdWorkbookLoader?: {
-      parseWorkbook: (
-        arrayBuffer: ArrayBuffer,
-        workbookName: string,
-        deps: Record<string, unknown>
-      ) => Promise<ParsedWorkbook>;
-    };
-  }).__xlsx2mdWorkbookLoader;
-  if (!workbookLoaderHelper) {
-    throw new Error("xlsx2md workbook loader module is not loaded");
-  }
-  const formulaResolverHelper = (globalThis as typeof globalThis & {
-    __xlsx2mdFormulaResolver?: {
-      resolveSimpleFormulaReferences: (workbook: ParsedWorkbook, deps: Record<string, unknown>) => void;
-    };
-  }).__xlsx2mdFormulaResolver;
-  if (!formulaResolverHelper) {
-    throw new Error("xlsx2md formula resolver module is not loaded");
-  }
-  const formulaLegacyModule = (globalThis as typeof globalThis & {
-    __xlsx2mdFormulaLegacy?: {
-      createFormulaLegacyApi: (deps: Record<string, unknown>) => {
-        tryResolveFormulaExpressionLegacy: (
-          normalized: string,
-          currentSheetName: string,
-          resolveCellValue: (sheetName: string, address: string) => string,
-          resolveRangeValues?: (sheetName: string, rangeText: string) => number[],
-          resolveRangeEntries?: (sheetName: string, rangeText: string) => { rawValues: string[]; numericValues: number[] }
-        ) => string | null;
-        findTopLevelOperatorIndex: (expression: string, operator: string) => number;
-        parseWholeFunctionCall: (expression: string, allowedNames: string[]) => { name: string; argsText: string } | null;
-        splitFormulaArguments: (argText: string) => string[];
-        parseQualifiedRangeReference: (argText: string, currentSheetName: string) => { sheetName: string; start: string; end: string } | null;
-        resolveScalarFormulaValue: (
-          expression: string,
-          currentSheetName: string,
-          resolveCellValue: (sheetName: string, address: string) => string,
-          resolveRangeValues?: (sheetName: string, rangeText: string) => number[],
-          resolveRangeEntries?: (sheetName: string, rangeText: string) => { rawValues: string[]; numericValues: number[] }
-        ) => string | null;
-      };
-    };
-  }).__xlsx2mdFormulaLegacy;
-  if (!formulaLegacyModule) {
-    throw new Error("xlsx2md formula legacy module is not loaded");
-  }
-  const formulaAstModule = (globalThis as typeof globalThis & {
-    __xlsx2mdFormulaAst?: {
-      createFormulaAstApi: (deps: Record<string, unknown>) => {
-        tryResolveFormulaExpressionWithAst: (
-          expression: string,
-          currentSheetName: string,
-          resolveCellValue: (sheetName: string, address: string) => string,
-          resolveDefinedNameScalarValue: ((sheetName: string, name: string) => string | null) | null,
-          resolveDefinedNameRangeRef: ((sheetName: string, name: string) => { sheetName: string; start: string; end: string } | null) | null,
-          resolveStructuredRangeRef: ((sheetName: string, text: string) => { sheetName: string; start: string; end: string } | null) | null,
-          resolveSpillRange: ((sheetName: string, ref: string) => { sheetName: string; start: string; end: string } | null),
-          resolveRangeEntries?: (sheetName: string, rangeText: string) => { rawValues: string[]; numericValues: number[] },
-          currentAddress?: string
-        ) => string | null;
-      };
-    };
-  }).__xlsx2mdFormulaAst;
-  if (!formulaAstModule) {
-    throw new Error("xlsx2md formula ast module is not loaded");
-  }
-  const zipIoHelper = (globalThis as typeof globalThis & {
-    __xlsx2mdZipIo?: {
-      unzipEntries: (arrayBuffer: ArrayBuffer) => Promise<Map<string, Uint8Array>>;
-      createStoredZip: (entries: ExportEntry[]) => Uint8Array;
-    };
-  }).__xlsx2mdZipIo;
-  if (!zipIoHelper) {
-    throw new Error("xlsx2md zip io module is not loaded");
-  }
+
+  const drawingHelper = getXlsx2mdDrawingHelperModule();
+  const markdownNormalizeHelper = requireXlsx2mdMarkdownNormalize();
+  const narrativeStructureHelper = requireCoreNarrativeStructure();
+  const tableDetectorHelper = requireCoreTableDetector();
+  const markdownExportHelper = requireCoreMarkdownExport();
+  const stylesParserHelper = requireCoreStylesParser();
+  const sharedStringsHelper = requireXlsx2mdSharedStringsModule();
+  const worksheetTablesHelper = requireCoreWorksheetTables();
+  const cellFormatHelper = requireCoreCellFormat();
+  const xmlUtilsHelper = requireXlsx2mdXmlUtilsModule();
+  const addressUtilsHelper = requireCoreAddressUtils();
+  const relsParserModule = requireXlsx2mdRelsParserModule();
+  const formulaReferenceUtilsModule = requireXlsx2mdFormulaReferenceUtilsModule();
+  const sheetMarkdownModule = requireCoreSheetMarkdown();
+  const formulaEngineModule = requireCoreFormulaEngine();
+  const sheetAssetsHelper = requireCoreSheetAssets();
+  const worksheetParserHelper = requireCoreWorksheetParser();
+  const workbookLoaderHelper = requireCoreWorkbookLoader();
+  const formulaResolverHelper = requireCoreFormulaResolver();
+  const formulaLegacyModule = requireXlsx2mdFormulaLegacyModule();
+  const formulaAstModule = requireXlsx2mdFormulaAstModule();
+  const zipIoHelper = moduleRegistry.requireModule<{
+    unzipEntries: (arrayBuffer: ArrayBuffer) => Promise<Map<string, Uint8Array>>;
+    createStoredZip: (entries: ExportEntry[]) => Uint8Array;
+  }>("zipIo", "xlsx2md zip io module is not loaded");
   let resolveDefinedNameScalarValue: ((sheetName: string, name: string) => string | null) | null = null;
   let resolveDefinedNameRangeRef: ((sheetName: string, name: string) => { sheetName: string; start: string; end: string } | null) | null = null;
   let resolveStructuredRangeRef: ((sheetName: string, text: string) => { sheetName: string; start: string; end: string } | null) | null = null;
@@ -839,9 +553,7 @@
     });
   }
 
-  (globalThis as typeof globalThis & {
-    __xlsx2md?: Record<string, unknown>;
-  }).__xlsx2md = {
+  const xlsx2mdApi = {
     parseWorkbook,
     unzipEntries: zipIoHelper.unzipEntries,
     parseRangeRef,
@@ -859,4 +571,6 @@
     lettersToCol,
     textEncoder: markdownExportHelper.textEncoder
   };
+
+  moduleRegistry.registerModule("xlsx2md", xlsx2mdApi);
 })();

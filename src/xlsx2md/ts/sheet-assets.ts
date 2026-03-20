@@ -1,4 +1,5 @@
 (() => {
+  const moduleRegistry = getXlsx2mdModuleRegistry();
   type ParsedImageAsset = {
     sheetName: string;
     filename: string;
@@ -79,6 +80,13 @@
     shapeBlockGapXEmu: number;
     shapeBlockGapYEmu: number;
   };
+  const runtimeEnv = moduleRegistry?.getModule<{
+    ELEMENT_NODE: number;
+    TEXT_NODE: number;
+  }>("runtimeEnv");
+  if (!runtimeEnv) {
+    throw new Error("xlsx2md runtime env module is not loaded");
+  }
 
   function createSafeSheetAssetDir(sheetName: string): string {
     return sheetName.replace(/[\\/:*?"<>|]+/g, "_").trim() || "Sheet";
@@ -305,7 +313,8 @@
   }
 
   function parseShapeText(shapeNode: Element | null, deps: ParseAssetDependencies): string {
-    return deps.getElementsByLocalName(shapeNode || document, "t")
+    if (!shapeNode) return "";
+    return deps.getElementsByLocalName(shapeNode, "t")
       .map((node) => deps.getTextContent(node))
       .filter(Boolean)
       .join("")
@@ -344,7 +353,7 @@
     }
 
     const directText = Array.from(node.childNodes)
-      .filter((child) => child.nodeType === Node.TEXT_NODE)
+      .filter((child) => child.nodeType === runtimeEnv.TEXT_NODE)
       .map((child) => (child.textContent || "").trim())
       .filter(Boolean)
       .join(" ");
@@ -356,7 +365,7 @@
     }
 
     for (const child of Array.from(node.childNodes)) {
-      if (child.nodeType === Node.ELEMENT_NODE) {
+      if (child.nodeType === runtimeEnv.ELEMENT_NODE) {
         flattenXmlNodeEntries(child as Element, deps, currentPath, entries);
       }
     }
@@ -413,8 +422,9 @@
   }
 
   function parseAnchorInt(anchor: Element | null, parentName: string, childName: string, deps: ParseAssetDependencies): number | null {
-    const parent = deps.getFirstChildByLocalName(anchor || document, parentName);
-    const child = deps.getFirstChildByLocalName(parent || anchor || document, childName);
+    if (!anchor) return null;
+    const parent = deps.getFirstChildByLocalName(anchor, parentName);
+    const child = deps.getFirstChildByLocalName(parent || anchor, childName);
     const value = Number(deps.getTextContent(child));
     return Number.isFinite(value) ? value : null;
   }
@@ -576,16 +586,7 @@
     return shapes;
   }
 
-  (globalThis as typeof globalThis & {
-    __xlsx2mdSheetAssets?: {
-      createSafeSheetAssetDir: typeof createSafeSheetAssetDir;
-      parseDrawingImages: typeof parseDrawingImages;
-      parseDrawingCharts: typeof parseDrawingCharts;
-      parseDrawingShapes: typeof parseDrawingShapes;
-      extractShapeBlocks: typeof extractShapeBlocks;
-      renderHierarchicalRawEntries: typeof renderHierarchicalRawEntries;
-    };
-  }).__xlsx2mdSheetAssets = {
+  const sheetAssetsApi = {
     createSafeSheetAssetDir,
     parseDrawingImages,
     parseDrawingCharts,
@@ -593,4 +594,6 @@
     extractShapeBlocks,
     renderHierarchicalRawEntries
   };
+
+  moduleRegistry.registerModule("sheetAssets", sheetAssetsApi);
 })();

@@ -5,6 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
+import { loadModuleRegistry } from "./helpers/module-registry.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,8 +17,9 @@ const formulaEngineCode = readFileSync(
 
 function bootFormulaEngine() {
   document.body.innerHTML = "";
+  loadModuleRegistry(__dirname);
   new Function(formulaEngineCode)();
-  return globalThis.__xlsx2mdFormulaEngine;
+  return globalThis.__xlsx2mdModuleRegistry.getModule("formulaEngine");
 }
 
 describe("xlsx2md formula engine", () => {

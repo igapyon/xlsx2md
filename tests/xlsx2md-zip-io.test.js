@@ -7,6 +7,7 @@ import { DecompressionStream as NodeDecompressionStream } from "node:stream/web"
 import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
+import { loadModuleRegistry } from "./helpers/module-registry.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,8 +24,9 @@ const zipIoCode = readFileSync(
 
 function bootZipIo() {
   document.body.innerHTML = "";
+  loadModuleRegistry(__dirname);
   new Function(zipIoCode)();
-  return globalThis.__xlsx2mdZipIo;
+  return globalThis.__xlsx2mdModuleRegistry.getModule("zipIo");
 }
 
 describe("xlsx2md zip io", () => {

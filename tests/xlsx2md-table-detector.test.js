@@ -5,6 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
+import { loadModuleRegistry } from "./helpers/module-registry.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,9 +21,10 @@ const tableDetectorCode = readFileSync(
 
 function bootTableDetector() {
   document.body.innerHTML = "";
+  loadModuleRegistry(__dirname);
   new Function(borderGridCode)();
   new Function(tableDetectorCode)();
-  return globalThis.__xlsx2mdTableDetector;
+  return globalThis.__xlsx2mdModuleRegistry.getModule("tableDetector");
 }
 
 function createCell(row, col, outputValue, borders = {}) {

@@ -5,6 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
+import { loadModuleRegistry, loadRuntimeEnv } from "./helpers/module-registry.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,8 +17,10 @@ const sharedStringsCode = readFileSync(
 
 function bootSharedStrings() {
   document.body.innerHTML = "";
+  loadModuleRegistry(__dirname);
+  loadRuntimeEnv(__dirname);
   new Function(sharedStringsCode)();
-  return globalThis.__xlsx2mdSharedStrings;
+  return globalThis.__xlsx2mdModuleRegistry.getModule("sharedStrings");
 }
 
 describe("xlsx2md shared strings", () => {

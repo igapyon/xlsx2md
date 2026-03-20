@@ -1,4 +1,5 @@
 (() => {
+  const moduleRegistry = getXlsx2mdModuleRegistry();
   type FormulaResolutionSource = "cached_value" | "ast_evaluator" | "legacy_resolver" | "formula_text" | "external_unsupported" | null;
 
   type FormulaAstDeps = {
@@ -23,7 +24,7 @@
       resolveRangeEntries?: (sheetName: string, rangeText: string) => { rawValues: string[]; numericValues: number[] },
       currentAddress?: string
     ): string | null {
-      const formulaApi = (globalThis as any).__xlsx2mdFormula;
+      const formulaApi = moduleRegistry.getModule<Record<string, unknown>>("formulaRuntime");
       if (!formulaApi?.parseFormula || !formulaApi?.evaluateFormulaAst) {
         return null;
       }
@@ -190,11 +191,9 @@
     };
   }
 
-  (globalThis as typeof globalThis & {
-    __xlsx2mdFormulaAst?: {
-      createFormulaAstApi: typeof createFormulaAstApi;
-    };
-  }).__xlsx2mdFormulaAst = {
+  const formulaAstApi = {
     createFormulaAstApi
   };
+
+  moduleRegistry.registerModule("formulaAst", formulaAstApi);
 })();

@@ -1,4 +1,5 @@
 (() => {
+  const moduleRegistry = getXlsx2mdModuleRegistry();
   type BorderFlags = {
     top: boolean;
     bottom: boolean;
@@ -109,19 +110,13 @@
     return count;
   }
 
-  (globalThis as typeof globalThis & {
-    __xlsx2mdBorderGrid?: {
-      getCellAt: typeof getCellAt;
-      hasNormalizedBorderOnSide: typeof hasNormalizedBorderOnSide;
-      hasAnyNormalizedBorder: typeof hasAnyNormalizedBorder;
-      collectTableEdgeStats: typeof collectTableEdgeStats;
-      countNormalizedBorderedCells: typeof countNormalizedBorderedCells;
-    };
-  }).__xlsx2mdBorderGrid = {
+  const borderGridApi = {
     getCellAt,
     hasNormalizedBorderOnSide,
     hasAnyNormalizedBorder,
     collectTableEdgeStats,
     countNormalizedBorderedCells
   };
+
+  moduleRegistry.registerModule("borderGrid", borderGridApi);
 })();

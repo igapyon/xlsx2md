@@ -1,4 +1,5 @@
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     function colToLetters(col) {
         let current = col;
         let result = "";
@@ -54,7 +55,7 @@
             end: normalizeFormulaAddress(match[2])
         };
     }
-    globalThis.__xlsx2mdAddressUtils = {
+    const addressUtilsApi = {
         colToLetters,
         lettersToCol,
         parseCellAddress,
@@ -63,4 +64,5 @@
         parseRangeRef,
         parseRangeAddress
     };
+    moduleRegistry.registerModule("addressUtils", addressUtilsApi);
 })();

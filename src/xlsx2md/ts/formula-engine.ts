@@ -1,4 +1,5 @@
 (() => {
+  const moduleRegistry = getXlsx2mdModuleRegistry();
   type FormulaResolutionSource = "cached_value" | "ast_evaluator" | "legacy_resolver" | "formula_text" | "external_unsupported" | null;
 
   type FormulaEngineDeps = {
@@ -90,11 +91,9 @@
     };
   }
 
-  (globalThis as typeof globalThis & {
-    __xlsx2mdFormulaEngine?: {
-      createFormulaEngineApi: typeof createFormulaEngineApi;
-    };
-  }).__xlsx2mdFormulaEngine = {
+  const formulaEngineApi = {
     createFormulaEngineApi
   };
+
+  moduleRegistry.registerModule("formulaEngine", formulaEngineApi);
 })();

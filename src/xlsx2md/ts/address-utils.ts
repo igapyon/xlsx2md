@@ -1,4 +1,5 @@
 (() => {
+  const moduleRegistry = getXlsx2mdModuleRegistry();
   type MergeRange = {
     startRow: number;
     startCol: number;
@@ -68,17 +69,7 @@
     };
   }
 
-  (globalThis as typeof globalThis & {
-    __xlsx2mdAddressUtils?: {
-      colToLetters: typeof colToLetters;
-      lettersToCol: typeof lettersToCol;
-      parseCellAddress: typeof parseCellAddress;
-      normalizeFormulaAddress: typeof normalizeFormulaAddress;
-      formatRange: typeof formatRange;
-      parseRangeRef: typeof parseRangeRef;
-      parseRangeAddress: typeof parseRangeAddress;
-    };
-  }).__xlsx2mdAddressUtils = {
+  const addressUtilsApi = {
     colToLetters,
     lettersToCol,
     parseCellAddress,
@@ -87,4 +78,6 @@
     parseRangeRef,
     parseRangeAddress
   };
+
+  moduleRegistry.registerModule("addressUtils", addressUtilsApi);
 })();

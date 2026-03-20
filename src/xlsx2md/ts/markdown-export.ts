@@ -1,4 +1,5 @@
 (() => {
+  const moduleRegistry = getXlsx2mdModuleRegistry();
   type FormulaResolutionStatus = "resolved" | "fallback_formula" | "unsupported_external" | null;
 
   type FormulaDiagnostic = {
@@ -50,23 +51,8 @@
   };
 
   const textEncoder = new TextEncoder();
-  const zipIoHelper = (globalThis as typeof globalThis & {
-    __xlsx2mdZipIo?: {
-      createStoredZip: (entries: ExportEntry[]) => Uint8Array;
-    };
-  }).__xlsx2mdZipIo;
-  if (!zipIoHelper) {
-    throw new Error("xlsx2md zip io module is not loaded");
-  }
-  const markdownNormalizeHelper = (globalThis as typeof globalThis & {
-    __xlsx2mdMarkdownNormalize?: {
-      normalizeMarkdownText: (text: string) => string;
-      normalizeMarkdownTableCell: (text: string) => string;
-    };
-  }).__xlsx2mdMarkdownNormalize;
-  if (!markdownNormalizeHelper) {
-    throw new Error("xlsx2md markdown normalize module is not loaded");
-  }
+  const zipIoHelper = requireXlsx2mdZipIo();
+  const markdownNormalizeHelper = requireXlsx2mdMarkdownNormalize();
 
   function normalizeMarkdownLineBreaks(text: string): string {
     return markdownNormalizeHelper.normalizeMarkdownText(text);
@@ -181,20 +167,7 @@
     return zipIoHelper.createStoredZip(createExportEntries(workbook, markdownFiles));
   }
 
-  (globalThis as typeof globalThis & {
-    __xlsx2mdMarkdownExport?: {
-      escapeMarkdownCell: typeof escapeMarkdownCell;
-      renderMarkdownTable: typeof renderMarkdownTable;
-      sanitizeFileNameSegment: typeof sanitizeFileNameSegment;
-      createOutputFileName: typeof createOutputFileName;
-      createSummaryText: typeof createSummaryText;
-      createCombinedMarkdownExportFile: typeof createCombinedMarkdownExportFile;
-      createExportEntries: typeof createExportEntries;
-      createWorkbookExportArchive: typeof createWorkbookExportArchive;
-      normalizeMarkdownLineBreaks: typeof normalizeMarkdownLineBreaks;
-      textEncoder: typeof textEncoder;
-    };
-  }).__xlsx2mdMarkdownExport = {
+  const markdownExportApi = {
     escapeMarkdownCell,
     renderMarkdownTable,
     sanitizeFileNameSegment,
@@ -206,4 +179,6 @@
     normalizeMarkdownLineBreaks,
     textEncoder
   };
+
+  moduleRegistry.registerModule("markdownExport", markdownExportApi);
 })();

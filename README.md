@@ -34,6 +34,20 @@
 3. After loading, Markdown for all sheets is generated automatically
 4. Save the result as Markdown or ZIP
 
+### Experimental Node CLI
+
+You can also run the conversion in batch mode from Node.js.
+
+```bash
+npm run cli -- ./tests/fixtures/xlsx2md-basic-sample01.xlsx --out /tmp/xlsx2md-basic.md
+```
+
+ZIP export is also available.
+
+```bash
+npm run cli -- ./tests/fixtures/xlsx2md-basic-sample01.xlsx --zip /tmp/xlsx2md-basic.zip
+```
+
 ## Tech Stack
 
 - Runtime: Web Browser
@@ -121,6 +135,20 @@ The generated Markdown can then be previewed as a readable document.
 2. `.xlsx` ファイルを選択する
 3. 読み込み後、自動で全シートの Markdown が生成される
 4. Markdown または ZIP を保存する
+
+### Experimental Node CLI
+
+Node.js からバッチ実行することもできます。
+
+```bash
+npm run cli -- ./tests/fixtures/xlsx2md-basic-sample01.xlsx --out /tmp/xlsx2md-basic.md
+```
+
+ZIP 出力にも対応しています。
+
+```bash
+npm run cli -- ./tests/fixtures/xlsx2md-basic-sample01.xlsx --zip /tmp/xlsx2md-basic.zip
+```
 
 ## Tech Stack
 

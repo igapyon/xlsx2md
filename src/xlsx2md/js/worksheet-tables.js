@@ -1,10 +1,12 @@
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     const textDecoder = new TextDecoder("utf-8");
+    const runtimeEnv = requireXlsx2mdRuntimeEnv();
     function decodeXmlText(bytes) {
         return textDecoder.decode(bytes);
     }
     function xmlToDocument(xmlText) {
-        return new DOMParser().parseFromString(xmlText, "application/xml");
+        return runtimeEnv.xmlToDocument(xmlText);
     }
     function getElementsByLocalName(root, localName) {
         const elements = Array.from(root.getElementsByTagName("*"));
@@ -102,8 +104,9 @@
         }
         return tables;
     }
-    globalThis.__xlsx2mdWorksheetTables = {
+    const worksheetTablesApi = {
         normalizeStructuredTableKey,
         parseWorksheetTables
     };
+    moduleRegistry.registerModule("worksheetTables", worksheetTablesApi);
 })();

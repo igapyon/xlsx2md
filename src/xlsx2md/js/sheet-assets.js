@@ -1,4 +1,9 @@
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
+    const runtimeEnv = moduleRegistry === null || moduleRegistry === void 0 ? void 0 : moduleRegistry.getModule("runtimeEnv");
+    if (!runtimeEnv) {
+        throw new Error("xlsx2md runtime env module is not loaded");
+    }
     function createSafeSheetAssetDir(sheetName) {
         return sheetName.replace(/[\\/:*?"<>|]+/g, "_").trim() || "Sheet";
     }
@@ -203,7 +208,9 @@
         return prst ? `Shape (${prst})` : "Shape";
     }
     function parseShapeText(shapeNode, deps) {
-        return deps.getElementsByLocalName(shapeNode || document, "t")
+        if (!shapeNode)
+            return "";
+        return deps.getElementsByLocalName(shapeNode, "t")
             .map((node) => deps.getTextContent(node))
             .filter(Boolean)
             .join("")
@@ -231,7 +238,7 @@
             });
         }
         const directText = Array.from(node.childNodes)
-            .filter((child) => child.nodeType === Node.TEXT_NODE)
+            .filter((child) => child.nodeType === runtimeEnv.TEXT_NODE)
             .map((child) => (child.textContent || "").trim())
             .filter(Boolean)
             .join(" ");
@@ -242,7 +249,7 @@
             });
         }
         for (const child of Array.from(node.childNodes)) {
-            if (child.nodeType === Node.ELEMENT_NODE) {
+            if (child.nodeType === runtimeEnv.ELEMENT_NODE) {
                 flattenXmlNodeEntries(child, deps, currentPath, entries);
             }
         }
@@ -288,8 +295,10 @@
         return lines;
     }
     function parseAnchorInt(anchor, parentName, childName, deps) {
-        const parent = deps.getFirstChildByLocalName(anchor || document, parentName);
-        const child = deps.getFirstChildByLocalName(parent || anchor || document, childName);
+        if (!anchor)
+            return null;
+        const parent = deps.getFirstChildByLocalName(anchor, parentName);
+        const child = deps.getFirstChildByLocalName(parent || anchor, childName);
         const value = Number(deps.getTextContent(child));
         return Number.isFinite(value) ? value : null;
     }
@@ -433,7 +442,7 @@
         }
         return shapes;
     }
-    globalThis.__xlsx2mdSheetAssets = {
+    const sheetAssetsApi = {
         createSafeSheetAssetDir,
         parseDrawingImages,
         parseDrawingCharts,
@@ -441,4 +450,5 @@
         extractShapeBlocks,
         renderHierarchicalRawEntries
     };
+    moduleRegistry.registerModule("sheetAssets", sheetAssetsApi);
 })();

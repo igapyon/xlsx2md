@@ -1,4 +1,5 @@
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     function parseDefinedNames(workbookDoc, sheetNames, getTextContent) {
         const result = [];
         const definedNameElements = Array.from(workbookDoc.getElementsByTagName("definedName"));
@@ -48,8 +49,9 @@
         (_a = deps.postProcessWorkbook) === null || _a === void 0 ? void 0 : _a.call(deps, workbook);
         return workbook;
     }
-    globalThis.__xlsx2mdWorkbookLoader = {
+    const workbookLoaderApi = {
         parseDefinedNames,
         parseWorkbook
     };
+    moduleRegistry.registerModule("workbookLoader", workbookLoaderApi);
 })();

@@ -5,6 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
+import { loadModuleRegistry } from "./helpers/module-registry.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,8 +17,9 @@ const formulaReferenceUtilsCode = readFileSync(
 
 function bootFormulaReferenceUtils() {
   document.body.innerHTML = "";
+  loadModuleRegistry(__dirname);
   new Function(formulaReferenceUtilsCode)();
-  return globalThis.__xlsx2mdFormulaReferenceUtils;
+  return globalThis.__xlsx2mdModuleRegistry.getModule("formulaReferenceUtils");
 }
 
 describe("xlsx2md formula reference utils", () => {

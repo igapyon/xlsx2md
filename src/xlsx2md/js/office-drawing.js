@@ -1,10 +1,12 @@
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     const textEncoder = new TextEncoder();
+    const runtimeEnv = requireXlsx2mdRuntimeEnv();
     function getDirectChildByLocalName(root, localName) {
         if (!root)
             return null;
         for (const node of Array.from(root.childNodes)) {
-            if (node.nodeType === Node.ELEMENT_NODE && node.localName === localName) {
+            if (node.nodeType === runtimeEnv.ELEMENT_NODE && node.localName === localName) {
                 return node;
             }
         }
@@ -150,7 +152,8 @@
             data: textEncoder.encode(`${svg}\n`)
         };
     }
-    globalThis.__xlsx2mdOfficeDrawing = {
+    const officeDrawingApi = {
         renderShapeSvg
     };
+    moduleRegistry.registerModule("officeDrawing", officeDrawingApi);
 })();

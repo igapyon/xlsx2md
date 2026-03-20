@@ -1,4 +1,5 @@
 (() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
     function extractCellOutputValue(cellElement, sharedStrings, cellStyle, deps, formulaOverride = "") {
         const type = (cellElement.getAttribute("t") || "").trim();
         const valueNode = cellElement.getElementsByTagName("v")[0] || null;
@@ -241,10 +242,11 @@
             maxCol
         };
     }
-    globalThis.__xlsx2mdWorksheetParser = {
+    const worksheetParserApi = {
         extractCellOutputValue,
         shiftReferenceAddress,
         translateSharedFormula,
         parseWorksheet
     };
+    moduleRegistry.registerModule("worksheetParser", worksheetParserApi);
 })();

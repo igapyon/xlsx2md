@@ -1,4 +1,5 @@
 (() => {
+  const moduleRegistry = getXlsx2mdModuleRegistry();
   type FormulaResolutionStatus = "resolved" | "fallback_formula" | "unsupported_external" | null;
 
   type BorderFlags = {
@@ -570,11 +571,9 @@
     };
   }
 
-  (globalThis as typeof globalThis & {
-    __xlsx2mdSheetMarkdown?: {
-      createSheetMarkdownApi: typeof createSheetMarkdownApi;
-    };
-  }).__xlsx2mdSheetMarkdown = {
+  const sheetMarkdownApi = {
     createSheetMarkdownApi
   };
+
+  moduleRegistry.registerModule("sheetMarkdown", sheetMarkdownApi);
 })();
