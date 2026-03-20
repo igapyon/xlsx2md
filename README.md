@@ -34,10 +34,11 @@
 3. After loading, Markdown for all sheets is generated automatically
 4. Save the result as Markdown or ZIP
 
-### Experimental Node CLI
+### Node CLI
 
 You can also run the conversion in batch mode from Node.js.
 The CLI intentionally stays small in the Unix style: one input workbook at a time, with Markdown or ZIP written to a file.
+CLI interface may change.
 
 Options:
 
@@ -163,10 +164,11 @@ The generated Markdown can then be previewed as a readable document.
 3. 読み込み後、自動で全シートの Markdown が生成される
 4. Markdown または ZIP を保存する
 
-### Experimental Node CLI
+### Node CLI
 
 Node.js からバッチ実行することもできます。
 CLI は UNIX 的に小さく保つ方針で、基本は 1 回につき 1 つのワークブックを受け取り、Markdown または ZIP をファイルへ出力します。
+CLI interface may change.
 
 オプション一覧:
 
