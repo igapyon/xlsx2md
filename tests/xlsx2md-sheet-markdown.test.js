@@ -14,6 +14,30 @@ const markdownNormalizeCode = readFileSync(
   path.resolve(__dirname, "../src/xlsx2md/js/markdown-normalize.js"),
   "utf8"
 );
+const markdownEscapeCode = readFileSync(
+  path.resolve(__dirname, "../src/xlsx2md/js/markdown-escape.js"),
+  "utf8"
+);
+const markdownTableEscapeCode = readFileSync(
+  path.resolve(__dirname, "../src/xlsx2md/js/markdown-table-escape.js"),
+  "utf8"
+);
+const richTextParserCode = readFileSync(
+  path.resolve(__dirname, "../src/xlsx2md/js/rich-text-parser.js"),
+  "utf8"
+);
+const richTextPlainFormatterCode = readFileSync(
+  path.resolve(__dirname, "../src/xlsx2md/js/rich-text-plain-formatter.js"),
+  "utf8"
+);
+const richTextGithubFormatterCode = readFileSync(
+  path.resolve(__dirname, "../src/xlsx2md/js/rich-text-github-formatter.js"),
+  "utf8"
+);
+const richTextRendererCode = readFileSync(
+  path.resolve(__dirname, "../src/xlsx2md/js/rich-text-renderer.js"),
+  "utf8"
+);
 const sheetMarkdownCode = readFileSync(
   path.resolve(__dirname, "../src/xlsx2md/js/sheet-markdown.js"),
   "utf8"
@@ -23,6 +47,12 @@ function bootSheetMarkdown() {
   document.body.innerHTML = "";
   loadModuleRegistry(__dirname);
   new Function(markdownNormalizeCode)();
+  new Function(markdownEscapeCode)();
+  new Function(markdownTableEscapeCode)();
+  new Function(richTextParserCode)();
+  new Function(richTextPlainFormatterCode)();
+  new Function(richTextGithubFormatterCode)();
+  new Function(richTextRendererCode)();
   new Function(sheetMarkdownCode)();
   return globalThis.__xlsx2mdModuleRegistry.getModule("sheetMarkdown");
 }
@@ -118,7 +148,7 @@ describe("xlsx2md sheet markdown", () => {
     expect(result.summary.narrativeBlocks).toBe(1);
   });
 
-  it("normalizes cell line breaks into spaces before markdown rendering", () => {
+  it("normalizes cell line breaks into spaces in plain mode", () => {
     const module = bootSheetMarkdown();
     const api = module.createSheetMarkdownApi(createDeps({
       renderNarrativeBlock: (block) => block.lines.join("\n")
@@ -140,6 +170,41 @@ describe("xlsx2md sheet markdown", () => {
 
     expect(result.markdown).toContain("Line1 Line2");
     expect(result.markdown).not.toContain("Line1\nLine2");
+  });
+
+  it("renders cell line breaks as <br> in github mode", () => {
+    const module = bootSheetMarkdown();
+    const api = module.createSheetMarkdownApi(createDeps({
+      renderNarrativeBlock: (block) => block.lines.join("\n")
+    }));
+    const workbook = { name: "book.xlsx", sheets: [] };
+    const sheet = {
+      name: "Sheet1",
+      index: 1,
+      cells: [
+        {
+          address: "A1",
+          row: 1,
+          col: 1,
+          outputValue: "Line1\nLine2",
+          rawValue: "Raw1\nRaw2",
+          formulaText: "",
+          resolutionStatus: null,
+          resolutionSource: null,
+          textStyle: { bold: false, italic: false, strike: false, underline: false },
+          richTextRuns: null
+        }
+      ],
+      merges: [],
+      images: [],
+      charts: [],
+      shapes: []
+    };
+
+    const result = api.convertSheetToMarkdown(workbook, sheet, { formattingMode: "github" });
+
+    expect(result.markdown).toContain("Line1<br>Line2");
+    expect(result.markdown).not.toContain("Line1 Line2");
   });
 
   it("omits shape sections when includeShapeDetails is disabled", () => {

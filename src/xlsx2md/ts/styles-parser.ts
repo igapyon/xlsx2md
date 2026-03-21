@@ -11,6 +11,12 @@
     borders: BorderFlags;
     numFmtId: number;
     formatCode: string;
+    textStyle: {
+      bold: boolean;
+      italic: boolean;
+      strike: boolean;
+      underline: boolean;
+    };
   };
 
   const EMPTY_BORDERS: BorderFlags = {
@@ -18,6 +24,12 @@
     bottom: false,
     left: false,
     right: false
+  };
+  const EMPTY_TEXT_STYLE = {
+    bold: false,
+    italic: false,
+    strike: false,
+    underline: false
   };
   const runtimeEnv = requireXlsx2mdRuntimeEnv();
 
@@ -62,13 +74,29 @@
     return side.hasAttribute("style") || side.children.length > 0;
   }
 
+  function hasEnabledBooleanValue(node: Element | null | undefined): boolean {
+    if (!node) return false;
+    const value = (node.getAttribute("val") || "").trim().toLowerCase();
+    return value !== "false" && value !== "0" && value !== "none";
+  }
+
+  function parseFontStyle(fontElement: Element | null | undefined): typeof EMPTY_TEXT_STYLE {
+    return {
+      bold: hasEnabledBooleanValue(fontElement?.getElementsByTagName("b")[0]),
+      italic: hasEnabledBooleanValue(fontElement?.getElementsByTagName("i")[0]),
+      strike: hasEnabledBooleanValue(fontElement?.getElementsByTagName("strike")[0]),
+      underline: hasEnabledBooleanValue(fontElement?.getElementsByTagName("u")[0])
+    };
+  }
+
   function parseCellStyles(files: Map<string, Uint8Array>): CellStyleInfo[] {
     const stylesBytes = files.get("xl/styles.xml");
     if (!stylesBytes) {
       return [{
         borders: EMPTY_BORDERS,
         numFmtId: 0,
-        formatCode: "General"
+        formatCode: "General",
+        textStyle: EMPTY_TEXT_STYLE
       }];
     }
     const doc = xmlToDocument(decodeXmlText(stylesBytes));
@@ -85,6 +113,8 @@
         right: hasBorderSide(right)
       };
     });
+    const fontElements = Array.from(doc.getElementsByTagName("font"));
+    const fontStyles = fontElements.map((fontElement) => parseFontStyle(fontElement));
     const numFmtMap = new Map<number, string>();
     const numFmtParent = doc.getElementsByTagName("numFmts")[0];
     if (numFmtParent) {
@@ -102,30 +132,36 @@
       return [{
         borders: borders[0] || EMPTY_BORDERS,
         numFmtId: 0,
-        formatCode: "General"
+        formatCode: "General",
+        textStyle: fontStyles[0] || EMPTY_TEXT_STYLE
       }];
     }
     const xfElements = Array.from(xfsParent.getElementsByTagName("xf"));
     const styles = xfElements.map((xfElement) => {
       const borderId = Number(xfElement.getAttribute("borderId") || 0);
       const numFmtId = Number(xfElement.getAttribute("numFmtId") || 0);
+      const fontId = Number(xfElement.getAttribute("fontId") || 0);
       return {
         borders: borders[borderId] || EMPTY_BORDERS,
         numFmtId,
-        formatCode: numFmtMap.get(numFmtId) || BUILTIN_FORMAT_CODES[numFmtId] || "General"
+        formatCode: numFmtMap.get(numFmtId) || BUILTIN_FORMAT_CODES[numFmtId] || "General",
+        textStyle: fontStyles[fontId] || EMPTY_TEXT_STYLE
       };
     });
     return styles.length > 0 ? styles : [{
       borders: EMPTY_BORDERS,
       numFmtId: 0,
-      formatCode: "General"
+      formatCode: "General",
+      textStyle: EMPTY_TEXT_STYLE
     }];
   }
 
   const stylesParserApi = {
     EMPTY_BORDERS,
+    EMPTY_TEXT_STYLE,
     BUILTIN_FORMAT_CODES,
     hasBorderSide,
+    parseFontStyle,
     parseCellStyles
   };
 

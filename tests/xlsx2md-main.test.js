@@ -44,6 +44,30 @@ const markdownNormalizeCode = readFileSync(
   path.resolve(__dirname, "../src/xlsx2md/js/markdown-normalize.js"),
   "utf8"
 );
+const markdownEscapeCode = readFileSync(
+  path.resolve(__dirname, "../src/xlsx2md/js/markdown-escape.js"),
+  "utf8"
+);
+const markdownTableEscapeCode = readFileSync(
+  path.resolve(__dirname, "../src/xlsx2md/js/markdown-table-escape.js"),
+  "utf8"
+);
+const richTextParserCode = readFileSync(
+  path.resolve(__dirname, "../src/xlsx2md/js/rich-text-parser.js"),
+  "utf8"
+);
+const richTextPlainFormatterCode = readFileSync(
+  path.resolve(__dirname, "../src/xlsx2md/js/rich-text-plain-formatter.js"),
+  "utf8"
+);
+const richTextGithubFormatterCode = readFileSync(
+  path.resolve(__dirname, "../src/xlsx2md/js/rich-text-github-formatter.js"),
+  "utf8"
+);
+const richTextRendererCode = readFileSync(
+  path.resolve(__dirname, "../src/xlsx2md/js/rich-text-renderer.js"),
+  "utf8"
+);
 const narrativeStructureCode = readFileSync(
   path.resolve(__dirname, "../src/xlsx2md/js/narrative-structure.js"),
   "utf8"
@@ -134,6 +158,12 @@ function bootCore() {
   new Function(zipIoCode)();
   new Function(borderGridCode)();
   new Function(markdownNormalizeCode)();
+  new Function(markdownEscapeCode)();
+  new Function(markdownTableEscapeCode)();
+  new Function(richTextParserCode)();
+  new Function(richTextPlainFormatterCode)();
+  new Function(richTextGithubFormatterCode)();
+  new Function(richTextRendererCode)();
   new Function(narrativeStructureCode)();
   new Function(tableDetectorCode)();
   new Function(markdownExportCode)();
@@ -293,8 +323,8 @@ describe("xlsx2md core", () => {
     const sheet = workbook.sheets[0];
     const markdownFile = files[0];
 
-    expect(workbook.sharedStrings.some((text) => text.includes("通常のテキスト"))).toBe(true);
-    expect(workbook.sharedStrings.some((text) => text.includes("記述省略（という名前のセル結合）"))).toBe(true);
+    expect(workbook.sharedStrings.some((entry) => entry.text.includes("通常のテキスト"))).toBe(true);
+    expect(workbook.sharedStrings.some((entry) => entry.text.includes("記述省略（という名前のセル結合）"))).toBe(true);
     expect(workbook.sharedStrings.length).toBe(61);
 
     expect(workbook.sheets).toHaveLength(1);
@@ -662,8 +692,8 @@ describe("xlsx2md core", () => {
     expect(markdownFile.markdown).toContain("| countif | 1 |");
     expect(markdownFile.markdown).toContain("| text | 0010 |");
     expect(markdownFile.markdown).toContain("| date | 2024/3/17 |");
-    expect(markdownFile.markdown).toContain("| value_num | 1234.5 |");
-    expect(markdownFile.markdown).toContain("| value_date | 45368 |");
+    expect(markdownFile.markdown).toContain("| value\\_num | 1234.5 |");
+    expect(markdownFile.markdown).toContain("| value\\_date | 45368 |");
   });
 
   it("parses the formula-crosssheet fixture workbook with concrete cross-sheet expectations", async () => {
@@ -726,9 +756,9 @@ describe("xlsx2md core", () => {
     expect(sheet1File.summary.formulaDiagnostics.every((diagnostic) => diagnostic.source === "cached_value")).toBe(true);
     expect(sheet1File.markdown).toContain("# Sheet1");
     expect(sheet1File.markdown).toContain("Workbook: formula-crosssheet-sample01.xlsx");
-    expect(sheet1File.markdown).toContain("| sheet2_ref | CrossValue |");
-    expect(sheet1File.markdown).toContain("| jp_sheet_ref | 日本語参照値 |");
-    expect(sheet1File.markdown).toContain("| sum_range | 10 |");
+    expect(sheet1File.markdown).toContain("| sheet2\\_ref | CrossValue |");
+    expect(sheet1File.markdown).toContain("| jp\\_sheet\\_ref | 日本語参照値 |");
+    expect(sheet1File.markdown).toContain("| sum\\_range | 10 |");
 
     expect(sheet2File.fileName).toBe("formula-crosssheet-sample01_002_Sheet2.md");
     expect(sheet2File.summary.tables).toBe(1);
@@ -3282,5 +3312,142 @@ describe("xlsx2md core", () => {
     expect(markdownFile.summary.formulaDiagnostics).toEqual([
       { address: "A1", formulaText: "=IF(1=1,\"\",\"X\")", status: "resolved", source: "cached_value", outputValue: "" }
     ]);
+  });
+
+  it("preserves supported rich text as github-compatible markdown", async () => {
+    const api = bootCore();
+    const workbookBuffer = createStoredZip([
+      {
+        name: "[Content_Types].xml",
+        data: `<?xml version="1.0" encoding="UTF-8"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+  <Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+  <Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/>
+  <Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
+</Types>`
+      },
+      {
+        name: "_rels/.rels",
+        data: `<?xml version="1.0" encoding="UTF-8"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+</Relationships>`
+      },
+      {
+        name: "xl/workbook.xml",
+        data: `<?xml version="1.0" encoding="UTF-8"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <sheets>
+    <sheet name="Sheet1" sheetId="1" r:id="rId1"/>
+  </sheets>
+</workbook>`
+      },
+      {
+        name: "xl/_rels/workbook.xml.rels",
+        data: `<?xml version="1.0" encoding="UTF-8"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>
+</Relationships>`
+      },
+      {
+        name: "xl/worksheets/sheet1.xml",
+        data: `<?xml version="1.0" encoding="UTF-8"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <sheetData>
+    <row r="1">
+      <c r="A1" t="s"><v>0</v></c>
+      <c r="B1" t="inlineStr" s="1"><is><t>WholeCell</t></is></c>
+    </row>
+  </sheetData>
+</worksheet>`
+      },
+      {
+        name: "xl/sharedStrings.xml",
+        data: `<?xml version="1.0" encoding="UTF-8"?>
+<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="1" uniqueCount="1">
+  <si>
+    <r><rPr><b/></rPr><t>Bold</t></r>
+    <r><rPr><i/></rPr><t>Italic</t></r>
+    <r><rPr><strike/></rPr><t>Strike</t></r>
+    <r><rPr><u/></rPr><t>Under</t></r>
+  </si>
+</sst>`
+      },
+      {
+        name: "xl/styles.xml",
+        data: `<?xml version="1.0" encoding="UTF-8"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <fonts count="2">
+    <font/>
+    <font><u/></font>
+  </fonts>
+  <fills count="1"><fill><patternFill patternType="none"/></fill></fills>
+  <borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>
+  <cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
+  <cellXfs count="2">
+    <xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>
+    <xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/>
+  </cellXfs>
+</styleSheet>`
+      }
+    ]);
+
+    const workbook = await api.parseWorkbook(workbookBuffer, "rich-text.xlsx");
+    const githubFiles = api.convertWorkbookToMarkdownFiles(workbook, {
+      treatFirstRowAsHeader: true,
+      trimText: true,
+      removeEmptyRows: true,
+      removeEmptyColumns: true,
+      formattingMode: "github"
+    });
+    const plainFiles = api.convertWorkbookToMarkdownFiles(workbook, {
+      treatFirstRowAsHeader: true,
+      trimText: true,
+      removeEmptyRows: true,
+      removeEmptyColumns: true,
+      formattingMode: "plain"
+    });
+
+    expect(githubFiles[0].markdown).toContain("**Bold***Italic*~~Strike~~<ins>Under</ins>");
+    expect(githubFiles[0].markdown).toContain("<ins>WholeCell</ins>");
+    expect(githubFiles[0].summary.formattingMode).toBe("github");
+    expect(plainFiles[0].markdown).toContain("BoldItalicStrikeUnder");
+    expect(plainFiles[0].markdown).not.toContain("<ins>WholeCell</ins>");
+  });
+
+  it("converts the rich text fixture into github-compatible markdown", async () => {
+    const api = bootCore();
+    const fixturePath = path.resolve(__dirname, "./fixtures/rich/rich-text-github-sample01.xlsx");
+    const fixtureBytes = readFileSync(fixturePath);
+    const arrayBuffer = fixtureBytes.buffer.slice(
+      fixtureBytes.byteOffset,
+      fixtureBytes.byteOffset + fixtureBytes.byteLength
+    );
+
+    const workbook = await api.parseWorkbook(arrayBuffer, "rich-text-github-sample01.xlsx");
+    const markdownFile = api.convertWorkbookToMarkdownFiles(workbook, {
+      treatFirstRowAsHeader: true,
+      trimText: true,
+      removeEmptyRows: true,
+      removeEmptyColumns: true,
+      formattingMode: "github"
+    })[0];
+
+    expect(markdownFile.summary.formattingMode).toBe("github");
+    expect(markdownFile.markdown).toContain("**bold whole cell**");
+    expect(markdownFile.markdown).toContain("*italic whole cell*");
+    expect(markdownFile.markdown).toContain("~~strike whole cell~~");
+    expect(markdownFile.markdown).toContain("<ins>underline whole cell</ins>");
+    expect(markdownFile.markdown).toContain("plain **bold** *italic* strike <ins>underline</ins>");
+    expect(markdownFile.markdown).toContain("***bold+italic***");
+    expect(markdownFile.markdown).toContain("**<ins>bold+underline</ins>**");
+    expect(markdownFile.markdown).toContain("*~~italic+strike~~*");
+    expect(markdownFile.markdown).toContain("改行入り文字列で<br>**一部だけ太**字");
+    expect(markdownFile.markdown).toContain("重要, <ins>取消線</ins>, **強調**");
+    expect(markdownFile.markdown).toContain("**12345**");
+    expect(markdownFile.markdown).toContain("<ins>24690</ins>");
   });
 });

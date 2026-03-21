@@ -3,11 +3,12 @@
     const textEncoder = new TextEncoder();
     const zipIoHelper = requireXlsx2mdZipIo();
     const markdownNormalizeHelper = requireXlsx2mdMarkdownNormalize();
+    const markdownTableEscapeHelper = requireXlsx2mdMarkdownTableEscape();
     function normalizeMarkdownLineBreaks(text) {
         return markdownNormalizeHelper.normalizeMarkdownText(text);
     }
     function escapeMarkdownCell(text) {
-        return markdownNormalizeHelper.normalizeMarkdownTableCell(text);
+        return markdownTableEscapeHelper.escapeMarkdownTableCell(text);
     }
     function renderMarkdownTable(rows, treatFirstRowAsHeader) {
         if (rows.length === 0) {
@@ -38,10 +39,10 @@
             .replace(/^[_ .-]+|[_ .-]+$/g, "");
         return sanitized || fallback;
     }
-    function createOutputFileName(workbookName, sheetIndex, sheetName, outputMode = "display") {
+    function createOutputFileName(workbookName, sheetIndex, sheetName, outputMode = "display", formattingMode = "plain") {
         const bookBase = sanitizeFileNameSegment(workbookName.replace(/\.xlsx$/i, ""), "workbook");
         const safeSheetName = sanitizeFileNameSegment(sheetName, `Sheet${sheetIndex}`);
-        const suffix = outputMode === "display" ? "" : `_${outputMode}`;
+        const suffix = `${outputMode === "display" ? "" : `_${outputMode}`}${formattingMode === "plain" ? "" : `_${formattingMode}`}`;
         return `${bookBase}_${String(sheetIndex).padStart(3, "0")}_${safeSheetName}${suffix}.md`;
     }
     function createSummaryText(markdownFile) {
@@ -51,6 +52,7 @@
         return [
             `Output file: ${markdownFile.fileName}`,
             `Output mode: ${markdownFile.summary.outputMode}`,
+            `Formatting mode: ${markdownFile.summary.formattingMode}`,
             `Sections: ${markdownFile.summary.sections}`,
             `Tables: ${markdownFile.summary.tables}`,
             `Narrative blocks: ${markdownFile.summary.narrativeBlocks}`,
@@ -65,9 +67,10 @@
         ].join("\n");
     }
     function createCombinedMarkdownExportFile(workbook, markdownFiles) {
-        var _a;
+        var _a, _b;
         const outputMode = ((_a = markdownFiles[0]) === null || _a === void 0 ? void 0 : _a.summary.outputMode) || "display";
-        const suffix = outputMode === "display" ? "" : `_${outputMode}`;
+        const formattingMode = ((_b = markdownFiles[0]) === null || _b === void 0 ? void 0 : _b.summary.formattingMode) || "plain";
+        const suffix = `${outputMode === "display" ? "" : `_${outputMode}`}${formattingMode === "plain" ? "" : `_${formattingMode}`}`;
         const fileName = `${String(workbook.name || "workbook").replace(/\.xlsx$/i, "")}${suffix}.md`;
         const content = markdownFiles
             .map((markdownFile) => `<!-- ${markdownFile.fileName.replace(/\.md$/i, "")} -->\n${markdownFile.markdown}`)

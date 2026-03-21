@@ -22,6 +22,7 @@
     markdown: string;
     summary: {
       outputMode: "display" | "raw" | "both";
+      formattingMode: "plain" | "github";
       sections: number;
       tables: number;
       narrativeBlocks: number;
@@ -53,13 +54,14 @@
   const textEncoder = new TextEncoder();
   const zipIoHelper = requireXlsx2mdZipIo();
   const markdownNormalizeHelper = requireXlsx2mdMarkdownNormalize();
+  const markdownTableEscapeHelper = requireXlsx2mdMarkdownTableEscape();
 
   function normalizeMarkdownLineBreaks(text: string): string {
     return markdownNormalizeHelper.normalizeMarkdownText(text);
   }
 
   function escapeMarkdownCell(text: string): string {
-    return markdownNormalizeHelper.normalizeMarkdownTableCell(text);
+    return markdownTableEscapeHelper.escapeMarkdownTableCell(text);
   }
 
   function renderMarkdownTable(rows: string[][], treatFirstRowAsHeader: boolean): string {
@@ -97,11 +99,12 @@
     workbookName: string,
     sheetIndex: number,
     sheetName: string,
-    outputMode: "display" | "raw" | "both" = "display"
+    outputMode: "display" | "raw" | "both" = "display",
+    formattingMode: "plain" | "github" = "plain"
   ): string {
     const bookBase = sanitizeFileNameSegment(workbookName.replace(/\.xlsx$/i, ""), "workbook");
     const safeSheetName = sanitizeFileNameSegment(sheetName, `Sheet${sheetIndex}`);
-    const suffix = outputMode === "display" ? "" : `_${outputMode}`;
+    const suffix = `${outputMode === "display" ? "" : `_${outputMode}`}${formattingMode === "plain" ? "" : `_${formattingMode}`}`;
     return `${bookBase}_${String(sheetIndex).padStart(3, "0")}_${safeSheetName}${suffix}.md`;
   }
 
@@ -112,6 +115,7 @@
     return [
       `Output file: ${markdownFile.fileName}`,
       `Output mode: ${markdownFile.summary.outputMode}`,
+      `Formatting mode: ${markdownFile.summary.formattingMode}`,
       `Sections: ${markdownFile.summary.sections}`,
       `Tables: ${markdownFile.summary.tables}`,
       `Narrative blocks: ${markdownFile.summary.narrativeBlocks}`,
@@ -128,7 +132,8 @@
 
   function createCombinedMarkdownExportFile(workbook: WorkbookLike, markdownFiles: MarkdownFile[]): { fileName: string; content: string } {
     const outputMode = markdownFiles[0]?.summary.outputMode || "display";
-    const suffix = outputMode === "display" ? "" : `_${outputMode}`;
+    const formattingMode = markdownFiles[0]?.summary.formattingMode || "plain";
+    const suffix = `${outputMode === "display" ? "" : `_${outputMode}`}${formattingMode === "plain" ? "" : `_${formattingMode}`}`;
     const fileName = `${String(workbook.name || "workbook").replace(/\.xlsx$/i, "")}${suffix}.md`;
     const content = markdownFiles
       .map((markdownFile) => `<!-- ${markdownFile.fileName.replace(/\.md$/i, "")} -->\n${markdownFile.markdown}`)

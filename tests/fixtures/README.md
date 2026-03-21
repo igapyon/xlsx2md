@@ -18,6 +18,8 @@
 | --- | --- | --- |
 | `xlsx2md-basic-sample01.xlsx` | 総合サンプル | `xlsx2md-spec.md` 6, 7, 10, 13 | 表と地の文の崩れ、基本 Markdown 差分 |
 | `display/display-format-sample01.xlsx` | 表示形式 | `xlsx2md-spec.md` 12 | `display / raw / both` の見え方差分 |
+| `rich/rich-text-github-sample01.xlsx` | rich text / 文字装飾 | `xlsx2md-spec.md` 5, 6 | GitHub 互換の `bold / italic / strike / underline` 出力 |
+| `rich/rich-markdown-escape-sample01.xlsx` | Markdown 記号 / escape | `xlsx2md-spec.md` 5, 6 | Markdown 記号を含む文字列と rich text の混在 |
 | `merge/merge-pattern-sample01.xlsx` | 結合セル | `xlsx2md-spec.md` 13 | `[MERGED←] / [MERGED↑]` の崩れ |
 | `table/table-basic-sample01.xlsx` | 隣接表(縦) | `xlsx2md-spec.md` 7, 8 | 縦に密接した独立表の誤結合 |
 | `table/table-basic-sample02.xlsx` | 隣接表(横) | `xlsx2md-spec.md` 7, 8 | 横に密接した独立表の誤結合 |
@@ -43,6 +45,21 @@
   - 数値、通貨、会計、日付、時刻、パーセンテージ、分数、指数、文字列、和暦を確認する
   - 対応章: `xlsx2md-spec.md` 12
   - 主に確認する症状: `display / raw / both` の見え方差分
+
+### `rich/`
+
+- `rich-text-github-sample01.xlsx`
+  - rich text / 文字装飾専用
+  - セル全体装飾と部分装飾を使って、GitHub 互換の `bold / italic / strike / underline` 変換を確認する
+  - `A9` は italic ベースに strike を一部上乗せした混在ケース、`B9` は `italic+strike` のセル全体装飾ケースとして使う
+  - 対応章: `xlsx2md-spec.md` 5, 6
+  - 主に確認する症状: 文字装飾の脱落、run 境界での空白欠落、表セル内装飾の崩れ
+- `rich-markdown-escape-sample01.xlsx`
+  - Markdown 記号 / escape 専用
+  - `*`, `_`, `~~`, `#`, `-`, `1.`, link 風、image 風、backtick、`<tag>`, `|`, `\` を含む文字列を確認する
+  - セル全体装飾、部分装飾、セル内改行、表セルを同時に含める
+  - 対応章: `xlsx2md-spec.md` 5, 6
+  - 主に確認する症状: Markdown 記号の誤解釈、`github` モードでの `<br>` 変換、表セル内の崩れ
 
 ### `merge/`
 

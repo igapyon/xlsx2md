@@ -1,6 +1,9 @@
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     function createSheetMarkdownApi(deps) {
+        const richTextRenderer = requireXlsx2mdRichTextRendererModule().createRichTextRendererApi({
+            normalizeMarkdownText: deps.normalizeMarkdownText
+        });
         function buildCellMap(sheet) {
             const map = new Map();
             for (const cell of sheet.cells) {
@@ -12,22 +15,23 @@
             if (!cell)
                 return "";
             const mode = options.outputMode || "display";
-            const normalizeText = deps.normalizeMarkdownText || ((text) => String(text || "").replace(/\r\n?|\n/g, " ").replace(/\s+/g, " ").trim());
-            const displayValue = normalizeText(String(cell.outputValue || ""));
-            const rawValue = normalizeText(String(cell.rawValue || ""));
+            const formattingMode = options.formattingMode || "plain";
+            const displayValue = richTextRenderer.compactText(String(cell.outputValue || ""));
+            const rawValue = richTextRenderer.compactText(String(cell.rawValue || ""));
+            const displayMarkdown = richTextRenderer.renderCellDisplayText(cell, formattingMode);
             if (mode === "raw") {
                 return rawValue || displayValue;
             }
             if (mode === "both") {
                 if (rawValue && rawValue !== displayValue) {
-                    if (displayValue) {
-                        return `${displayValue} [raw=${rawValue}]`;
+                    if (displayMarkdown) {
+                        return `${displayMarkdown} [raw=${rawValue}]`;
                     }
                     return `[raw=${rawValue}]`;
                 }
-                return displayValue || rawValue;
+                return displayMarkdown || rawValue;
             }
-            return displayValue;
+            return displayMarkdown;
         }
         function isCellInAnyTable(row, col, tables) {
             return tables.some((table) => row >= table.startRow && row <= table.endRow && col >= table.startCol && col <= table.endCol);
@@ -326,11 +330,12 @@
                 imageSection
             ].join("\n");
             return {
-                fileName: deps.createOutputFileName(workbook.name, sheet.index, sheet.name, options.outputMode || "display"),
+                fileName: deps.createOutputFileName(workbook.name, sheet.index, sheet.name, options.outputMode || "display", options.formattingMode || "plain"),
                 sheetName: sheet.name,
                 markdown,
                 summary: {
                     outputMode: options.outputMode || "display",
+                    formattingMode: options.formattingMode || "plain",
                     sections: sectionBlocks.length,
                     tables: tables.length,
                     narrativeBlocks: narrativeBlocks.length,

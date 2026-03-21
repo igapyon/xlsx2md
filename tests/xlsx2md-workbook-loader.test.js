@@ -63,8 +63,8 @@ describe("xlsx2md workbook loader", () => {
 
     const workbook = await api.parseWorkbook(new ArrayBuffer(0), "book.xlsx", {
       unzipEntries: async () => files,
-      parseSharedStrings: () => ["A"],
-      parseCellStyles: () => [{ borders: {}, numFmtId: 0, formatCode: "General" }],
+      parseSharedStrings: () => [{ text: "A", runs: null }],
+      parseCellStyles: () => [{ borders: {}, numFmtId: 0, formatCode: "General", textStyle: {} }],
       parseRelationships: () => new Map([["rId1", "xl/worksheets/sheet1.xml"], ["rId2", "xl/worksheets/sheet2.xml"]]),
       xmlToDocument: (xmlText) => new DOMParser().parseFromString(xmlText, "application/xml"),
       decodeXmlText: (bytes) => new TextDecoder().decode(bytes),
@@ -79,7 +79,7 @@ describe("xlsx2md workbook loader", () => {
     });
 
     expect(workbook.name).toBe("book.xlsx");
-    expect(workbook.sharedStrings).toEqual(["A"]);
+    expect(workbook.sharedStrings).toEqual([{ text: "A", runs: null }]);
     expect(workbook.sheets).toHaveLength(2);
     expect(seen.parseWorksheet).toEqual([
       { sheetName: "First", sheetPath: "xl/worksheets/sheet1.xml", sheetIndex: 1 },

@@ -22,12 +22,17 @@ const markdownExportCode = readFileSync(
   path.resolve(__dirname, "../src/xlsx2md/js/markdown-export.js"),
   "utf8"
 );
+const markdownTableEscapeCode = readFileSync(
+  path.resolve(__dirname, "../src/xlsx2md/js/markdown-table-escape.js"),
+  "utf8"
+);
 
 function bootMarkdownExport() {
   document.body.innerHTML = "";
   loadModuleRegistry(__dirname);
   new Function(zipIoCode)();
   new Function(markdownNormalizeCode)();
+  new Function(markdownTableEscapeCode)();
   new Function(markdownExportCode)();
   return globalThis.__xlsx2mdModuleRegistry.getModule("markdownExport");
 }
@@ -52,11 +57,20 @@ describe("xlsx2md markdown export", () => {
     );
   });
 
+  it("delegates table cell escaping to the dedicated table-escape helper", () => {
+    const api = bootMarkdownExport();
+
+    expect(api.escapeMarkdownCell("A|\nB")).toBe("A\\| B");
+  });
+
   it("creates sanitized output file names with mode suffixes", () => {
     const api = bootMarkdownExport();
 
     expect(api.createOutputFileName("book name.xlsx", 2, "A/B:東京", "both")).toBe(
       "book_name_002_A_B_東京_both.md"
+    );
+    expect(api.createOutputFileName("book name.xlsx", 2, "A/B:東京", "display", "github")).toBe(
+      "book_name_002_A_B_東京_github.md"
     );
   });
 
@@ -68,6 +82,7 @@ describe("xlsx2md markdown export", () => {
       markdown: "# Sheet1",
       summary: {
         outputMode: "display",
+        formattingMode: "plain",
         sections: 2,
         tables: 1,
         narrativeBlocks: 1,
@@ -84,6 +99,7 @@ describe("xlsx2md markdown export", () => {
     });
 
     expect(summary).toContain("Output file: sample.md");
+    expect(summary).toContain("Formatting mode: plain");
     expect(summary).toContain("Formula resolved: 1");
     expect(summary).toContain("Formula unsupported_external: 1");
     expect(summary).toContain("Table candidate A1-B2: score 7 / Has borders");
@@ -107,6 +123,7 @@ describe("xlsx2md markdown export", () => {
         markdown: "# Sheet1",
         summary: {
           outputMode: "display",
+          formattingMode: "plain",
           sections: 1,
           tables: 0,
           narrativeBlocks: 1,
@@ -133,5 +150,32 @@ describe("xlsx2md markdown export", () => {
     expect(new TextDecoder().decode(extracted.get("output/sample.md"))).toContain("<!-- sample_001_Sheet1 -->");
     expect(extracted.get("output/images/pic.png")).toEqual(new Uint8Array([1, 2, 3]));
     expect(extracted.get("output/shapes/shape_001.svg")).toEqual(new Uint8Array([4, 5]));
+  });
+
+  it("uses formatting mode suffixes in combined export file names", () => {
+    const api = bootMarkdownExport();
+    const payload = api.createCombinedMarkdownExportFile(
+      { name: "sample.xlsx", sheets: [{ images: [], shapes: [] }] },
+      [{
+        fileName: "sample_001_Sheet1_github.md",
+        sheetName: "Sheet1",
+        markdown: "# Sheet1",
+        summary: {
+          outputMode: "display",
+          formattingMode: "github",
+          sections: 1,
+          tables: 0,
+          narrativeBlocks: 1,
+          merges: 0,
+          images: 0,
+          charts: 0,
+          cells: 1,
+          tableScores: [],
+          formulaDiagnostics: []
+        }
+      }]
+    );
+
+    expect(payload.fileName).toBe("sample_github.md");
   });
 });

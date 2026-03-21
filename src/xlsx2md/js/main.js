@@ -18,18 +18,23 @@
         return !!element.checked;
     }
     function getOptions() {
-        var _a;
+        var _a, _b;
         const outputModeSelect = getElement("outputModeSelect");
         const outputMode = typeof outputModeSelect.getValue === "function"
             ? outputModeSelect.getValue()
             : ((_a = document.getElementById("outputModeSelect")) === null || _a === void 0 ? void 0 : _a.value) || "display";
+        const formattingModeSelect = getElement("formattingModeSelect");
+        const formattingMode = typeof formattingModeSelect.getValue === "function"
+            ? formattingModeSelect.getValue()
+            : ((_b = document.getElementById("formattingModeSelect")) === null || _b === void 0 ? void 0 : _b.value) || "plain";
         return {
             treatFirstRowAsHeader: getSwitchValue("headerRowEnabled"),
             trimText: getSwitchValue("trimTextEnabled"),
             removeEmptyRows: getSwitchValue("removeEmptyRowsEnabled"),
             removeEmptyColumns: getSwitchValue("removeEmptyColumnsEnabled"),
             includeShapeDetails: getSwitchValue("includeShapeDetailsEnabled"),
-            outputMode: outputMode === "raw" || outputMode === "both" ? outputMode : "display"
+            outputMode: outputMode === "raw" || outputMode === "both" ? outputMode : "display",
+            formattingMode: formattingMode === "github" ? "github" : "plain"
         };
     }
     function getSelectedOutputMode() {
@@ -203,7 +208,7 @@
         }).join("")}`;
     }
     function renderAnalysisSummary(files, workbookName) {
-        var _a;
+        var _a, _b;
         if (files.length === 0) {
             return '<div class="md-summary-empty">No conversion yet.</div>';
         }
@@ -214,7 +219,8 @@
         const totalCells = files.reduce((sum, file) => sum + file.summary.cells, 0);
         const totalFormulas = files.reduce((sum, file) => sum + file.summary.formulaDiagnostics.length, 0);
         const outputMode = ((_a = files[0]) === null || _a === void 0 ? void 0 : _a.summary.outputMode) || "display";
-        const overview = `<div class="md-summary-overview">Workbook ${escapeHtml(workbookName)} / ${files.length} sheet(s) / mode ${escapeHtml(outputMode)}</div>`;
+        const formattingMode = ((_b = files[0]) === null || _b === void 0 ? void 0 : _b.summary.formattingMode) || "plain";
+        const overview = `<div class="md-summary-overview">Workbook ${escapeHtml(workbookName)} / ${files.length} sheet(s) / value mode ${escapeHtml(outputMode)} / formatting ${escapeHtml(formattingMode)}</div>`;
         const items = files.map((file) => (`<section class="md-summary-group"><div class="md-summary-group-head"><h3 class="md-summary-group-title">${escapeHtml(file.sheetName)}</h3><span class="md-summary-group-count">${file.summary.cells} cells</span></div><div class="md-summary-group-meta">tables ${file.summary.tables} / narrative ${file.summary.narrativeBlocks} / merges ${file.summary.merges} / images ${file.summary.images} / formulas ${file.summary.formulaDiagnostics.length}</div></section>`)).join("");
         const totals = `<section class="md-summary-group"><div class="md-summary-group-head"><h3 class="md-summary-group-title">Total</h3><span class="md-summary-group-count">${files.length} sheets</span></div><div class="md-summary-group-meta">tables ${totalTables} / narrative ${totalNarratives} / merges ${totalMerges} / images ${totalImages} / formulas ${totalFormulas} / analyzed cells ${totalCells}</div></section>`;
         return `${overview}${totals}${items}`;
@@ -230,6 +236,14 @@
             return;
         }
         notice.textContent = "`display` outputs values close to what Excel shows.";
+    }
+    function updateFormattingModeNotice(mode) {
+        const notice = getElement("formattingModeNotice");
+        if (mode === "github") {
+            notice.textContent = "`github` preserves supported Excel emphasis as GitHub-compatible Markdown: bold, italic, strike, underline, and in-cell line breaks as `<br>`.";
+            return;
+        }
+        notice.textContent = "`plain` strips Excel text emphasis and outputs plain Markdown text.";
     }
     function updatePreviewModeBanner(mode) {
         const banner = getElement("previewModeBanner");
@@ -345,14 +359,15 @@
         showToast("Saved Markdown.");
     }
     function downloadExportZip() {
-        var _a;
+        var _a, _b;
         if (!currentWorkbook || currentFiles.length === 0) {
             showError("Generate Markdown first.");
             return;
         }
         const zipBytes = xlsx2md.createWorkbookExportArchive(currentWorkbook, currentFiles);
         const outputMode = ((_a = currentFiles[0]) === null || _a === void 0 ? void 0 : _a.summary.outputMode) || "display";
-        const suffix = outputMode === "display" ? "" : `_${outputMode}`;
+        const formattingMode = ((_b = currentFiles[0]) === null || _b === void 0 ? void 0 : _b.summary.formattingMode) || "plain";
+        const suffix = `${outputMode === "display" ? "" : `_${outputMode}`}${formattingMode === "plain" ? "" : `_${formattingMode}`}`;
         const blob = new Blob([zipBytes], { type: "application/zip" });
         const objectUrl = URL.createObjectURL(blob);
         const link = document.createElement("a");
@@ -433,6 +448,9 @@
                 updatePreviewModeBanner(mode);
             }
         });
+        getElement("formattingModeSelect").addEventListener("change", () => {
+            updateFormattingModeNotice(getOptions().formattingMode);
+        });
     }
     function initialize() {
         clearError();
@@ -441,6 +459,7 @@
         setFormulaSummaryHtml('<div class="md-summary-empty">No conversion yet.</div>');
         setPreviewMarkdown("");
         updateOutputModeNotice(getSelectedOutputMode());
+        updateFormattingModeNotice(getOptions().formattingMode);
         updatePreviewModeBanner(getSelectedOutputMode());
         getElement("downloadBtn").disabled = true;
         getElement("exportZipBtn").disabled = true;

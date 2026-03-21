@@ -23,6 +23,19 @@
     borders: BorderFlags;
     numFmtId: number;
     formatCode: string;
+    textStyle: {
+      bold: boolean;
+      italic: boolean;
+      strike: boolean;
+      underline: boolean;
+    };
+    richTextRuns: Array<{
+      text: string;
+      bold: boolean;
+      italic: boolean;
+      strike: boolean;
+      underline: boolean;
+    }> | null;
     formulaType: string;
     spillRef: string;
   };
@@ -109,6 +122,7 @@
     removeEmptyColumns?: boolean;
     includeShapeDetails?: boolean;
     outputMode?: "display" | "raw" | "both";
+    formattingMode?: "plain" | "github";
   };
 
   type TableCandidate = {
@@ -134,6 +148,7 @@
     markdown: string;
     summary: {
       outputMode: "display" | "raw" | "both";
+      formattingMode: "plain" | "github";
       sections: number;
       tables: number;
       narrativeBlocks: number;
@@ -171,7 +186,8 @@
       workbookName: string,
       sheetIndex: number,
       sheetName: string,
-      outputMode?: "display" | "raw" | "both"
+      outputMode?: "display" | "raw" | "both",
+      formattingMode?: "plain" | "github"
     ) => string;
     extractShapeBlocks: (
       shapes: ParsedShapeAsset[],
@@ -194,6 +210,10 @@
   };
 
   function createSheetMarkdownApi(deps: SheetMarkdownDeps) {
+    const richTextRenderer = requireXlsx2mdRichTextRendererModule<ParsedCell>().createRichTextRendererApi({
+      normalizeMarkdownText: deps.normalizeMarkdownText
+    });
+
     function buildCellMap(sheet: ParsedSheet): Map<string, ParsedCell> {
       const map = new Map<string, ParsedCell>();
       for (const cell of sheet.cells) {
@@ -205,22 +225,23 @@
     function formatCellForMarkdown(cell: ParsedCell | undefined, options: MarkdownOptions): string {
       if (!cell) return "";
       const mode = options.outputMode || "display";
-      const normalizeText = deps.normalizeMarkdownText || ((text: string) => String(text || "").replace(/\r\n?|\n/g, " ").replace(/\s+/g, " ").trim());
-      const displayValue = normalizeText(String(cell.outputValue || ""));
-      const rawValue = normalizeText(String(cell.rawValue || ""));
+      const formattingMode = options.formattingMode || "plain";
+      const displayValue = richTextRenderer.compactText(String(cell.outputValue || ""));
+      const rawValue = richTextRenderer.compactText(String(cell.rawValue || ""));
+      const displayMarkdown = richTextRenderer.renderCellDisplayText(cell, formattingMode);
       if (mode === "raw") {
         return rawValue || displayValue;
       }
       if (mode === "both") {
         if (rawValue && rawValue !== displayValue) {
-          if (displayValue) {
-            return `${displayValue} [raw=${rawValue}]`;
+          if (displayMarkdown) {
+            return `${displayMarkdown} [raw=${rawValue}]`;
           }
           return `[raw=${rawValue}]`;
         }
-        return displayValue || rawValue;
+        return displayMarkdown || rawValue;
       }
-      return displayValue;
+      return displayMarkdown;
     }
 
     function isCellInAnyTable(row: number, col: number, tables: TableCandidate[]): boolean {
@@ -533,11 +554,18 @@
       ].join("\n");
 
       return {
-        fileName: deps.createOutputFileName(workbook.name, sheet.index, sheet.name, options.outputMode || "display"),
+        fileName: deps.createOutputFileName(
+          workbook.name,
+          sheet.index,
+          sheet.name,
+          options.outputMode || "display",
+          options.formattingMode || "plain"
+        ),
         sheetName: sheet.name,
         markdown,
         summary: {
           outputMode: options.outputMode || "display",
+          formattingMode: options.formattingMode || "plain",
           sections: sectionBlocks.length,
           tables: tables.length,
           narrativeBlocks: narrativeBlocks.length,

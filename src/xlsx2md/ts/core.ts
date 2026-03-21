@@ -1,4 +1,17 @@
 (() => {
+  type RichTextStyle = {
+    bold: boolean;
+    italic: boolean;
+    strike: boolean;
+    underline: boolean;
+  };
+  type RichTextRun = RichTextStyle & {
+    text: string;
+  };
+  type SharedStringEntry = {
+    text: string;
+    runs: RichTextRun[] | null;
+  };
   type BorderFlags = {
     top: boolean;
     bottom: boolean;
@@ -25,6 +38,8 @@
     borders: BorderFlags;
     numFmtId: number;
     formatCode: string;
+    textStyle: RichTextStyle;
+    richTextRuns: RichTextRun[] | null;
     formulaType: string;
     spillRef: string;
   };
@@ -33,6 +48,7 @@
     borders: BorderFlags;
     numFmtId: number;
     formatCode: string;
+    textStyle: RichTextStyle;
   };
 
   type MergeRange = {
@@ -127,7 +143,7 @@
   type ParsedWorkbook = {
     name: string;
     sheets: ParsedSheet[];
-    sharedStrings: string[];
+    sharedStrings: SharedStringEntry[];
     definedNames: {
       name: string;
       formulaText: string;
@@ -185,6 +201,7 @@
     removeEmptyColumns?: boolean;
     includeShapeDetails?: boolean;
     outputMode?: "display" | "raw" | "both";
+    formattingMode?: "plain" | "github";
   };
 
   type MarkdownFile = {
@@ -193,6 +210,7 @@
     markdown: string;
     summary: {
       outputMode: "display" | "raw" | "both";
+      formattingMode: "plain" | "github";
       sections: number;
       tables: number;
       narrativeBlocks: number;
@@ -544,7 +562,7 @@
         name: string,
         sheetPath: string,
         sheetIndex: number,
-        sharedStrings: string[],
+        sharedStrings: SharedStringEntry[],
         cellStyles: CellStyleInfo[]
       ) => worksheetParserHelper.parseWorksheet(files, name, sheetPath, sheetIndex, sharedStrings, cellStyles, worksheetParseDeps),
       postProcessWorkbook: (workbook: ParsedWorkbook) => {

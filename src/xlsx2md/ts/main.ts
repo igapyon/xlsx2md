@@ -6,6 +6,7 @@
     removeEmptyColumns: boolean;
     includeShapeDetails: boolean;
     outputMode: "display" | "raw" | "both";
+    formattingMode: "plain" | "github";
   };
 
   type WorkbookFile = {
@@ -14,6 +15,7 @@
     markdown: string;
     summary: {
       outputMode: "display" | "raw" | "both";
+      formattingMode: "plain" | "github";
       tables: number;
       narrativeBlocks: number;
       merges: number;
@@ -73,13 +75,18 @@
     const outputMode = typeof outputModeSelect.getValue === "function"
       ? outputModeSelect.getValue()
       : (document.getElementById("outputModeSelect") as HTMLSelectElement | null)?.value || "display";
+    const formattingModeSelect = getElement<HTMLElement>("formattingModeSelect") as HTMLElement & { getValue?: () => string };
+    const formattingMode = typeof formattingModeSelect.getValue === "function"
+      ? formattingModeSelect.getValue()
+      : (document.getElementById("formattingModeSelect") as HTMLSelectElement | null)?.value || "plain";
     return {
       treatFirstRowAsHeader: getSwitchValue("headerRowEnabled"),
       trimText: getSwitchValue("trimTextEnabled"),
       removeEmptyRows: getSwitchValue("removeEmptyRowsEnabled"),
       removeEmptyColumns: getSwitchValue("removeEmptyColumnsEnabled"),
       includeShapeDetails: getSwitchValue("includeShapeDetailsEnabled"),
-      outputMode: outputMode === "raw" || outputMode === "both" ? outputMode : "display"
+      outputMode: outputMode === "raw" || outputMode === "both" ? outputMode : "display",
+      formattingMode: formattingMode === "github" ? "github" : "plain"
     };
   }
 
@@ -288,7 +295,8 @@
     const totalCells = files.reduce((sum, file) => sum + file.summary.cells, 0);
     const totalFormulas = files.reduce((sum, file) => sum + file.summary.formulaDiagnostics.length, 0);
     const outputMode = files[0]?.summary.outputMode || "display";
-    const overview = `<div class="md-summary-overview">Workbook ${escapeHtml(workbookName)} / ${files.length} sheet(s) / mode ${escapeHtml(outputMode)}</div>`;
+    const formattingMode = files[0]?.summary.formattingMode || "plain";
+    const overview = `<div class="md-summary-overview">Workbook ${escapeHtml(workbookName)} / ${files.length} sheet(s) / value mode ${escapeHtml(outputMode)} / formatting ${escapeHtml(formattingMode)}</div>`;
     const items = files.map((file) => (
       `<section class="md-summary-group"><div class="md-summary-group-head"><h3 class="md-summary-group-title">${escapeHtml(file.sheetName)}</h3><span class="md-summary-group-count">${file.summary.cells} cells</span></div><div class="md-summary-group-meta">tables ${file.summary.tables} / narrative ${file.summary.narrativeBlocks} / merges ${file.summary.merges} / images ${file.summary.images} / formulas ${file.summary.formulaDiagnostics.length}</div></section>`
     )).join("");
@@ -307,6 +315,15 @@
       return;
     }
     notice.textContent = "`display` outputs values close to what Excel shows.";
+  }
+
+  function updateFormattingModeNotice(mode: "plain" | "github"): void {
+    const notice = getElement<HTMLElement>("formattingModeNotice");
+    if (mode === "github") {
+      notice.textContent = "`github` preserves supported Excel emphasis as GitHub-compatible Markdown: bold, italic, strike, underline, and in-cell line breaks as `<br>`.";
+      return;
+    }
+    notice.textContent = "`plain` strips Excel text emphasis and outputs plain Markdown text.";
   }
 
   function updatePreviewModeBanner(mode: "display" | "raw" | "both"): void {
@@ -431,7 +448,8 @@
     }
     const zipBytes = xlsx2md.createWorkbookExportArchive(currentWorkbook, currentFiles);
     const outputMode = currentFiles[0]?.summary.outputMode || "display";
-    const suffix = outputMode === "display" ? "" : `_${outputMode}`;
+    const formattingMode = currentFiles[0]?.summary.formattingMode || "plain";
+    const suffix = `${outputMode === "display" ? "" : `_${outputMode}`}${formattingMode === "plain" ? "" : `_${formattingMode}`}`;
     const blob = new Blob([zipBytes], { type: "application/zip" });
     const objectUrl = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -511,6 +529,9 @@
         updatePreviewModeBanner(mode);
       }
     });
+    getElement<HTMLElement>("formattingModeSelect").addEventListener("change", () => {
+      updateFormattingModeNotice(getOptions().formattingMode);
+    });
   }
 
   function initialize(): void {
@@ -520,6 +541,7 @@
     setFormulaSummaryHtml('<div class="md-summary-empty">No conversion yet.</div>');
     setPreviewMarkdown("");
     updateOutputModeNotice(getSelectedOutputMode());
+    updateFormattingModeNotice(getOptions().formattingMode);
     updatePreviewModeBanner(getSelectedOutputMode());
     getElement<HTMLButtonElement>("downloadBtn").disabled = true;
     getElement<HTMLButtonElement>("exportZipBtn").disabled = true;

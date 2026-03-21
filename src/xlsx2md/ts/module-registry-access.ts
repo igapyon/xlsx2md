@@ -15,6 +15,73 @@
     normalizeMarkdownListItemText: (text: string) => string;
     normalizeMarkdownTableCell: (text: string) => string;
   };
+  type MarkdownEscapeApi = {
+    escapeMarkdownLineStart: (text: string) => string;
+    escapeMarkdownLiteralParts: (text: string) => Array<{ kind: "text" | "escaped"; text: string; rawText: string }>;
+    escapeMarkdownLiteralText: (text: string) => string;
+  };
+  type MarkdownTableEscapeApi = {
+    escapeMarkdownTableCell: (text: string) => string;
+  };
+  type Xlsx2mdRichTextParserModule<TCell> = {
+    createRichTextParserApi: (deps: {
+      normalizeMarkdownText?: (text: string) => string;
+    }) => {
+      compactText: (text: string) => string;
+      splitTextWithLineBreaks: (text: string) => Array<
+        | { kind: "text"; text: string }
+        | { kind: "lineBreak" }
+        | {
+          kind: "styledText";
+          parts: Array<{ kind: "text" | "escaped"; text: string; rawText: string }>;
+          style: { bold: boolean; italic: boolean; strike: boolean; underline: boolean };
+        }
+      >;
+      createStyledTextToken: (
+        text: string,
+        style: { bold: boolean; italic: boolean; strike: boolean; underline: boolean }
+      ) => {
+        kind: "styledText";
+        parts: Array<{ kind: "text" | "escaped"; text: string; rawText: string }>;
+        style: { bold: boolean; italic: boolean; strike: boolean; underline: boolean };
+      };
+      tokenizePlainCellText: (text: string) => Array<{ kind: "text"; text: string }>;
+      tokenizeGithubCellText: (
+        text: string,
+        style: { bold: boolean; italic: boolean; strike: boolean; underline: boolean }
+      ) => Array<
+        | { kind: "lineBreak" }
+        | {
+          kind: "styledText";
+          parts: Array<{ kind: "text" | "escaped"; text: string; rawText: string }>;
+          style: { bold: boolean; italic: boolean; strike: boolean; underline: boolean };
+        }
+      >;
+      tokenizeGithubRichTextRuns: (runs: Array<{
+        text: string;
+        bold: boolean;
+        italic: boolean;
+        strike: boolean;
+        underline: boolean;
+      }>) => Array<
+        | { kind: "lineBreak" }
+        | {
+          kind: "styledText";
+          parts: Array<{ kind: "text" | "escaped"; text: string; rawText: string }>;
+          style: { bold: boolean; italic: boolean; strike: boolean; underline: boolean };
+        }
+      >;
+      tokenizeCellDisplayText: (cell: TCell | undefined, formattingMode?: "plain" | "github") => Array<
+        | { kind: "text"; text: string }
+        | { kind: "lineBreak" }
+        | {
+          kind: "styledText";
+          parts: Array<{ kind: "text" | "escaped"; text: string; rawText: string }>;
+          style: { bold: boolean; italic: boolean; strike: boolean; underline: boolean };
+        }
+      >;
+    };
+  };
   type ZipIoApi = {
     unzipEntries: (arrayBuffer: ArrayBuffer) => Promise<Map<string, Uint8Array>>;
     createStoredZip: (entries: Array<{ name: string; data: Uint8Array }>) => Uint8Array;
@@ -29,6 +96,73 @@
   type Xlsx2mdNarrativeStructureModule<TNarrativeBlock> = {
     renderNarrativeBlock: (block: TNarrativeBlock) => string;
     isSectionHeadingNarrativeBlock: (block: TNarrativeBlock | null | undefined) => boolean;
+  };
+  type Xlsx2mdRichTextRendererModule<TCell> = {
+    createRichTextRendererApi: (deps: {
+      normalizeMarkdownText?: (text: string) => string;
+    }) => {
+      compactText: (text: string) => string;
+      normalizeGithubSegment: (text: string) => string;
+      normalizeGithubCellText: (text: string) => string;
+      applyTextStyle: (
+        text: string,
+        style: { bold: boolean; italic: boolean; strike: boolean; underline: boolean }
+      ) => string;
+      renderStyledTextParts: (parts: Array<{ kind: "text" | "escaped"; text: string; rawText: string }>) => string;
+      renderPlainTokens: (tokens: Array<
+        | { kind: "text"; text: string }
+        | { kind: "lineBreak" }
+        | {
+          kind: "styledText";
+          parts: Array<{ kind: "text" | "escaped"; text: string; rawText: string }>;
+          style: { bold: boolean; italic: boolean; strike: boolean; underline: boolean };
+        }
+      >) => string;
+      renderGithubTokens: (tokens: Array<
+        | { kind: "text"; text: string }
+        | { kind: "lineBreak" }
+        | {
+          kind: "styledText";
+          parts: Array<{ kind: "text" | "escaped"; text: string }>;
+          style: { bold: boolean; italic: boolean; strike: boolean; underline: boolean };
+        }
+      >) => string;
+      renderCellDisplayText: (cell: TCell | undefined, formattingMode?: "plain" | "github") => string;
+    };
+  };
+  type Xlsx2mdRichTextPlainFormatterModule = {
+    createRichTextPlainFormatterApi: () => {
+      renderStyledTextPart: (part: { kind: "text" | "escaped"; text: string; rawText: string }) => string;
+      renderStyledTextParts: (parts: Array<{ kind: "text" | "escaped"; text: string; rawText: string }>) => string;
+      renderPlainTokens: (tokens: Array<
+        | { kind: "text"; text: string }
+        | { kind: "lineBreak" }
+        | {
+          kind: "styledText";
+          parts: Array<{ kind: "text" | "escaped"; text: string; rawText: string }>;
+          style: { bold: boolean; italic: boolean; strike: boolean; underline: boolean };
+        }
+      >) => string;
+    };
+  };
+  type Xlsx2mdRichTextGithubFormatterModule = {
+    createRichTextGithubFormatterApi: () => {
+      applyTextStyle: (
+        text: string,
+        style: { bold: boolean; italic: boolean; strike: boolean; underline: boolean }
+      ) => string;
+      renderStyledTextPart: (part: { kind: "text" | "escaped"; text: string; rawText: string }) => string;
+      renderStyledTextParts: (parts: Array<{ kind: "text" | "escaped"; text: string; rawText: string }>) => string;
+      renderGithubTokens: (tokens: Array<
+        | { kind: "text"; text: string }
+        | { kind: "lineBreak" }
+        | {
+          kind: "styledText";
+          parts: Array<{ kind: "text" | "escaped"; text: string; rawText: string }>;
+          style: { bold: boolean; italic: boolean; strike: boolean; underline: boolean };
+        }
+      >) => string;
+    };
   };
   type Xlsx2mdTableDetectorModule<TSheet, TCell, TMergeRange, TCandidate, TOptions> = {
     detectTableCandidates: (
@@ -67,7 +201,8 @@
       workbookName: string,
       sheetIndex: number,
       sheetName: string,
-      outputMode?: "display" | "raw" | "both"
+      outputMode?: "display" | "raw" | "both",
+      formattingMode?: "plain" | "github"
     ) => string;
     createSummaryText: (markdownFile: TMarkdownFile) => string;
     createCombinedMarkdownExportFile: (workbook: TParsedWorkbook, markdownFiles: TMarkdownFile[]) => { fileName: string; content: string };
@@ -82,7 +217,16 @@
     parseCellStyles: (files: Map<string, Uint8Array>) => TCellStyleInfo[];
   };
   type Xlsx2mdSharedStringsModule = {
-    parseSharedStrings: (files: Map<string, Uint8Array>) => string[];
+    parseSharedStrings: (files: Map<string, Uint8Array>) => Array<{
+      text: string;
+      runs: Array<{
+        text: string;
+        bold: boolean;
+        italic: boolean;
+        strike: boolean;
+        underline: boolean;
+      }> | null;
+    }>;
   };
   type Xlsx2mdWorksheetTablesModule<TParsedTable> = {
     normalizeStructuredTableKey: (value: string) => string;
@@ -230,7 +374,16 @@
       sheetName: string,
       sheetPath: string,
       sheetIndex: number,
-      sharedStrings: string[],
+      sharedStrings: Array<{
+        text: string;
+        runs: Array<{
+          text: string;
+          bold: boolean;
+          italic: boolean;
+          strike: boolean;
+          underline: boolean;
+        }> | null;
+      }>,
       cellStyles: TCellStyleInfo[],
       deps: Record<string, unknown>
     ) => TParsedSheet;
@@ -292,6 +445,8 @@
     requireXlsx2mdZipIo?: () => ZipIoApi;
     getXlsx2mdDrawingHelperModule?: () => Xlsx2mdDrawingHelperModule | null;
     requireXlsx2mdNarrativeStructureModule?: <TNarrativeBlock>() => Xlsx2mdNarrativeStructureModule<TNarrativeBlock>;
+    requireXlsx2mdRichTextPlainFormatterModule?: () => Xlsx2mdRichTextPlainFormatterModule;
+    requireXlsx2mdRichTextRendererModule?: <TCell>() => Xlsx2mdRichTextRendererModule<TCell>;
     requireXlsx2mdTableDetectorModule?: <TSheet, TCell, TMergeRange, TCandidate, TOptions>() => Xlsx2mdTableDetectorModule<TSheet, TCell, TMergeRange, TCandidate, TOptions>;
     requireXlsx2mdMarkdownExportModule?: <TParsedWorkbook, TMarkdownFile, TExportEntry>() => Xlsx2mdMarkdownExportModule<TParsedWorkbook, TMarkdownFile, TExportEntry>;
     requireXlsx2mdStylesParserModule?: <TCellStyleInfo>() => Xlsx2mdStylesParserModule<TCellStyleInfo>;
@@ -350,6 +505,36 @@
     );
   };
   (globalThis as typeof globalThis & {
+    requireXlsx2mdMarkdownEscape?: () => MarkdownEscapeApi;
+  }).requireXlsx2mdMarkdownEscape = function requireXlsx2mdMarkdownEscape(): MarkdownEscapeApi {
+    return (globalThis as typeof globalThis & {
+      getXlsx2mdModuleRegistry: () => Xlsx2mdModuleRegistry;
+    }).getXlsx2mdModuleRegistry().requireModule<MarkdownEscapeApi>(
+      "markdownEscape",
+      "xlsx2md markdown escape module is not loaded"
+    );
+  };
+  (globalThis as typeof globalThis & {
+    requireXlsx2mdMarkdownTableEscape?: () => MarkdownTableEscapeApi;
+  }).requireXlsx2mdMarkdownTableEscape = function requireXlsx2mdMarkdownTableEscape(): MarkdownTableEscapeApi {
+    return (globalThis as typeof globalThis & {
+      getXlsx2mdModuleRegistry: () => Xlsx2mdModuleRegistry;
+    }).getXlsx2mdModuleRegistry().requireModule<MarkdownTableEscapeApi>(
+      "markdownTableEscape",
+      "xlsx2md markdown table escape module is not loaded"
+    );
+  };
+  (globalThis as typeof globalThis & {
+    requireXlsx2mdRichTextPlainFormatterModule?: () => Xlsx2mdRichTextPlainFormatterModule;
+  }).requireXlsx2mdRichTextPlainFormatterModule = function requireXlsx2mdRichTextPlainFormatterModule(): Xlsx2mdRichTextPlainFormatterModule {
+    return (globalThis as typeof globalThis & {
+      getXlsx2mdModuleRegistry: () => Xlsx2mdModuleRegistry;
+    }).getXlsx2mdModuleRegistry().requireModule<Xlsx2mdRichTextPlainFormatterModule>(
+      "richTextPlainFormatter",
+      "xlsx2md rich text plain formatter module is not loaded"
+    );
+  };
+  (globalThis as typeof globalThis & {
     getXlsx2mdDrawingHelperModule?: () => Xlsx2mdDrawingHelperModule | null;
   }).getXlsx2mdDrawingHelperModule = function getXlsx2mdDrawingHelperModule(): Xlsx2mdDrawingHelperModule | null {
     return (globalThis as typeof globalThis & {
@@ -362,6 +547,33 @@
     return (globalThis as typeof globalThis & {
       getXlsx2mdModuleRegistry: () => Xlsx2mdModuleRegistry;
     }).getXlsx2mdModuleRegistry().requireModule<Xlsx2mdNarrativeStructureModule<TNarrativeBlock>>("narrativeStructure", "xlsx2md narrative structure module is not loaded");
+  };
+  (globalThis as typeof globalThis & {
+    requireXlsx2mdRichTextParserModule?: <TCell>() => Xlsx2mdRichTextParserModule<TCell>;
+  }).requireXlsx2mdRichTextParserModule = function requireXlsx2mdRichTextParserModule<TCell>(): Xlsx2mdRichTextParserModule<TCell> {
+    return (globalThis as typeof globalThis & {
+      getXlsx2mdModuleRegistry: () => Xlsx2mdModuleRegistry;
+    }).getXlsx2mdModuleRegistry().requireModule<Xlsx2mdRichTextParserModule<TCell>>(
+      "richTextParser",
+      "xlsx2md rich text parser module is not loaded"
+    );
+  };
+  (globalThis as typeof globalThis & {
+    requireXlsx2mdRichTextGithubFormatterModule?: () => Xlsx2mdRichTextGithubFormatterModule;
+  }).requireXlsx2mdRichTextGithubFormatterModule = function requireXlsx2mdRichTextGithubFormatterModule(): Xlsx2mdRichTextGithubFormatterModule {
+    return (globalThis as typeof globalThis & {
+      getXlsx2mdModuleRegistry: () => Xlsx2mdModuleRegistry;
+    }).getXlsx2mdModuleRegistry().requireModule<Xlsx2mdRichTextGithubFormatterModule>(
+      "richTextGithubFormatter",
+      "xlsx2md rich text github formatter module is not loaded"
+    );
+  };
+  (globalThis as typeof globalThis & {
+    requireXlsx2mdRichTextRendererModule?: <TCell>() => Xlsx2mdRichTextRendererModule<TCell>;
+  }).requireXlsx2mdRichTextRendererModule = function requireXlsx2mdRichTextRendererModule<TCell>(): Xlsx2mdRichTextRendererModule<TCell> {
+    return (globalThis as typeof globalThis & {
+      getXlsx2mdModuleRegistry: () => Xlsx2mdModuleRegistry;
+    }).getXlsx2mdModuleRegistry().requireModule<Xlsx2mdRichTextRendererModule<TCell>>("richTextRenderer", "xlsx2md rich text renderer module is not loaded");
   };
   (globalThis as typeof globalThis & {
     requireXlsx2mdTableDetectorModule?: <TSheet, TCell, TMergeRange, TCandidate, TOptions>() => Xlsx2mdTableDetectorModule<TSheet, TCell, TMergeRange, TCandidate, TOptions>;
