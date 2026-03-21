@@ -12,7 +12,8 @@ Options:
   --zip <file>                  Write ZIP export to this file
   --output-mode <mode>          display | raw | both (default: display)
   --formatting-mode <mode>      plain | github (default: plain)
-  --include-shape-details       Include shape source details in Markdown
+  --shape-details <mode>        include | exclude (default: exclude)
+  --include-shape-details       Alias for --shape-details include
   --no-header-row               Do not treat the first row as a table header
   --no-trim-text                Preserve surrounding whitespace
   --keep-empty-rows             Keep empty rows
@@ -76,7 +77,7 @@ function parseArgs(argv) {
       options.summary = true;
       continue;
     }
-    if (arg === "--out" || arg === "--zip" || arg === "--output-mode" || arg === "--formatting-mode") {
+    if (arg === "--out" || arg === "--zip" || arg === "--output-mode" || arg === "--formatting-mode" || arg === "--shape-details") {
       const value = argv[index + 1];
       if (!value) {
         throw new Error(`Missing value for ${arg}`);
@@ -95,6 +96,12 @@ function parseArgs(argv) {
           throw new Error(`Invalid formatting mode: ${value}`);
         }
         options.formattingMode = value;
+      }
+      if (arg === "--shape-details") {
+        if (value !== "include" && value !== "exclude") {
+          throw new Error(`Invalid shape details mode: ${value}`);
+        }
+        options.includeShapeDetails = value === "include";
       }
       continue;
     }

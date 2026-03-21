@@ -79,6 +79,7 @@ describe("xlsx2md cli", () => {
     });
 
     expect(result.stdout).toContain("Usage:");
+    expect(result.stdout).toContain("--shape-details");
     expect(result.stdout).toContain("--include-shape-details");
     expect(result.stdout).toContain("--formatting-mode");
     expect(result.stdout).toContain("Exit codes:");
@@ -130,6 +131,30 @@ describe("xlsx2md cli", () => {
         "both",
         "--formatting-mode",
         "github",
+        "--shape-details",
+        "include"
+      ], {
+        cwd: path.resolve(__dirname, "..")
+      });
+
+      const outputText = readFileSync(outputPath, "utf8");
+      expect(outputText).toContain("# ");
+    } finally {
+      rmSync(workspace, { recursive: true, force: true });
+    }
+  });
+
+  it("keeps --include-shape-details as a compatibility alias", async () => {
+    const workspace = mkdtempSync(path.join(tmpdir(), "xlsx2md-cli-"));
+    const fixturePath = path.resolve(__dirname, "./fixtures/shape/shape-basic-sample01.xlsx");
+    const outputPath = path.join(workspace, "shape-alias.md");
+
+    try {
+      await execFileAsync(process.execPath, [
+        path.resolve(__dirname, "../scripts/xlsx2md-cli.mjs"),
+        fixturePath,
+        "--out",
+        outputPath,
         "--include-shape-details"
       ], {
         cwd: path.resolve(__dirname, "..")
@@ -165,6 +190,19 @@ describe("xlsx2md cli", () => {
       cwd: path.resolve(__dirname, "..")
     })).rejects.toMatchObject({
       stderr: expect.stringContaining("Invalid formatting mode: invalid")
+    });
+  });
+
+  it("fails for an invalid shape details mode", async () => {
+    await expect(execFileAsync(process.execPath, [
+      path.resolve(__dirname, "../scripts/xlsx2md-cli.mjs"),
+      path.resolve(__dirname, "./fixtures/xlsx2md-basic-sample01.xlsx"),
+      "--shape-details",
+      "invalid"
+    ], {
+      cwd: path.resolve(__dirname, "..")
+    })).rejects.toMatchObject({
+      stderr: expect.stringContaining("Invalid shape details mode: invalid")
     });
   });
 });

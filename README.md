@@ -47,7 +47,8 @@ Options:
 - `--zip <file>`: Write ZIP export to a file
 - `--output-mode <mode>`: `display`, `raw`, or `both`
 - `--formatting-mode <mode>`: `plain` or `github`
-- `--include-shape-details`: Include shape source details in Markdown
+- `--shape-details <mode>`: `include` or `exclude`
+- `--include-shape-details`: Alias for `--shape-details include`
 - `--no-header-row`: Do not treat the first row as a table header
 - `--no-trim-text`: Preserve surrounding whitespace
 - `--keep-empty-rows`: Keep empty rows
@@ -73,7 +74,7 @@ npm run cli -- ./tests/fixtures/xlsx2md-basic-sample01.xlsx --zip /tmp/xlsx2md-b
 You can also switch the Markdown output mode or include shape source details.
 
 ```bash
-npm run cli -- ./tests/fixtures/shape/shape-basic-sample01.xlsx --output-mode both --include-shape-details
+npm run cli -- ./tests/fixtures/shape/shape-basic-sample01.xlsx --output-mode both --shape-details include
 ```
 
 You can also switch how Excel text emphasis is rendered. `github` formatting mode currently preserves supported `bold`, `italic`, `strike`, `underline`, and in-cell line breaks as `<br>`.
@@ -185,7 +186,8 @@ CLI interface may change.
 - `--zip <file>`: ZIP をファイルへ出力
 - `--output-mode <mode>`: `display` / `raw` / `both`
 - `--formatting-mode <mode>`: `plain` / `github`
-- `--include-shape-details`: Markdown に図形の source details を含める
+- `--shape-details <mode>`: `include` / `exclude`
+- `--include-shape-details`: `--shape-details include` の互換 alias
 - `--no-header-row`: 先頭行を表ヘッダーとして扱わない
 - `--no-trim-text`: 前後の空白を維持する
 - `--keep-empty-rows`: 空行を維持する
@@ -211,7 +213,7 @@ npm run cli -- ./tests/fixtures/xlsx2md-basic-sample01.xlsx --zip /tmp/xlsx2md-b
 Markdown の出力モードを切り替えたり、図形の source details を含めたりすることもできます。
 
 ```bash
-npm run cli -- ./tests/fixtures/shape/shape-basic-sample01.xlsx --output-mode both --include-shape-details
+npm run cli -- ./tests/fixtures/shape/shape-basic-sample01.xlsx --output-mode both --shape-details include
 ```
 
 Excel の文字装飾の出し方も切り替えられます。`github` formatting mode は、現時点で `bold`、`italic`、`strike`、`underline`、セル内改行の `<br>` に対応します。
