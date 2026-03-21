@@ -1,9 +1,19 @@
 (() => {
   const moduleRegistry = getXlsx2mdModuleRegistry();
+  type SharedStringEntry = {
+    text: string;
+    runs: Array<{
+      text: string;
+      bold: boolean;
+      italic: boolean;
+      strike: boolean;
+      underline: boolean;
+    }> | null;
+  };
   type ParsedWorkbook = {
     name: string;
     sheets: unknown[];
-    sharedStrings: string[];
+    sharedStrings: SharedStringEntry[];
     definedNames: {
       name: string;
       formulaText: string;
@@ -15,11 +25,12 @@
     borders: unknown;
     numFmtId: number;
     formatCode: string;
+    textStyle: unknown;
   };
 
   type WorkbookLoaderDependencies = {
     unzipEntries: (arrayBuffer: ArrayBuffer) => Promise<Map<string, Uint8Array>>;
-    parseSharedStrings: (files: Map<string, Uint8Array>) => string[];
+    parseSharedStrings: (files: Map<string, Uint8Array>) => SharedStringEntry[];
     parseCellStyles: (files: Map<string, Uint8Array>) => CellStyleInfo[];
     parseRelationships: (files: Map<string, Uint8Array>, relsPath: string, sourcePath: string) => Map<string, string>;
     xmlToDocument: (xmlText: string) => Document;
@@ -30,7 +41,7 @@
       sheetName: string,
       sheetPath: string,
       sheetIndex: number,
-      sharedStrings: string[],
+      sharedStrings: SharedStringEntry[],
       cellStyles: CellStyleInfo[]
     ) => unknown;
     postProcessWorkbook?: (workbook: ParsedWorkbook) => void;

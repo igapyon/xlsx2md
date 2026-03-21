@@ -15,11 +15,29 @@
     globalThis.requireXlsx2mdZipIo = function requireXlsx2mdZipIo() {
         return globalThis.getXlsx2mdModuleRegistry().requireModule("zipIo", "xlsx2md zip io module is not loaded");
     };
+    globalThis.requireXlsx2mdMarkdownEscape = function requireXlsx2mdMarkdownEscape() {
+        return globalThis.getXlsx2mdModuleRegistry().requireModule("markdownEscape", "xlsx2md markdown escape module is not loaded");
+    };
+    globalThis.requireXlsx2mdMarkdownTableEscape = function requireXlsx2mdMarkdownTableEscape() {
+        return globalThis.getXlsx2mdModuleRegistry().requireModule("markdownTableEscape", "xlsx2md markdown table escape module is not loaded");
+    };
+    globalThis.requireXlsx2mdRichTextPlainFormatterModule = function requireXlsx2mdRichTextPlainFormatterModule() {
+        return globalThis.getXlsx2mdModuleRegistry().requireModule("richTextPlainFormatter", "xlsx2md rich text plain formatter module is not loaded");
+    };
     globalThis.getXlsx2mdDrawingHelperModule = function getXlsx2mdDrawingHelperModule() {
         return globalThis.getXlsx2mdModuleRegistry().getModule("officeDrawing") || null;
     };
     globalThis.requireXlsx2mdNarrativeStructureModule = function requireXlsx2mdNarrativeStructureModule() {
         return globalThis.getXlsx2mdModuleRegistry().requireModule("narrativeStructure", "xlsx2md narrative structure module is not loaded");
+    };
+    globalThis.requireXlsx2mdRichTextParserModule = function requireXlsx2mdRichTextParserModule() {
+        return globalThis.getXlsx2mdModuleRegistry().requireModule("richTextParser", "xlsx2md rich text parser module is not loaded");
+    };
+    globalThis.requireXlsx2mdRichTextGithubFormatterModule = function requireXlsx2mdRichTextGithubFormatterModule() {
+        return globalThis.getXlsx2mdModuleRegistry().requireModule("richTextGithubFormatter", "xlsx2md rich text github formatter module is not loaded");
+    };
+    globalThis.requireXlsx2mdRichTextRendererModule = function requireXlsx2mdRichTextRendererModule() {
+        return globalThis.getXlsx2mdModuleRegistry().requireModule("richTextRenderer", "xlsx2md rich text renderer module is not loaded");
     };
     globalThis.requireXlsx2mdTableDetectorModule = function requireXlsx2mdTableDetectorModule() {
         return globalThis.getXlsx2mdModuleRegistry().requireModule("tableDetector", "xlsx2md table detector module is not loaded");

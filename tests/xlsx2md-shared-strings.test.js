@@ -41,7 +41,10 @@ describe("xlsx2md shared strings", () => {
       ["xl/sharedStrings.xml", new TextEncoder().encode(xml)]
     ]);
 
-    expect(api.parseSharedStrings(files)).toEqual(["通常のテキスト", "分割テキスト"]);
+    expect(api.parseSharedStrings(files)).toEqual([
+      { text: "通常のテキスト", runs: null },
+      { text: "分割テキスト", runs: null }
+    ]);
   });
 
   it("skips phonetic text nodes and normalizes CRLF to LF", () => {
@@ -58,6 +61,32 @@ describe("xlsx2md shared strings", () => {
       ["xl/sharedStrings.xml", new TextEncoder().encode(xml)]
     ]);
 
-    expect(api.parseSharedStrings(files)).toEqual(["line1\nline2"]);
+    expect(api.parseSharedStrings(files)).toEqual([{ text: "line1\nline2", runs: null }]);
+  });
+
+  it("preserves supported rich text emphasis flags", () => {
+    const api = bootSharedStrings();
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+      <sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="1" uniqueCount="1">
+        <si>
+          <r><rPr><b/></rPr><t>Bold</t></r>
+          <r><rPr><i/></rPr><t>Italic</t></r>
+          <r><rPr><strike/></rPr><t>Strike</t></r>
+          <r><rPr><u/></rPr><t>Under</t></r>
+        </si>
+      </sst>`;
+    const files = new Map([
+      ["xl/sharedStrings.xml", new TextEncoder().encode(xml)]
+    ]);
+
+    expect(api.parseSharedStrings(files)).toEqual([{
+      text: "BoldItalicStrikeUnder",
+      runs: [
+        { text: "Bold", bold: true, italic: false, strike: false, underline: false },
+        { text: "Italic", bold: false, italic: true, strike: false, underline: false },
+        { text: "Strike", bold: false, italic: false, strike: true, underline: false },
+        { text: "Under", bold: false, italic: false, strike: false, underline: true }
+      ]
+    }]);
   });
 });

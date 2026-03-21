@@ -31,7 +31,8 @@ describe("xlsx2md styles parser", () => {
       {
         borders: { top: false, bottom: false, left: false, right: false },
         numFmtId: 0,
-        formatCode: "General"
+        formatCode: "General",
+        textStyle: { bold: false, italic: false, strike: false, underline: false }
       }
     ]);
   });
@@ -75,12 +76,14 @@ describe("xlsx2md styles parser", () => {
     expect(styles[0]).toEqual({
       borders: { top: false, bottom: false, left: false, right: false },
       numFmtId: 0,
-      formatCode: "General"
+      formatCode: "General",
+      textStyle: { bold: false, italic: false, strike: false, underline: false }
     });
     expect(styles[1]).toEqual({
       borders: { top: true, bottom: false, left: true, right: false },
       numFmtId: 164,
-      formatCode: "yyyy-mm-dd"
+      formatCode: "yyyy-mm-dd",
+      textStyle: { bold: false, italic: false, strike: false, underline: false }
     });
   });
 

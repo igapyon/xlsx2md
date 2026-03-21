@@ -23,7 +23,19 @@
   - 表セル、narrative、見出し、箇条書きで共通方針を持つ
   - 少なくとも `改行 / | / \`` を安全に扱う
   - 必要に応じて行頭の Markdown 記号 (`#`, `-`, `*`, `>`) も整理する
-  - 結合セル内の改行を `<br>` として許容するか、別の表現にするかを決める
+  - `github` formatting mode ではセル内改行を `<br>` として扱う方針に寄せた
+  - `markdown escape -> rich text parser -> plain/github formatter -> table escape` の段階分離までは実装済み
+  - 次は `escaped` part と table / narrative / heading / list それぞれの escape 方針をどこまで共通化するかを整理する
+  - 詳細メモは `docs/rich-text-markdown-rendering.md` を参照
+
+- rich text / Markdown renderer の責務整理
+  - 現状は `shared-strings.ts` / `styles-parser.ts` / `worksheet-parser.ts` / `sheet-markdown.ts` に加えて、`markdown-escape.ts` / `rich-text-parser.ts` / `rich-text-plain-formatter.ts` / `rich-text-github-formatter.ts` / `markdown-table-escape.ts` へ段階分離済み
+  - `plain` と `github` の責務境界は formatter 分離でかなり明確になった
+  - 必要なら token ベースの中間表現をさらに細粒度化する
+  - `styledText.parts` は `text / escaped` と `rawText` を持つ段階まで進めたので、次はそれを renderer policy にどう使うかを詰める
+  - rich fixture 回帰:
+    - `tests/fixtures/rich/rich-text-github-sample01.xlsx`
+    - `tests/fixtures/rich/rich-markdown-escape-sample01.xlsx`
 
 ## 未対応事項
 

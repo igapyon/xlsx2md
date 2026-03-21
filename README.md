@@ -13,6 +13,7 @@
 - Reads `.xlsx` files directly in the browser and processes them locally
 - Converts all sheets in a workbook in one pass
 - Extracts prose, tables, and images
+- Preserves supported Excel rich text in `github` formatting mode
 - Detects tables and converts them into Markdown tables
 - Prefers cached formula values and parses formulas when needed
 - Extracts chart configuration data
@@ -34,17 +35,20 @@
 3. After loading, Markdown for all sheets is generated automatically
 4. Save the result as Markdown or ZIP
 
-### Experimental Node CLI
+### Node CLI
 
 You can also run the conversion in batch mode from Node.js.
 The CLI intentionally stays small in the Unix style: one input workbook at a time, with Markdown or ZIP written to a file.
+CLI interface may change.
 
 Options:
 
 - `--out <file>`: Write combined Markdown to a file
 - `--zip <file>`: Write ZIP export to a file
 - `--output-mode <mode>`: `display`, `raw`, or `both`
-- `--include-shape-details`: Include shape source details in Markdown
+- `--formatting-mode <mode>`: `plain` or `github`
+- `--shape-details <mode>`: `include` or `exclude`
+- `--include-shape-details`: Alias for `--shape-details include`
 - `--no-header-row`: Do not treat the first row as a table header
 - `--no-trim-text`: Preserve surrounding whitespace
 - `--keep-empty-rows`: Keep empty rows
@@ -70,7 +74,13 @@ npm run cli -- ./tests/fixtures/xlsx2md-basic-sample01.xlsx --zip /tmp/xlsx2md-b
 You can also switch the Markdown output mode or include shape source details.
 
 ```bash
-npm run cli -- ./tests/fixtures/shape/shape-basic-sample01.xlsx --output-mode both --include-shape-details
+npm run cli -- ./tests/fixtures/shape/shape-basic-sample01.xlsx --output-mode both --shape-details include
+```
+
+You can also switch how Excel text emphasis is rendered. `github` formatting mode currently preserves supported `bold`, `italic`, `strike`, `underline`, and in-cell line breaks as `<br>`.
+
+```bash
+npm run cli -- ./tests/fixtures/rich/rich-text-github-sample01.xlsx --formatting-mode github
 ```
 
 ## Tech Stack
@@ -142,6 +152,7 @@ The generated Markdown can then be previewed as a readable document.
 - `.xlsx` ファイルをブラウザ内で読み込み、ローカル環境だけで処理
 - 全シートをまとめて一括変換
 - 地の文・表・画像を抽出
+- `github` formatting mode では、対応する Excel の rich text を Markdown / HTML へ反映
 - 表を検知して Markdown の表へ変換
 - 数式は保存済みの値を優先し、必要に応じて数式も解析
 - グラフは設定情報を抽出
@@ -163,17 +174,20 @@ The generated Markdown can then be previewed as a readable document.
 3. 読み込み後、自動で全シートの Markdown が生成される
 4. Markdown または ZIP を保存する
 
-### Experimental Node CLI
+### Node CLI
 
 Node.js からバッチ実行することもできます。
 CLI は UNIX 的に小さく保つ方針で、基本は 1 回につき 1 つのワークブックを受け取り、Markdown または ZIP をファイルへ出力します。
+CLI interface may change.
 
 オプション一覧:
 
 - `--out <file>`: 結合済み Markdown をファイルへ出力
 - `--zip <file>`: ZIP をファイルへ出力
 - `--output-mode <mode>`: `display` / `raw` / `both`
-- `--include-shape-details`: Markdown に図形の source details を含める
+- `--formatting-mode <mode>`: `plain` / `github`
+- `--shape-details <mode>`: `include` / `exclude`
+- `--include-shape-details`: `--shape-details include` の互換 alias
 - `--no-header-row`: 先頭行を表ヘッダーとして扱わない
 - `--no-trim-text`: 前後の空白を維持する
 - `--keep-empty-rows`: 空行を維持する
@@ -199,8 +213,21 @@ npm run cli -- ./tests/fixtures/xlsx2md-basic-sample01.xlsx --zip /tmp/xlsx2md-b
 Markdown の出力モードを切り替えたり、図形の source details を含めたりすることもできます。
 
 ```bash
-npm run cli -- ./tests/fixtures/shape/shape-basic-sample01.xlsx --output-mode both --include-shape-details
+npm run cli -- ./tests/fixtures/shape/shape-basic-sample01.xlsx --output-mode both --shape-details include
 ```
+
+Excel の文字装飾の出し方も切り替えられます。`github` formatting mode は、現時点で `bold`、`italic`、`strike`、`underline`、セル内改行の `<br>` に対応します。
+
+```bash
+npm run cli -- ./tests/fixtures/rich/rich-text-github-sample01.xlsx --formatting-mode github
+```
+
+補足:
+
+- `plain` は装飾を落として素朴なテキストへ寄せるモードです
+- `github` は GitHub 上の見え方を優先して Markdown / HTML を使うモードです
+- 内部的には `markdown escape -> rich text parser -> plain/github formatter -> table escape` の段階分離を進めています
+- Markdown 記号を含む生文字の escape は段階的に整理中です。現状の設計メモは [docs/rich-text-markdown-rendering.md](./docs/rich-text-markdown-rendering.md) を参照してください
 
 ## Tech Stack
 

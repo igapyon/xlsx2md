@@ -1,5 +1,72 @@
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
+    function hasEnabledBooleanValue(node) {
+        if (!node)
+            return false;
+        const value = (node.getAttribute("val") || "").trim().toLowerCase();
+        return value !== "false" && value !== "0" && value !== "none";
+    }
+    function mergeTextStyle(base, override) {
+        return {
+            bold: base.bold || override.bold,
+            italic: base.italic || override.italic,
+            strike: base.strike || override.strike,
+            underline: base.underline || override.underline
+        };
+    }
+    function hasTextStyle(style) {
+        return style.bold || style.italic || style.strike || style.underline;
+    }
+    function parseRichTextStyle(runProperties) {
+        return {
+            bold: hasEnabledBooleanValue(runProperties === null || runProperties === void 0 ? void 0 : runProperties.getElementsByTagName("b")[0]),
+            italic: hasEnabledBooleanValue(runProperties === null || runProperties === void 0 ? void 0 : runProperties.getElementsByTagName("i")[0]),
+            strike: hasEnabledBooleanValue(runProperties === null || runProperties === void 0 ? void 0 : runProperties.getElementsByTagName("strike")[0]),
+            underline: hasEnabledBooleanValue(runProperties === null || runProperties === void 0 ? void 0 : runProperties.getElementsByTagName("u")[0])
+        };
+    }
+    function mergeAdjacentRuns(runs) {
+        const merged = [];
+        for (const run of runs) {
+            if (!run.text)
+                continue;
+            const previous = merged[merged.length - 1];
+            if (previous
+                && previous.bold === run.bold
+                && previous.italic === run.italic
+                && previous.strike === run.strike
+                && previous.underline === run.underline) {
+                previous.text += run.text;
+            }
+            else {
+                merged.push({ ...run });
+            }
+        }
+        return merged.length > 0 && merged.some((run) => hasTextStyle(run)) ? merged : null;
+    }
+    function createStyledRuns(text, style) {
+        if (!text || !hasTextStyle(style)) {
+            return null;
+        }
+        return [{
+                text,
+                ...style
+            }];
+    }
+    function parseInlineRichTextRuns(cellElement, cellStyle, deps) {
+        const inlineStringElement = cellElement.getElementsByTagName("is")[0] || null;
+        if (!inlineStringElement) {
+            return null;
+        }
+        const runElements = Array.from(inlineStringElement.childNodes).filter((node) => (node.nodeType === Node.ELEMENT_NODE && node.localName === "r"));
+        if (runElements.length === 0) {
+            return null;
+        }
+        return mergeAdjacentRuns(runElements.map((runElement) => ({
+            text: Array.from(runElement.getElementsByTagName("t")).map((node) => deps.getTextContent(node)).join(""),
+            ...mergeTextStyle(cellStyle, parseRichTextStyle(runElement.getElementsByTagName("rPr")[0] || null))
+        })));
+    }
     function extractCellOutputValue(cellElement, sharedStrings, cellStyle, deps, formulaOverride = "") {
         const type = (cellElement.getAttribute("t") || "").trim();
         const valueNode = cellElement.getElementsByTagName("v")[0] || null;
@@ -22,7 +89,8 @@
                     formulaText: normalizedFormula,
                     resolutionStatus: "unsupported_external",
                     resolutionSource: "external_unsupported",
-                    cachedValueState
+                    cachedValueState,
+                    richTextRuns: null
                 };
             }
             if (valueNode) {
@@ -34,7 +102,8 @@
                     formulaText: normalizedFormula,
                     resolutionStatus: "resolved",
                     resolutionSource: "cached_value",
-                    cachedValueState
+                    cachedValueState,
+                    richTextRuns: null
                 };
             }
             return {
@@ -44,19 +113,27 @@
                 formulaText: normalizedFormula,
                 resolutionStatus: "fallback_formula",
                 resolutionSource: "formula_text",
-                cachedValueState
+                cachedValueState,
+                richTextRuns: null
             };
         }
         if (type === "s") {
             const sharedIndex = Number(valueText || 0);
+            const sharedEntry = sharedStrings[sharedIndex] || { text: "", runs: null };
             return {
                 valueType: type,
                 rawValue: valueText,
-                outputValue: sharedStrings[sharedIndex] || "",
+                outputValue: sharedEntry.text,
                 formulaText: "",
                 resolutionStatus: null,
                 resolutionSource: null,
-                cachedValueState: null
+                cachedValueState: null,
+                richTextRuns: sharedEntry.runs
+                    ? mergeAdjacentRuns(sharedEntry.runs.map((run) => ({
+                        text: run.text,
+                        ...mergeTextStyle(cellStyle.textStyle, run)
+                    })))
+                    : createStyledRuns(sharedEntry.text, cellStyle.textStyle)
             };
         }
         if (type === "inlineStr") {
@@ -68,7 +145,8 @@
                 formulaText: "",
                 resolutionStatus: null,
                 resolutionSource: null,
-                cachedValueState: null
+                cachedValueState: null,
+                richTextRuns: parseInlineRichTextRuns(cellElement, cellStyle.textStyle, deps) || createStyledRuns(inlineText, cellStyle.textStyle)
             };
         }
         if (type === "b") {
@@ -79,7 +157,8 @@
                 formulaText: "",
                 resolutionStatus: null,
                 resolutionSource: null,
-                cachedValueState: null
+                cachedValueState: null,
+                richTextRuns: createStyledRuns(valueText === "1" ? "TRUE" : "FALSE", cellStyle.textStyle)
             };
         }
         if (type === "str" || type === "e") {
@@ -90,7 +169,8 @@
                 formulaText: "",
                 resolutionStatus: null,
                 resolutionSource: null,
-                cachedValueState: null
+                cachedValueState: null,
+                richTextRuns: createStyledRuns(valueText, cellStyle.textStyle)
             };
         }
         if (valueText) {
@@ -103,7 +183,8 @@
                     formulaText: "",
                     resolutionStatus: null,
                     resolutionSource: null,
-                    cachedValueState: null
+                    cachedValueState: null,
+                    richTextRuns: createStyledRuns(formattedValue, cellStyle.textStyle)
                 };
             }
         }
@@ -114,7 +195,8 @@
             formulaText: "",
             resolutionStatus: null,
             resolutionSource: null,
-            cachedValueState: null
+            cachedValueState: null,
+            richTextRuns: createStyledRuns(valueText, cellStyle.textStyle)
         };
     }
     function shiftReferenceAddress(addressText, rowOffset, colOffset, deps) {
@@ -167,7 +249,13 @@
             const cellStyle = cellStyles[styleIndex] || {
                 borders: deps.EMPTY_BORDERS,
                 numFmtId: 0,
-                formatCode: "General"
+                formatCode: "General",
+                textStyle: {
+                    bold: false,
+                    italic: false,
+                    strike: false,
+                    underline: false
+                }
             };
             let formulaOverride = "";
             const formulaElement = cellElement.getElementsByTagName("f")[0] || null;
@@ -204,6 +292,8 @@
                 borders: cellStyle.borders,
                 numFmtId: cellStyle.numFmtId,
                 formatCode: cellStyle.formatCode,
+                textStyle: cellStyle.textStyle,
+                richTextRuns: output.richTextRuns,
                 formulaType,
                 spillRef
             };

@@ -90,12 +90,17 @@ function createDeps() {
 describe("xlsx2md worksheet parser", () => {
   it("extracts shared string and boolean cell values", () => {
     const api = bootWorksheetParser();
-    const cellStyle = { borders: {}, numFmtId: 0, formatCode: "General" };
+    const cellStyle = {
+      borders: {},
+      numFmtId: 0,
+      formatCode: "General",
+      textStyle: { bold: false, italic: false, strike: false, underline: false }
+    };
     const sharedCell = new DOMParser().parseFromString('<c t="s"><v>1</v></c>', "application/xml").documentElement;
     const boolCell = new DOMParser().parseFromString('<c t="b"><v>1</v></c>', "application/xml").documentElement;
     const deps = createDeps();
 
-    expect(api.extractCellOutputValue(sharedCell, ["A", "B"], cellStyle, deps)).toMatchObject({
+    expect(api.extractCellOutputValue(sharedCell, [{ text: "A", runs: null }, { text: "B", runs: null }], cellStyle, deps)).toMatchObject({
       valueType: "s",
       outputValue: "B"
     });
@@ -137,11 +142,21 @@ describe("xlsx2md worksheet parser", () => {
       ["xl/worksheets/sheet1.xml", new TextEncoder().encode(worksheetXml)]
     ]);
     const cellStyles = [
-      { borders: { top: false, bottom: false, left: false, right: false }, numFmtId: 0, formatCode: "General" },
-      { borders: { top: false, bottom: false, left: false, right: false }, numFmtId: 10, formatCode: "0.0%" }
+      {
+        borders: { top: false, bottom: false, left: false, right: false },
+        numFmtId: 0,
+        formatCode: "General",
+        textStyle: { bold: false, italic: false, strike: false, underline: false }
+      },
+      {
+        borders: { top: false, bottom: false, left: false, right: false },
+        numFmtId: 10,
+        formatCode: "0.0%",
+        textStyle: { bold: false, italic: false, strike: false, underline: false }
+      }
     ];
 
-    const sheet = api.parseWorksheet(files, "Sheet1", "xl/worksheets/sheet1.xml", 1, ["Hello"], cellStyles, deps);
+    const sheet = api.parseWorksheet(files, "Sheet1", "xl/worksheets/sheet1.xml", 1, [{ text: "Hello", runs: null }], cellStyles, deps);
 
     expect(sheet.cells.find((cell) => cell.address === "A1")?.outputValue).toBe("Hello");
     expect(sheet.cells.find((cell) => cell.address === "B1")?.outputValue).toBe("12.5%");
