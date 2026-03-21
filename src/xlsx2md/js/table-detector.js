@@ -24,7 +24,20 @@
     function collectBorderSeedCells(sheet) {
         return sheet.cells.filter((cell) => (cell.borders.top || cell.borders.bottom || cell.borders.left || cell.borders.right));
     }
-    function collectConnectedComponents(seedCells) {
+    function areBorderAdjacent(current, next) {
+        if (current.row === next.row && Math.abs(current.col - next.col) === 1) {
+            return (current.borders.top && next.borders.top)
+                || (current.borders.bottom && next.borders.bottom)
+                || (current.col < next.col ? current.borders.right && next.borders.left : current.borders.left && next.borders.right);
+        }
+        if (current.col === next.col && Math.abs(current.row - next.row) === 1) {
+            return (current.borders.left && next.borders.left)
+                || (current.borders.right && next.borders.right)
+                || (current.row < next.row ? current.borders.bottom && next.borders.top : current.borders.top && next.borders.bottom);
+        }
+        return false;
+    }
+    function collectConnectedComponents(seedCells, adjacencyMode = "grid") {
         const positionMap = new Map();
         for (const cell of seedCells) {
             positionMap.set(`${cell.row}:${cell.col}`, cell);
@@ -45,6 +58,8 @@
                     const nextKey = `${current.row + rowDelta}:${current.col + colDelta}`;
                     const nextCell = positionMap.get(nextKey);
                     if (!nextCell || visited.has(nextKey))
+                        continue;
+                    if (adjacencyMode === "border" && !areBorderAdjacent(current, nextCell))
                         continue;
                     visited.add(nextKey);
                     queue.push(nextCell);
@@ -182,7 +197,7 @@
                 });
             }
         }
-        for (const component of collectConnectedComponents(borderSeedCells)) {
+        for (const component of collectConnectedComponents(borderSeedCells, tableDetectionMode === "border" ? "border" : "grid")) {
             maybePushCandidate(component);
         }
         if (tableDetectionMode !== "border") {

@@ -338,4 +338,80 @@ describe("xlsx2md table detector", () => {
       endCol: 2
     });
   });
+
+  it("border mode still detects an inner bordered table that is not border-connected to an outer frame block", () => {
+    const api = bootTableDetector();
+    const sheet = {
+      cells: [
+        createCell(1, 1, "設計書", { top: true, bottom: true, left: true }),
+        createCell(1, 2, "", { top: true, bottom: true }),
+        createCell(1, 3, "", { top: true, bottom: true, right: true }),
+        createCell(2, 1, "見出し", { left: true }),
+        createCell(2, 3, "", { right: true }),
+        createCell(3, 1, "", { left: true }),
+        createCell(3, 3, "", { right: true }),
+        createCell(4, 1, "", { left: true, bottom: true }),
+        createCell(4, 2, "", { bottom: true }),
+        createCell(4, 3, "", { right: true, bottom: true }),
+
+        createCell(6, 1, "項目", { top: true, bottom: true, left: true }),
+        createCell(6, 2, "値", { top: true, bottom: true, right: true }),
+        createCell(7, 1, "A", { bottom: true, left: true }),
+        createCell(7, 2, "100", { bottom: true, right: true })
+      ],
+      merges: []
+    };
+
+    const candidates = api.detectTableCandidates(sheet, buildCellMap, undefined, "border");
+
+    expect(candidates).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        startRow: 6,
+        startCol: 1,
+        endRow: 7,
+        endCol: 2
+      })
+    ]));
+  });
+
+  it("keeps an inner bordered table even when it sits inside the bounds of a separate outer frame block", () => {
+    const api = bootTableDetector();
+    const sheet = {
+      cells: [
+        createCell(1, 1, "設計書", { top: true, bottom: true, left: true }),
+        createCell(1, 2, "", { top: true, bottom: true }),
+        createCell(1, 3, "", { top: true, bottom: true }),
+        createCell(1, 4, "", { top: true, bottom: true, right: true }),
+        createCell(2, 1, "見出し", { left: true }),
+        createCell(2, 4, "", { right: true }),
+        createCell(3, 1, "", { left: true }),
+        createCell(3, 4, "", { right: true }),
+        createCell(4, 1, "", { left: true }),
+        createCell(4, 4, "", { right: true }),
+        createCell(5, 1, "", { left: true }),
+        createCell(5, 4, "", { right: true }),
+        createCell(6, 1, "", { left: true, bottom: true }),
+        createCell(6, 2, "", { bottom: true }),
+        createCell(6, 3, "", { bottom: true }),
+        createCell(6, 4, "", { right: true, bottom: true }),
+
+        createCell(4, 2, "項目", { top: true, bottom: true, left: true }),
+        createCell(4, 3, "値", { top: true, bottom: true, right: true }),
+        createCell(5, 2, "A", { bottom: true, left: true }),
+        createCell(5, 3, "100", { bottom: true, right: true })
+      ],
+      merges: []
+    };
+
+    const candidates = api.detectTableCandidates(sheet, buildCellMap, undefined, "border");
+
+    expect(candidates).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        startRow: 4,
+        startCol: 2,
+        endRow: 5,
+        endCol: 3
+      })
+    ]));
+  });
 });
