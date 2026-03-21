@@ -95,7 +95,21 @@
     ));
   }
 
-  function collectConnectedComponents<TCell extends CellLike>(seedCells: TCell[]): TCell[][] {
+  function areBorderAdjacent<TCell extends CellLike>(current: TCell, next: TCell): boolean {
+    if (current.row === next.row && Math.abs(current.col - next.col) === 1) {
+      return (current.borders.top && next.borders.top)
+        || (current.borders.bottom && next.borders.bottom)
+        || (current.col < next.col ? current.borders.right && next.borders.left : current.borders.left && next.borders.right);
+    }
+    if (current.col === next.col && Math.abs(current.row - next.row) === 1) {
+      return (current.borders.left && next.borders.left)
+        || (current.borders.right && next.borders.right)
+        || (current.row < next.row ? current.borders.bottom && next.borders.top : current.borders.top && next.borders.bottom);
+    }
+    return false;
+  }
+
+  function collectConnectedComponents<TCell extends CellLike>(seedCells: TCell[], adjacencyMode: "grid" | "border" = "grid"): TCell[][] {
     const positionMap = new Map<string, TCell>();
     for (const cell of seedCells) {
       positionMap.set(`${cell.row}:${cell.col}`, cell);
@@ -116,6 +130,7 @@
           const nextKey = `${current.row + rowDelta}:${current.col + colDelta}`;
           const nextCell = positionMap.get(nextKey);
           if (!nextCell || visited.has(nextKey)) continue;
+          if (adjacencyMode === "border" && !areBorderAdjacent(current, nextCell)) continue;
           visited.add(nextKey);
           queue.push(nextCell);
         }
@@ -271,7 +286,7 @@
       }
     }
 
-    for (const component of collectConnectedComponents(borderSeedCells)) {
+    for (const component of collectConnectedComponents(borderSeedCells, tableDetectionMode === "border" ? "border" : "grid")) {
       maybePushCandidate(component);
     }
 
