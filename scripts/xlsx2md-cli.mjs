@@ -11,6 +11,7 @@ Options:
   --out <file>                  Write combined Markdown to this file
   --zip <file>                  Write ZIP export to this file
   --output-mode <mode>          display | raw | both (default: display)
+  --formatting-mode <mode>      plain | github (default: plain)
   --include-shape-details       Include shape source details in Markdown
   --no-header-row               Do not treat the first row as a table header
   --no-trim-text                Preserve surrounding whitespace
@@ -33,6 +34,7 @@ function parseArgs(argv) {
     removeEmptyColumns: true,
     includeShapeDetails: false,
     outputMode: "display",
+    formattingMode: "plain",
     summary: false,
     outPath: null,
     zipPath: null
@@ -74,7 +76,7 @@ function parseArgs(argv) {
       options.summary = true;
       continue;
     }
-    if (arg === "--out" || arg === "--zip" || arg === "--output-mode") {
+    if (arg === "--out" || arg === "--zip" || arg === "--output-mode" || arg === "--formatting-mode") {
       const value = argv[index + 1];
       if (!value) {
         throw new Error(`Missing value for ${arg}`);
@@ -87,6 +89,12 @@ function parseArgs(argv) {
           throw new Error(`Invalid output mode: ${value}`);
         }
         options.outputMode = value;
+      }
+      if (arg === "--formatting-mode") {
+        if (value !== "plain" && value !== "github") {
+          throw new Error(`Invalid formatting mode: ${value}`);
+        }
+        options.formattingMode = value;
       }
       continue;
     }
@@ -164,7 +172,8 @@ async function main() {
         removeEmptyRows: options.removeEmptyRows,
         removeEmptyColumns: options.removeEmptyColumns,
         includeShapeDetails: options.includeShapeDetails,
-        outputMode: options.outputMode
+        outputMode: options.outputMode,
+        formattingMode: options.formattingMode
       });
     } catch (error) {
       throw new Error(formatWorkbookError(inputPath, "convert failed", error));

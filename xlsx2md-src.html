@@ -77,6 +77,14 @@ limitations under the License.
                 ]
               </script>
             </lht-select-help>
+            <lht-select-help field-id="formattingModeSelect" label="Formatting Mode" help-text="Choose how Excel text emphasis should be represented in Markdown. `github` preserves supported emphasis as GitHub-compatible Markdown or HTML.">
+              <script type="application/json" slot="options">
+                [
+                  { "value": "plain", "label": "plain: output plain text" },
+                  { "value": "github", "label": "github: preserve supported emphasis", "selected": true }
+                ]
+              </script>
+            </lht-select-help>
             <lht-switch-help switch-id="headerRowEnabled" label="Treat the first row as a header" help-label="About header rows" checked>
               Use the first row of each detected table as the Markdown table header.
             </lht-switch-help>
@@ -94,6 +102,7 @@ limitations under the License.
             </lht-switch-help>
           </div>
           <div id="outputModeNotice" class="md-caption">`display` outputs values close to what Excel shows.</div>
+          <div id="formattingModeNotice" class="md-caption">`github` preserves supported Excel emphasis as GitHub-compatible Markdown: bold, italic, strike, underline, and in-cell line breaks as `&lt;br&gt;`.</div>
         </div>
       </details>
 
@@ -168,6 +177,12 @@ limitations under the License.
   <script src="src/xlsx2md/js/zip-io.js"></script>
   <script src="src/xlsx2md/js/border-grid.js"></script>
   <script src="src/xlsx2md/js/markdown-normalize.js"></script>
+  <script src="src/xlsx2md/js/markdown-escape.js"></script>
+  <script src="src/xlsx2md/js/markdown-table-escape.js"></script>
+  <script src="src/xlsx2md/js/rich-text-parser.js"></script>
+  <script src="src/xlsx2md/js/rich-text-plain-formatter.js"></script>
+  <script src="src/xlsx2md/js/rich-text-github-formatter.js"></script>
+  <script src="src/xlsx2md/js/rich-text-renderer.js"></script>
   <script src="src/xlsx2md/js/narrative-structure.js"></script>
   <script src="src/xlsx2md/js/table-detector.js"></script>
   <script src="src/xlsx2md/js/markdown-export.js"></script>

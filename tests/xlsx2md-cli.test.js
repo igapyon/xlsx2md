@@ -80,6 +80,7 @@ describe("xlsx2md cli", () => {
 
     expect(result.stdout).toContain("Usage:");
     expect(result.stdout).toContain("--include-shape-details");
+    expect(result.stdout).toContain("--formatting-mode");
     expect(result.stdout).toContain("Exit codes:");
   });
 
@@ -127,6 +128,8 @@ describe("xlsx2md cli", () => {
         outputPath,
         "--output-mode",
         "both",
+        "--formatting-mode",
+        "github",
         "--include-shape-details"
       ], {
         cwd: path.resolve(__dirname, "..")
@@ -149,6 +152,19 @@ describe("xlsx2md cli", () => {
       cwd: path.resolve(__dirname, "..")
     })).rejects.toMatchObject({
       stderr: expect.stringContaining("Invalid output mode: invalid")
+    });
+  });
+
+  it("fails for an invalid formatting mode", async () => {
+    await expect(execFileAsync(process.execPath, [
+      path.resolve(__dirname, "../scripts/xlsx2md-cli.mjs"),
+      path.resolve(__dirname, "./fixtures/xlsx2md-basic-sample01.xlsx"),
+      "--formatting-mode",
+      "invalid"
+    ], {
+      cwd: path.resolve(__dirname, "..")
+    })).rejects.toMatchObject({
+      stderr: expect.stringContaining("Invalid formatting mode: invalid")
     });
   });
 });

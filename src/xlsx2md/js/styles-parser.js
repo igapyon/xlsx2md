@@ -6,6 +6,12 @@
         left: false,
         right: false
     };
+    const EMPTY_TEXT_STYLE = {
+        bold: false,
+        italic: false,
+        strike: false,
+        underline: false
+    };
     const runtimeEnv = requireXlsx2mdRuntimeEnv();
     const textDecoder = new TextDecoder("utf-8");
     const BUILTIN_FORMAT_CODES = {
@@ -45,13 +51,28 @@
             return false;
         return side.hasAttribute("style") || side.children.length > 0;
     }
+    function hasEnabledBooleanValue(node) {
+        if (!node)
+            return false;
+        const value = (node.getAttribute("val") || "").trim().toLowerCase();
+        return value !== "false" && value !== "0" && value !== "none";
+    }
+    function parseFontStyle(fontElement) {
+        return {
+            bold: hasEnabledBooleanValue(fontElement === null || fontElement === void 0 ? void 0 : fontElement.getElementsByTagName("b")[0]),
+            italic: hasEnabledBooleanValue(fontElement === null || fontElement === void 0 ? void 0 : fontElement.getElementsByTagName("i")[0]),
+            strike: hasEnabledBooleanValue(fontElement === null || fontElement === void 0 ? void 0 : fontElement.getElementsByTagName("strike")[0]),
+            underline: hasEnabledBooleanValue(fontElement === null || fontElement === void 0 ? void 0 : fontElement.getElementsByTagName("u")[0])
+        };
+    }
     function parseCellStyles(files) {
         const stylesBytes = files.get("xl/styles.xml");
         if (!stylesBytes) {
             return [{
                     borders: EMPTY_BORDERS,
                     numFmtId: 0,
-                    formatCode: "General"
+                    formatCode: "General",
+                    textStyle: EMPTY_TEXT_STYLE
                 }];
         }
         const doc = xmlToDocument(decodeXmlText(stylesBytes));
@@ -68,6 +89,8 @@
                 right: hasBorderSide(right)
             };
         });
+        const fontElements = Array.from(doc.getElementsByTagName("font"));
+        const fontStyles = fontElements.map((fontElement) => parseFontStyle(fontElement));
         const numFmtMap = new Map();
         const numFmtParent = doc.getElementsByTagName("numFmts")[0];
         if (numFmtParent) {
@@ -84,29 +107,35 @@
             return [{
                     borders: borders[0] || EMPTY_BORDERS,
                     numFmtId: 0,
-                    formatCode: "General"
+                    formatCode: "General",
+                    textStyle: fontStyles[0] || EMPTY_TEXT_STYLE
                 }];
         }
         const xfElements = Array.from(xfsParent.getElementsByTagName("xf"));
         const styles = xfElements.map((xfElement) => {
             const borderId = Number(xfElement.getAttribute("borderId") || 0);
             const numFmtId = Number(xfElement.getAttribute("numFmtId") || 0);
+            const fontId = Number(xfElement.getAttribute("fontId") || 0);
             return {
                 borders: borders[borderId] || EMPTY_BORDERS,
                 numFmtId,
-                formatCode: numFmtMap.get(numFmtId) || BUILTIN_FORMAT_CODES[numFmtId] || "General"
+                formatCode: numFmtMap.get(numFmtId) || BUILTIN_FORMAT_CODES[numFmtId] || "General",
+                textStyle: fontStyles[fontId] || EMPTY_TEXT_STYLE
             };
         });
         return styles.length > 0 ? styles : [{
                 borders: EMPTY_BORDERS,
                 numFmtId: 0,
-                formatCode: "General"
+                formatCode: "General",
+                textStyle: EMPTY_TEXT_STYLE
             }];
     }
     const stylesParserApi = {
         EMPTY_BORDERS,
+        EMPTY_TEXT_STYLE,
         BUILTIN_FORMAT_CODES,
         hasBorderSide,
+        parseFontStyle,
         parseCellStyles
     };
     moduleRegistry.registerModule("stylesParser", stylesParserApi);

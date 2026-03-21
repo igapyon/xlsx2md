@@ -31,7 +31,12 @@ function createDomFixture() {
       <option value="raw">raw</option>
       <option value="both">both</option>
     </select>
+    <select id="formattingModeSelect">
+      <option value="plain">plain</option>
+      <option value="github" selected>github</option>
+    </select>
     <div id="outputModeNotice"></div>
+    <div id="formattingModeNotice"></div>
     <div id="previewModeBanner" hidden></div>
     <div id="analysisSummary"></div>
     <div id="scoreSummary"></div>
@@ -45,6 +50,10 @@ function createDomFixture() {
 
   const outputModeSelect = document.getElementById("outputModeSelect");
   outputModeSelect.getValue = function getValue() {
+    return this.value;
+  };
+  const formattingModeSelect = document.getElementById("formattingModeSelect");
+  formattingModeSelect.getValue = function getValue() {
     return this.value;
   };
 
@@ -86,6 +95,7 @@ function createWorkbookFile() {
     markdown: "# Sheet1",
     summary: {
       outputMode: "display",
+      formattingMode: "github",
       tables: 1,
       narrativeBlocks: 1,
       merges: 0,
@@ -126,6 +136,7 @@ describe("xlsx2md main ui", () => {
     expect(document.getElementById("downloadBtn").disabled).toBe(true);
     expect(document.getElementById("exportZipBtn").disabled).toBe(true);
     expect(document.getElementById("outputModeNotice").textContent).toContain("`display`");
+    expect(document.getElementById("formattingModeNotice").textContent).toContain("`github`");
     expect(document.getElementById("analysisSummary").textContent).toContain("No conversion yet.");
   });
 
@@ -141,6 +152,7 @@ describe("xlsx2md main ui", () => {
     const api = bootMain();
     document.getElementById("includeShapeDetailsEnabled").checked = false;
     document.getElementById("outputModeSelect").value = "both";
+    document.getElementById("formattingModeSelect").value = "github";
 
     const fileInput = document.getElementById("xlsxFileInput");
     const file = {
@@ -161,6 +173,7 @@ describe("xlsx2md main ui", () => {
       expect.objectContaining({
         includeShapeDetails: false,
         outputMode: "both",
+        formattingMode: "github",
         treatFirstRowAsHeader: true,
         trimText: true,
         removeEmptyRows: true,
