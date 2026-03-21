@@ -630,6 +630,52 @@ describe("xlsx2md core", () => {
     expect(markdownFile.markdown).toContain("[MERGED↑]");
   });
 
+  it("parses the merge-multiline fixture workbook with concrete multiline-merge expectations", async () => {
+    const api = bootCore();
+    const fixtureName = "merge-multiline-sample01.xlsx";
+    const fixturePath = path.resolve(fixtureDir, "merge", fixtureName);
+    const fixtureBytes = readFileSync(fixturePath);
+    const arrayBuffer = fixtureBytes.buffer.slice(
+      fixtureBytes.byteOffset,
+      fixtureBytes.byteOffset + fixtureBytes.byteLength
+    );
+
+    const workbook = await api.parseWorkbook(arrayBuffer, fixtureName);
+    const files = api.convertWorkbookToMarkdownFiles(workbook, {
+      treatFirstRowAsHeader: true,
+      trimText: true,
+      removeEmptyRows: true,
+      removeEmptyColumns: true
+    });
+    const sheet = workbook.sheets[0];
+    const markdownFile = files[0];
+
+    expect(workbook.sheets).toHaveLength(1);
+    expect(sheet.name).toBe("merge-multiline");
+    expect(sheet.maxRow).toBe(6);
+    expect(sheet.maxCol).toBe(3);
+    expect(sheet.cells).toHaveLength(11);
+    expect(sheet.merges.map((merge) => merge.ref)).toEqual(["B3:C4"]);
+
+    expect(sheet.cells.find((cell) => cell.address === "B3")?.outputValue).toBe("1行目\n2行目");
+    expect(sheet.cells.find((cell) => cell.address === "C3")?.outputValue).toBe("");
+    expect(sheet.cells.find((cell) => cell.address === "B4")?.outputValue).toBe("");
+    expect(sheet.cells.find((cell) => cell.address === "A6")?.outputValue).toBe("※結合セル内の改行確認用");
+
+    expect(markdownFile.fileName).toBe("merge-multiline-sample01_001_merge-multiline.md");
+    expect(markdownFile.summary.tables).toBe(1);
+    expect(markdownFile.summary.merges).toBe(1);
+    expect(markdownFile.summary.images).toBe(0);
+    expect(markdownFile.summary.formulaDiagnostics).toHaveLength(0);
+    expect(markdownFile.summary.tableScores.map((detail) => detail.range)).toEqual(["A1-C4"]);
+    expect(markdownFile.markdown).toContain("# merge-multiline");
+    expect(markdownFile.markdown).toContain("Workbook: merge-multiline-sample01.xlsx");
+    expect(markdownFile.markdown).toContain("### Table 001 (A1-C4)");
+    expect(markdownFile.markdown).toContain("| 1 | 1行目 2行目 | [MERGED←] |");
+    expect(markdownFile.markdown).toContain("| 2 | [MERGED↑] | [MERGED↑] |");
+    expect(markdownFile.markdown).toContain("※結合セル内の改行確認用");
+  });
+
   it("parses the formula-basic fixture workbook with concrete formula expectations", async () => {
     const api = bootCore();
     const fixtureName = "formula-basic-sample01.xlsx";
@@ -694,6 +740,59 @@ describe("xlsx2md core", () => {
     expect(markdownFile.markdown).toContain("| date | 2024/3/17 |");
     expect(markdownFile.markdown).toContain("| value\\_num | 1234.5 |");
     expect(markdownFile.markdown).toContain("| value\\_date | 45368 |");
+  });
+
+  it("parses the formula-spill fixture workbook with concrete spill-like expectations", async () => {
+    const api = bootCore();
+    const fixtureName = "formula-spill-sample01.xlsx";
+    const fixturePath = path.resolve(fixtureDir, "formula", fixtureName);
+    const fixtureBytes = readFileSync(fixturePath);
+    const arrayBuffer = fixtureBytes.buffer.slice(
+      fixtureBytes.byteOffset,
+      fixtureBytes.byteOffset + fixtureBytes.byteLength
+    );
+
+    const workbook = await api.parseWorkbook(arrayBuffer, fixtureName);
+    const files = api.convertWorkbookToMarkdownFiles(workbook, {
+      treatFirstRowAsHeader: true,
+      trimText: true,
+      removeEmptyRows: true,
+      removeEmptyColumns: true
+    });
+    const sheet = workbook.sheets[0];
+    const markdownFile = files[0];
+
+    expect(workbook.sheets).toHaveLength(1);
+    expect(sheet.name).toBe("spill-sample");
+    expect(sheet.maxRow).toBe(6);
+    expect(sheet.maxCol).toBe(5);
+    expect(sheet.cells).toHaveLength(11);
+
+    expect(sheet.cells.find((cell) => cell.address === "A4")?.outputValue).toBe("1");
+    expect(sheet.cells.find((cell) => cell.address === "A6")?.outputValue).toBe("3");
+    expect(sheet.cells.find((cell) => cell.address === "C4")?.formulaText).toBe("=_xlfn.SEQUENCE(3)");
+    expect(sheet.cells.find((cell) => cell.address === "C4")?.outputValue).toBe("1");
+    expect(sheet.cells.find((cell) => cell.address === "C4")?.resolutionStatus).toBe("resolved");
+    expect(sheet.cells.find((cell) => cell.address === "C5")?.outputValue).toBe("2");
+    expect(sheet.cells.find((cell) => cell.address === "C6")?.outputValue).toBe("3");
+    expect(sheet.cells.find((cell) => cell.address === "E4")?.formulaText).toBe("=SUM(_xlfn.ANCHORARRAY(C4))");
+    expect(sheet.cells.find((cell) => cell.address === "E4")?.outputValue).toBe("6");
+    expect(sheet.cells.find((cell) => cell.address === "E4")?.resolutionStatus).toBe("resolved");
+
+    expect(markdownFile.fileName).toBe("formula-spill-sample01_001_spill-sample.md");
+    expect(markdownFile.summary.tables).toBe(0);
+    expect(markdownFile.summary.merges).toBe(0);
+    expect(markdownFile.summary.images).toBe(0);
+    expect(markdownFile.summary.formulaDiagnostics).toHaveLength(2);
+    expect(markdownFile.summary.formulaDiagnostics.every((diagnostic) => diagnostic.source === "cached_value")).toBe(true);
+    expect(markdownFile.summary.tableScores).toHaveLength(0);
+    expect(markdownFile.markdown).toContain("# spill-sample");
+    expect(markdownFile.markdown).toContain("Workbook: formula-spill-sample01.xlsx");
+    expect(markdownFile.markdown).toContain("spill サンプル");
+    expect(markdownFile.markdown).toContain("src1 spill\\_ref spill\\_sum");
+    expect(markdownFile.markdown).toContain("1 1 6");
+    expect(markdownFile.markdown).toContain("2 2");
+    expect(markdownFile.markdown).toContain("3 3");
   });
 
   it("parses the formula-crosssheet fixture workbook with concrete cross-sheet expectations", async () => {
@@ -2389,6 +2488,64 @@ describe("xlsx2md core", () => {
     expect(markdownFile.markdown).toContain("| 項番 | 項目名称 | 物理名 | デフォルト値 | [MERGED←] | 備考 |");
     expect(markdownFile.markdown).toContain("| 2 | 名前 | name | Taro | Ito | 何かの名前 |");
     expect(markdownFile.markdown).toContain("たまに結合漏れのセルがあって、さらに複数文字が登場");
+  });
+
+  it("parses the table-border-priority-sample01 fixture workbook differently between balanced and border-priority modes", async () => {
+    const api = bootCore();
+    const fixtureName = "table-border-priority-sample01.xlsx";
+    const fixturePath = path.resolve(fixtureDir, "table", fixtureName);
+    const fixtureBytes = readFileSync(fixturePath);
+    const arrayBuffer = fixtureBytes.buffer.slice(
+      fixtureBytes.byteOffset,
+      fixtureBytes.byteOffset + fixtureBytes.byteLength
+    );
+
+    const workbook = await api.parseWorkbook(arrayBuffer, fixtureName);
+    const balancedFiles = api.convertWorkbookToMarkdownFiles(workbook, {
+      treatFirstRowAsHeader: true,
+      trimText: true,
+      removeEmptyRows: true,
+      removeEmptyColumns: true,
+      tableDetectionMode: "balanced"
+    });
+    const borderPriorityFiles = api.convertWorkbookToMarkdownFiles(workbook, {
+      treatFirstRowAsHeader: true,
+      trimText: true,
+      removeEmptyRows: true,
+      removeEmptyColumns: true,
+      tableDetectionMode: "border-priority"
+    });
+    const sheet = workbook.sheets[0];
+    const balancedFile = balancedFiles[0];
+    const borderPriorityFile = borderPriorityFiles[0];
+
+    expect(workbook.sheets).toHaveLength(1);
+    expect(sheet.name).toBe("border-priority");
+    expect(sheet.maxRow).toBe(6);
+    expect(sheet.maxCol).toBe(2);
+    expect(sheet.cells).toHaveLength(6);
+    expect(sheet.cells.find((cell) => cell.address === "A1")?.outputValue).toBe("border-priority fixture");
+    expect(sheet.cells.find((cell) => cell.address === "A3")?.outputValue).toBe("項目");
+    expect(sheet.cells.find((cell) => cell.address === "B4")?.outputValue).toBe("100");
+
+    expect(balancedFile.fileName).toBe("table-border-priority-sample01_001_border-priority.md");
+    expect(balancedFile.summary.tables).toBe(1);
+    expect(balancedFile.summary.tableDetectionMode).toBe("balanced");
+    expect(balancedFile.summary.tableScores.map((detail) => detail.range)).toEqual(["A3-B4"]);
+    expect(balancedFile.markdown).toContain("Workbook: table-border-priority-sample01.xlsx");
+    expect(balancedFile.markdown).toContain("### Table 001 (A3-B4)");
+    expect(balancedFile.markdown).toContain("| 項目 | 値 |");
+    expect(balancedFile.markdown).toContain("| A | 100 |");
+
+    expect(borderPriorityFile.fileName).toBe("table-border-priority-sample01_001_border-priority.md");
+    expect(borderPriorityFile.summary.tables).toBe(0);
+    expect(borderPriorityFile.summary.tableDetectionMode).toBe("border-priority");
+    expect(borderPriorityFile.summary.tableScores).toHaveLength(0);
+    expect(borderPriorityFile.markdown).toContain("Workbook: table-border-priority-sample01.xlsx");
+    expect(borderPriorityFile.markdown).not.toContain("### Table 001");
+    expect(borderPriorityFile.markdown).toContain("項目");
+    expect(borderPriorityFile.markdown).toContain("100");
+    expect(borderPriorityFile.markdown).toContain("※罫線優先モード確認用");
   });
 
   it("expands merged cells with structural tokens", () => {

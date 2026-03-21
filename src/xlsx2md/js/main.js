@@ -18,7 +18,7 @@
         return !!element.checked;
     }
     function getOptions() {
-        var _a, _b;
+        var _a, _b, _c;
         const outputModeSelect = getElement("outputModeSelect");
         const outputMode = typeof outputModeSelect.getValue === "function"
             ? outputModeSelect.getValue()
@@ -27,6 +27,10 @@
         const formattingMode = typeof formattingModeSelect.getValue === "function"
             ? formattingModeSelect.getValue()
             : ((_b = document.getElementById("formattingModeSelect")) === null || _b === void 0 ? void 0 : _b.value) || "plain";
+        const tableDetectionModeSelect = getElement("tableDetectionModeSelect");
+        const tableDetectionMode = typeof tableDetectionModeSelect.getValue === "function"
+            ? tableDetectionModeSelect.getValue()
+            : ((_c = document.getElementById("tableDetectionModeSelect")) === null || _c === void 0 ? void 0 : _c.value) || "balanced";
         return {
             treatFirstRowAsHeader: getSwitchValue("headerRowEnabled"),
             trimText: getSwitchValue("trimTextEnabled"),
@@ -34,7 +38,8 @@
             removeEmptyColumns: getSwitchValue("removeEmptyColumnsEnabled"),
             includeShapeDetails: getSwitchValue("includeShapeDetailsEnabled"),
             outputMode: outputMode === "raw" || outputMode === "both" ? outputMode : "display",
-            formattingMode: formattingMode === "github" ? "github" : "plain"
+            formattingMode: formattingMode === "github" ? "github" : "plain",
+            tableDetectionMode: tableDetectionMode === "border-priority" ? "border-priority" : "balanced"
         };
     }
     function getSelectedOutputMode() {
@@ -208,7 +213,7 @@
         }).join("")}`;
     }
     function renderAnalysisSummary(files, workbookName) {
-        var _a, _b;
+        var _a, _b, _c;
         if (files.length === 0) {
             return '<div class="md-summary-empty">No conversion yet.</div>';
         }
@@ -220,7 +225,8 @@
         const totalFormulas = files.reduce((sum, file) => sum + file.summary.formulaDiagnostics.length, 0);
         const outputMode = ((_a = files[0]) === null || _a === void 0 ? void 0 : _a.summary.outputMode) || "display";
         const formattingMode = ((_b = files[0]) === null || _b === void 0 ? void 0 : _b.summary.formattingMode) || "plain";
-        const overview = `<div class="md-summary-overview">Workbook ${escapeHtml(workbookName)} / ${files.length} sheet(s) / value mode ${escapeHtml(outputMode)} / formatting ${escapeHtml(formattingMode)}</div>`;
+        const tableDetectionMode = ((_c = files[0]) === null || _c === void 0 ? void 0 : _c.summary.tableDetectionMode) || "balanced";
+        const overview = `<div class="md-summary-overview">Workbook ${escapeHtml(workbookName)} / ${files.length} sheet(s) / value mode ${escapeHtml(outputMode)} / formatting ${escapeHtml(formattingMode)} / table detection ${escapeHtml(tableDetectionMode)}</div>`;
         const items = files.map((file) => (`<section class="md-summary-group"><div class="md-summary-group-head"><h3 class="md-summary-group-title">${escapeHtml(file.sheetName)}</h3><span class="md-summary-group-count">${file.summary.cells} cells</span></div><div class="md-summary-group-meta">tables ${file.summary.tables} / narrative ${file.summary.narrativeBlocks} / merges ${file.summary.merges} / images ${file.summary.images} / formulas ${file.summary.formulaDiagnostics.length}</div></section>`)).join("");
         const totals = `<section class="md-summary-group"><div class="md-summary-group-head"><h3 class="md-summary-group-title">Total</h3><span class="md-summary-group-count">${files.length} sheets</span></div><div class="md-summary-group-meta">tables ${totalTables} / narrative ${totalNarratives} / merges ${totalMerges} / images ${totalImages} / formulas ${totalFormulas} / analyzed cells ${totalCells}</div></section>`;
         return `${overview}${totals}${items}`;
@@ -244,6 +250,14 @@
             return;
         }
         notice.textContent = "`plain` strips Excel text emphasis and outputs plain Markdown text.";
+    }
+    function updateTableDetectionModeNotice(mode) {
+        const notice = getElement("tableDetectionModeNotice");
+        if (mode === "border-priority") {
+            notice.textContent = "`border-priority` prefers bordered table candidates and suppresses borderless fallback detection.";
+            return;
+        }
+        notice.textContent = "`balanced` uses both bordered candidates and value-density fallback detection.";
     }
     function updatePreviewModeBanner(mode) {
         const banner = getElement("previewModeBanner");
@@ -451,6 +465,9 @@
         getElement("formattingModeSelect").addEventListener("change", () => {
             updateFormattingModeNotice(getOptions().formattingMode);
         });
+        getElement("tableDetectionModeSelect").addEventListener("change", () => {
+            updateTableDetectionModeNotice(getOptions().tableDetectionMode);
+        });
     }
     function initialize() {
         clearError();
@@ -460,6 +477,7 @@
         setPreviewMarkdown("");
         updateOutputModeNotice(getSelectedOutputMode());
         updateFormattingModeNotice(getOptions().formattingMode);
+        updateTableDetectionModeNotice(getOptions().tableDetectionMode);
         updatePreviewModeBanner(getSelectedOutputMode());
         getElement("downloadBtn").disabled = true;
         getElement("exportZipBtn").disabled = true;

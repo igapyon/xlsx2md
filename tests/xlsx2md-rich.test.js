@@ -258,6 +258,9 @@ describe("xlsx2md rich fixtures", () => {
     expect(markdownFile.markdown).toContain("| a\\~\\~b\\~\\~c | ~~a\\~\\~b\\~\\~c~~ |");
     expect(markdownFile.markdown).toContain("| \\# not heading | <ins>\\# not heading</ins> |");
     expect(markdownFile.markdown).toContain("| &lt;tag&gt; | &lt;tag&gt; |");
+    expect(markdownFile.markdown).toContain("| \\!\\[alt\\]\\(image.png\\) | \\!\\[alt\\]\\(image.png\\) |");
+    expect(markdownFile.markdown).toContain("| code \\`sample\\` | code \\`sample\\` |");
+    expect(markdownFile.markdown).toContain("| path\\\\to\\\\file | path\\\\to\\\\file |");
   });
 
   it("renders rich-markdown-escape-sample01.xlsx in plain mode as plain text without <br>", async () => {
@@ -273,5 +276,8 @@ describe("xlsx2md rich fixtures", () => {
     expect(markdownFile.markdown).toContain("| \\# not heading | \\# not heading |");
     expect(markdownFile.markdown).toContain("| a\\*b | a\\_b | a\\~\\~b\\~\\~c |");
     expect(markdownFile.markdown).toContain("| \\# not heading | \\- not list | 1\\. not list |");
+    expect(markdownFile.markdown).toContain("| \\!\\[alt\\]\\(image.png\\) | \\!\\[alt\\]\\(image.png\\) |");
+    expect(markdownFile.markdown).toContain("| code \\`sample\\` | code \\`sample\\` |");
+    expect(markdownFile.markdown).toContain("| path\\\\to\\\\file | path\\\\to\\\\file |");
   });
 });

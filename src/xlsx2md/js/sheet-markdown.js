@@ -189,7 +189,8 @@
                 shapeBlockGapYEmu: deps.shapeBlockGapYEmu
             });
             const treatFirstRowAsHeader = options.treatFirstRowAsHeader !== false;
-            const tables = deps.detectTableCandidates(sheet, buildCellMap);
+            const tableDetectionMode = options.tableDetectionMode || "balanced";
+            const tables = deps.detectTableCandidates(sheet, buildCellMap, tableDetectionMode);
             const narrativeBlocks = extractNarrativeBlocks(sheet, tables, options);
             const sectionBlocks = extractSectionBlocks(sheet, tables, narrativeBlocks);
             const formulaDiagnostics = sheet.cells
@@ -336,6 +337,7 @@
                 summary: {
                     outputMode: options.outputMode || "display",
                     formattingMode: options.formattingMode || "plain",
+                    tableDetectionMode,
                     sections: sectionBlocks.length,
                     tables: tables.length,
                     narrativeBlocks: narrativeBlocks.length,

@@ -257,4 +257,85 @@ describe("xlsx2md table detector", () => {
       { startRow: 5, startCol: 5, endRow: 6, endCol: 7 }
     ]);
   });
+
+  it("currently detects a dense borderless 2x2 block as a table candidate", () => {
+    const api = bootTableDetector();
+    const sheet = {
+      cells: [
+        createCell(1, 1, "項目"),
+        createCell(1, 2, "値"),
+        createCell(2, 1, "A"),
+        createCell(2, 2, "100")
+      ],
+      merges: []
+    };
+
+    const candidates = api.detectTableCandidates(sheet, buildCellMap);
+
+    expect(candidates).toHaveLength(1);
+    expect(candidates[0]).toMatchObject({
+      startRow: 1,
+      startCol: 1,
+      endRow: 2,
+      endCol: 2
+    });
+    expect(candidates[0].reasonSummary).toContain("High density (+2)");
+  });
+
+  it("balanced mode keeps dense borderless blocks that are currently detected via fallback seeds", () => {
+    const api = bootTableDetector();
+    const sheet = {
+      cells: [
+        createCell(1, 1, "項目"),
+        createCell(1, 2, "値"),
+        createCell(2, 1, "A"),
+        createCell(2, 2, "100")
+      ],
+      merges: []
+    };
+
+    const candidates = api.detectTableCandidates(sheet, buildCellMap, undefined, "balanced");
+
+    expect(candidates).toHaveLength(1);
+  });
+
+  it("border-priority mode excludes dense borderless blocks that are only detected by fallback seeds", () => {
+    const api = bootTableDetector();
+    const sheet = {
+      cells: [
+        createCell(1, 1, "項目"),
+        createCell(1, 2, "値"),
+        createCell(2, 1, "A"),
+        createCell(2, 2, "100")
+      ],
+      merges: []
+    };
+
+    const candidates = api.detectTableCandidates(sheet, buildCellMap, undefined, "border-priority");
+
+    expect(candidates).toHaveLength(0);
+  });
+
+  it("border-priority mode still keeps bordered 2x2 tables", () => {
+    const api = bootTableDetector();
+    const sheet = {
+      cells: [
+        createCell(1, 1, "項番", { top: true, bottom: true, left: true }),
+        createCell(1, 2, "名称", { top: true, bottom: true, right: true }),
+        createCell(2, 1, "1", { bottom: true, left: true }),
+        createCell(2, 2, "コード", { bottom: true, right: true })
+      ],
+      merges: []
+    };
+
+    const candidates = api.detectTableCandidates(sheet, buildCellMap, undefined, "border-priority");
+
+    expect(candidates).toHaveLength(1);
+    expect(candidates[0]).toMatchObject({
+      startRow: 1,
+      startCol: 1,
+      endRow: 2,
+      endCol: 2
+    });
+  });
 });

@@ -12,6 +12,7 @@ Options:
   --zip <file>                  Write ZIP export to this file
   --output-mode <mode>          display | raw | both (default: display)
   --formatting-mode <mode>      plain | github (default: plain)
+  --table-detection-mode <mode> balanced | border-priority (default: balanced)
   --shape-details <mode>        include | exclude (default: exclude)
   --include-shape-details       Alias for --shape-details include
   --no-header-row               Do not treat the first row as a table header
@@ -36,6 +37,7 @@ function parseArgs(argv) {
     includeShapeDetails: false,
     outputMode: "display",
     formattingMode: "plain",
+    tableDetectionMode: "balanced",
     summary: false,
     outPath: null,
     zipPath: null
@@ -77,7 +79,7 @@ function parseArgs(argv) {
       options.summary = true;
       continue;
     }
-    if (arg === "--out" || arg === "--zip" || arg === "--output-mode" || arg === "--formatting-mode" || arg === "--shape-details") {
+    if (arg === "--out" || arg === "--zip" || arg === "--output-mode" || arg === "--formatting-mode" || arg === "--shape-details" || arg === "--table-detection-mode") {
       const value = argv[index + 1];
       if (!value) {
         throw new Error(`Missing value for ${arg}`);
@@ -96,6 +98,12 @@ function parseArgs(argv) {
           throw new Error(`Invalid formatting mode: ${value}`);
         }
         options.formattingMode = value;
+      }
+      if (arg === "--table-detection-mode") {
+        if (value !== "balanced" && value !== "border-priority") {
+          throw new Error(`Invalid table detection mode: ${value}`);
+        }
+        options.tableDetectionMode = value;
       }
       if (arg === "--shape-details") {
         if (value !== "include" && value !== "exclude") {
@@ -180,7 +188,8 @@ async function main() {
         removeEmptyColumns: options.removeEmptyColumns,
         includeShapeDetails: options.includeShapeDetails,
         outputMode: options.outputMode,
-        formattingMode: options.formattingMode
+        formattingMode: options.formattingMode,
+        tableDetectionMode: options.tableDetectionMode
       });
     } catch (error) {
       throw new Error(formatWorkbookError(inputPath, "convert failed", error));

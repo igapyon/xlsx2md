@@ -42,6 +42,8 @@
     removeEmptyColumns?: boolean;
   };
 
+  type TableDetectionMode = "balanced" | "border-priority";
+
   type TableScoreWeights = {
     minGrid: number;
     borderPresence: number;
@@ -172,7 +174,8 @@
   function detectTableCandidates<TCell extends CellLike>(
     sheet: SheetLike<TCell>,
     buildCellMap: (sheet: SheetLike<TCell>) => Map<string, TCell>,
-    scoreWeights: TableScoreWeights = DEFAULT_TABLE_SCORE_WEIGHTS
+    scoreWeights: TableScoreWeights = DEFAULT_TABLE_SCORE_WEIGHTS,
+    tableDetectionMode: TableDetectionMode = "balanced"
   ): TableCandidate[] {
     const cellMap = buildCellMap(sheet);
     const allSeedCells = collectTableSeedCells(sheet);
@@ -272,26 +275,28 @@
       maybePushCandidate(component);
     }
 
-    for (const component of collectConnectedComponents(allSeedCells)) {
-      const rows = component.map((entry) => entry.row);
-      const cols = component.map((entry) => entry.col);
-      const bounds = {
-        startRow: Math.min(...rows),
-        startCol: Math.min(...cols),
-        endRow: Math.max(...rows),
-        endCol: Math.max(...cols)
-      };
-      const containingBorderCandidates = candidates.filter((candidate) => isWithinBounds(candidate, bounds));
-      const fallbackArea = getBoundsArea(bounds);
-      const shadowedByBorderCandidate = containingBorderCandidates.some((candidate) => (
-        getBoundsArea(candidate) >= fallbackArea * 0.4
-      ));
-      const shadowedByMultipleBorderCandidates = containingBorderCandidates.length >= 2
-        && getCombinedCandidateArea(containingBorderCandidates) >= fallbackArea * 0.6;
-      if (shadowedByBorderCandidate || shadowedByMultipleBorderCandidates) {
-        continue;
+    if (tableDetectionMode !== "border-priority") {
+      for (const component of collectConnectedComponents(allSeedCells)) {
+        const rows = component.map((entry) => entry.row);
+        const cols = component.map((entry) => entry.col);
+        const bounds = {
+          startRow: Math.min(...rows),
+          startCol: Math.min(...cols),
+          endRow: Math.max(...rows),
+          endCol: Math.max(...cols)
+        };
+        const containingBorderCandidates = candidates.filter((candidate) => isWithinBounds(candidate, bounds));
+        const fallbackArea = getBoundsArea(bounds);
+        const shadowedByBorderCandidate = containingBorderCandidates.some((candidate) => (
+          getBoundsArea(candidate) >= fallbackArea * 0.4
+        ));
+        const shadowedByMultipleBorderCandidates = containingBorderCandidates.length >= 2
+          && getCombinedCandidateArea(containingBorderCandidates) >= fallbackArea * 0.6;
+        if (shadowedByBorderCandidate || shadowedByMultipleBorderCandidates) {
+          continue;
+        }
+        maybePushCandidate(component);
       }
-      maybePushCandidate(component);
     }
 
     return pruneRedundantCandidates(candidates).sort((left, right) => {

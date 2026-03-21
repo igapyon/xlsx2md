@@ -63,6 +63,43 @@ describe("xlsx2md markdown export", () => {
     expect(api.escapeMarkdownCell("A|\nB")).toBe("A\\| B");
   });
 
+  it("keeps table-cell pipes and line-start markers escaped together", () => {
+    const api = bootMarkdownExport();
+
+    expect(api.escapeMarkdownCell("| a")).toBe("\\| a");
+    expect(api.escapeMarkdownCell("1. item | > quote")).toBe("1. item \\| > quote");
+  });
+
+  it("normalizes html entities and pipes safely inside table cells", () => {
+    const api = bootMarkdownExport();
+
+    expect(api.escapeMarkdownCell("&lt;a&gt; &amp; b | c")).toBe("&lt;a&gt; &amp; b \\| c");
+  });
+
+  it("keeps non-pipe markdown-like text unchanged in table cells", () => {
+    const api = bootMarkdownExport();
+
+    expect(api.escapeMarkdownCell("`code` ![alt](img.png) | c")).toBe("`code` ![alt](img.png) \\| c");
+  });
+
+  it("preserves repeated spaces inside table cells while keeping pipe escaping", () => {
+    const api = bootMarkdownExport();
+
+    expect(api.escapeMarkdownCell("a   b | c")).toBe("a   b \\| c");
+  });
+
+  it("preserves leading and trailing spaces inside table cells", () => {
+    const api = bootMarkdownExport();
+
+    expect(api.escapeMarkdownCell("  a | b  ")).toBe("  a \\| b  ");
+  });
+
+  it("normalizes tabs inside table cells while keeping pipe escaping", () => {
+    const api = bootMarkdownExport();
+
+    expect(api.escapeMarkdownCell("a\tb | c")).toBe("a b \\| c");
+  });
+
   it("creates sanitized output file names with mode suffixes", () => {
     const api = bootMarkdownExport();
 
@@ -83,6 +120,7 @@ describe("xlsx2md markdown export", () => {
       summary: {
         outputMode: "display",
         formattingMode: "plain",
+        tableDetectionMode: "balanced",
         sections: 2,
         tables: 1,
         narrativeBlocks: 1,
@@ -100,6 +138,7 @@ describe("xlsx2md markdown export", () => {
 
     expect(summary).toContain("Output file: sample.md");
     expect(summary).toContain("Formatting mode: plain");
+    expect(summary).toContain("Table detection mode: balanced");
     expect(summary).toContain("Formula resolved: 1");
     expect(summary).toContain("Formula unsupported_external: 1");
     expect(summary).toContain("Table candidate A1-B2: score 7 / Has borders");
@@ -124,6 +163,7 @@ describe("xlsx2md markdown export", () => {
         summary: {
           outputMode: "display",
           formattingMode: "plain",
+          tableDetectionMode: "balanced",
           sections: 1,
           tables: 0,
           narrativeBlocks: 1,
@@ -163,6 +203,7 @@ describe("xlsx2md markdown export", () => {
         summary: {
           outputMode: "display",
           formattingMode: "github",
+          tableDetectionMode: "balanced",
           sections: 1,
           tables: 0,
           narrativeBlocks: 1,

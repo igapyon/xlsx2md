@@ -23,6 +23,7 @@
     summary: {
       outputMode: "display" | "raw" | "both";
       formattingMode: "plain" | "github";
+      tableDetectionMode: "balanced" | "border-priority";
       sections: number;
       tables: number;
       narrativeBlocks: number;
@@ -116,6 +117,7 @@
       `Output file: ${markdownFile.fileName}`,
       `Output mode: ${markdownFile.summary.outputMode}`,
       `Formatting mode: ${markdownFile.summary.formattingMode}`,
+      `Table detection mode: ${markdownFile.summary.tableDetectionMode}`,
       `Sections: ${markdownFile.summary.sections}`,
       `Tables: ${markdownFile.summary.tables}`,
       `Narrative blocks: ${markdownFile.summary.narrativeBlocks}`,

@@ -107,7 +107,7 @@
     });
     const sheetMarkdownHelper = sheetMarkdownModule.createSheetMarkdownApi({
         renderNarrativeBlock: narrativeStructureHelper.renderNarrativeBlock,
-        detectTableCandidates: tableDetectorHelper.detectTableCandidates,
+        detectTableCandidates: (sheet, buildCellMapForSheet, tableDetectionMode = "balanced") => tableDetectorHelper.detectTableCandidates(sheet, buildCellMapForSheet, undefined, tableDetectionMode),
         matrixFromCandidate: tableDetectorHelper.matrixFromCandidate,
         renderMarkdownTable: markdownExportHelper.renderMarkdownTable,
         createOutputFileName: markdownExportHelper.createOutputFileName,
@@ -215,7 +215,7 @@
         unzipEntries: zipIoHelper.unzipEntries,
         parseRangeRef,
         applyMergeTokens: tableDetectorHelper.applyMergeTokens,
-        detectTableCandidates: (sheet) => tableDetectorHelper.detectTableCandidates(sheet, buildCellMap),
+        detectTableCandidates: (sheet, tableDetectionMode = "balanced") => tableDetectorHelper.detectTableCandidates(sheet, buildCellMap, undefined, tableDetectionMode),
         extractNarrativeBlocks,
         convertSheetToMarkdown,
         convertWorkbookToMarkdownFiles,

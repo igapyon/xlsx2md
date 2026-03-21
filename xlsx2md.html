@@ -1559,6 +1559,14 @@ lht-preview-output {
                 ]
               </script>
             </lht-select-help>
+            <lht-select-help field-id="tableDetectionModeSelect" label="Table Detection" help-text="Choose how aggressively xlsx2md detects tables. `border-priority` prefers bordered regions and reduces borderless fallback detection.">
+              <script type="application/json" slot="options">
+                [
+                  { "value": "balanced", "label": "balanced: bordered + fallback detection", "selected": true },
+                  { "value": "border-priority", "label": "border-priority: prefer bordered regions" }
+                ]
+              </script>
+            </lht-select-help>
             <lht-switch-help switch-id="headerRowEnabled" label="Treat the first row as a header" help-label="About header rows" checked>
               Use the first row of each detected table as the Markdown table header.
             </lht-switch-help>
@@ -1577,6 +1585,7 @@ lht-preview-output {
           </div>
           <div id="outputModeNotice" class="md-caption">`display` outputs values close to what Excel shows.</div>
           <div id="formattingModeNotice" class="md-caption">`github` preserves supported Excel emphasis as GitHub-compatible Markdown: bold, italic, strike, underline, and in-cell line breaks as `&lt;br&gt;`.</div>
+          <div id="tableDetectionModeNotice" class="md-caption">`balanced` uses both bordered candidates and value-density fallback detection.</div>
         </div>
       </details>
 
@@ -4127,6 +4136,7 @@ if (!customElements.get("lht-page-menu")) {
     const textDecoder = new TextDecoder("utf-8");
     const textEncoder = new TextEncoder();
     const crcTable = buildCrc32Table();
+    const fixedZipEntryTimestamp = toDosDateTime(2025, 1, 1, 0, 0, 0);
     function buildCrc32Table() {
         const table = new Uint32Array(256);
         for (let i = 0; i < 256; i += 1) {
@@ -4147,6 +4157,15 @@ if (!customElements.get("lht-page-menu")) {
     }
     function decodeXmlText(bytes) {
         return textDecoder.decode(bytes);
+    }
+    function toDosDateTime(year, month, day, hour, minute, second) {
+        const clampedYear = Math.max(1980, Math.min(2107, year));
+        const dosTime = ((hour & 0x1f) << 11) | ((minute & 0x3f) << 5) | (Math.floor(second / 2) & 0x1f);
+        const dosDate = (((clampedYear - 1980) & 0x7f) << 9) | ((month & 0x0f) << 5) | (day & 0x1f);
+        return {
+            dosTime,
+            dosDate
+        };
     }
     function readUint16LE(view, offset) {
         return view.getUint16(offset, true);
@@ -4239,8 +4258,8 @@ if (!customElements.get("lht-page-menu")) {
             localView.setUint16(4, 20, true);
             localView.setUint16(6, 0, true);
             localView.setUint16(8, 0, true);
-            localView.setUint16(10, 0, true);
-            localView.setUint16(12, 0, true);
+            localView.setUint16(10, fixedZipEntryTimestamp.dosTime, true);
+            localView.setUint16(12, fixedZipEntryTimestamp.dosDate, true);
             localView.setUint32(14, entryCrc32, true);
             localView.setUint32(18, dataBytes.length, true);
             localView.setUint32(22, dataBytes.length, true);
@@ -4255,8 +4274,8 @@ if (!customElements.get("lht-page-menu")) {
             centralView.setUint16(6, 20, true);
             centralView.setUint16(8, 0, true);
             centralView.setUint16(10, 0, true);
-            centralView.setUint16(12, 0, true);
-            centralView.setUint16(14, 0, true);
+            centralView.setUint16(12, fixedZipEntryTimestamp.dosTime, true);
+            centralView.setUint16(14, fixedZipEntryTimestamp.dosDate, true);
             centralView.setUint32(16, entryCrc32, true);
             centralView.setUint32(20, dataBytes.length, true);
             centralView.setUint32(24, dataBytes.length, true);
@@ -4299,7 +4318,8 @@ if (!customElements.get("lht-page-menu")) {
     }
     const zipIoApi = {
         unzipEntries,
-        createStoredZip
+        createStoredZip,
+        fixedZipEntryTimestamp
     };
     moduleRegistry.registerModule("zipIo", zipIoApi);
 })();
@@ -4931,7 +4951,7 @@ if (!customElements.get("lht-page-menu")) {
             return true;
         });
     }
-    function detectTableCandidates(sheet, buildCellMap, scoreWeights = DEFAULT_TABLE_SCORE_WEIGHTS) {
+    function detectTableCandidates(sheet, buildCellMap, scoreWeights = DEFAULT_TABLE_SCORE_WEIGHTS, tableDetectionMode = "balanced") {
         const cellMap = buildCellMap(sheet);
         const allSeedCells = collectTableSeedCells(sheet);
         const borderSeedCells = collectBorderSeedCells(sheet);
@@ -5021,24 +5041,26 @@ if (!customElements.get("lht-page-menu")) {
         for (const component of collectConnectedComponents(borderSeedCells)) {
             maybePushCandidate(component);
         }
-        for (const component of collectConnectedComponents(allSeedCells)) {
-            const rows = component.map((entry) => entry.row);
-            const cols = component.map((entry) => entry.col);
-            const bounds = {
-                startRow: Math.min(...rows),
-                startCol: Math.min(...cols),
-                endRow: Math.max(...rows),
-                endCol: Math.max(...cols)
-            };
-            const containingBorderCandidates = candidates.filter((candidate) => isWithinBounds(candidate, bounds));
-            const fallbackArea = getBoundsArea(bounds);
-            const shadowedByBorderCandidate = containingBorderCandidates.some((candidate) => (getBoundsArea(candidate) >= fallbackArea * 0.4));
-            const shadowedByMultipleBorderCandidates = containingBorderCandidates.length >= 2
-                && getCombinedCandidateArea(containingBorderCandidates) >= fallbackArea * 0.6;
-            if (shadowedByBorderCandidate || shadowedByMultipleBorderCandidates) {
-                continue;
+        if (tableDetectionMode !== "border-priority") {
+            for (const component of collectConnectedComponents(allSeedCells)) {
+                const rows = component.map((entry) => entry.row);
+                const cols = component.map((entry) => entry.col);
+                const bounds = {
+                    startRow: Math.min(...rows),
+                    startCol: Math.min(...cols),
+                    endRow: Math.max(...rows),
+                    endCol: Math.max(...cols)
+                };
+                const containingBorderCandidates = candidates.filter((candidate) => isWithinBounds(candidate, bounds));
+                const fallbackArea = getBoundsArea(bounds);
+                const shadowedByBorderCandidate = containingBorderCandidates.some((candidate) => (getBoundsArea(candidate) >= fallbackArea * 0.4));
+                const shadowedByMultipleBorderCandidates = containingBorderCandidates.length >= 2
+                    && getCombinedCandidateArea(containingBorderCandidates) >= fallbackArea * 0.6;
+                if (shadowedByBorderCandidate || shadowedByMultipleBorderCandidates) {
+                    continue;
+                }
+                maybePushCandidate(component);
             }
-            maybePushCandidate(component);
         }
         return pruneRedundantCandidates(candidates).sort((left, right) => {
             if (left.startRow !== right.startRow)
@@ -5214,6 +5236,7 @@ if (!customElements.get("lht-page-menu")) {
             `Output file: ${markdownFile.fileName}`,
             `Output mode: ${markdownFile.summary.outputMode}`,
             `Formatting mode: ${markdownFile.summary.formattingMode}`,
+            `Table detection mode: ${markdownFile.summary.tableDetectionMode}`,
             `Sections: ${markdownFile.summary.sections}`,
             `Tables: ${markdownFile.summary.tables}`,
             `Narrative blocks: ${markdownFile.summary.narrativeBlocks}`,
@@ -5476,7 +5499,8 @@ if (!customElements.get("lht-page-menu")) {
                 shapeBlockGapYEmu: deps.shapeBlockGapYEmu
             });
             const treatFirstRowAsHeader = options.treatFirstRowAsHeader !== false;
-            const tables = deps.detectTableCandidates(sheet, buildCellMap);
+            const tableDetectionMode = options.tableDetectionMode || "balanced";
+            const tables = deps.detectTableCandidates(sheet, buildCellMap, tableDetectionMode);
             const narrativeBlocks = extractNarrativeBlocks(sheet, tables, options);
             const sectionBlocks = extractSectionBlocks(sheet, tables, narrativeBlocks);
             const formulaDiagnostics = sheet.cells
@@ -5623,6 +5647,7 @@ if (!customElements.get("lht-page-menu")) {
                 summary: {
                     outputMode: options.outputMode || "display",
                     formattingMode: options.formattingMode || "plain",
+                    tableDetectionMode,
                     sections: sectionBlocks.length,
                     tables: tables.length,
                     narrativeBlocks: narrativeBlocks.length,
@@ -11222,7 +11247,7 @@ if (!customElements.get("lht-page-menu")) {
     });
     const sheetMarkdownHelper = sheetMarkdownModule.createSheetMarkdownApi({
         renderNarrativeBlock: narrativeStructureHelper.renderNarrativeBlock,
-        detectTableCandidates: tableDetectorHelper.detectTableCandidates,
+        detectTableCandidates: (sheet, buildCellMapForSheet, tableDetectionMode = "balanced") => tableDetectorHelper.detectTableCandidates(sheet, buildCellMapForSheet, undefined, tableDetectionMode),
         matrixFromCandidate: tableDetectorHelper.matrixFromCandidate,
         renderMarkdownTable: markdownExportHelper.renderMarkdownTable,
         createOutputFileName: markdownExportHelper.createOutputFileName,
@@ -11330,7 +11355,7 @@ if (!customElements.get("lht-page-menu")) {
         unzipEntries: zipIoHelper.unzipEntries,
         parseRangeRef,
         applyMergeTokens: tableDetectorHelper.applyMergeTokens,
-        detectTableCandidates: (sheet) => tableDetectorHelper.detectTableCandidates(sheet, buildCellMap),
+        detectTableCandidates: (sheet, tableDetectionMode = "balanced") => tableDetectorHelper.detectTableCandidates(sheet, buildCellMap, undefined, tableDetectionMode),
         extractNarrativeBlocks,
         convertSheetToMarkdown,
         convertWorkbookToMarkdownFiles,
@@ -11368,7 +11393,7 @@ if (!customElements.get("lht-page-menu")) {
         return !!element.checked;
     }
     function getOptions() {
-        var _a, _b;
+        var _a, _b, _c;
         const outputModeSelect = getElement("outputModeSelect");
         const outputMode = typeof outputModeSelect.getValue === "function"
             ? outputModeSelect.getValue()
@@ -11377,6 +11402,10 @@ if (!customElements.get("lht-page-menu")) {
         const formattingMode = typeof formattingModeSelect.getValue === "function"
             ? formattingModeSelect.getValue()
             : ((_b = document.getElementById("formattingModeSelect")) === null || _b === void 0 ? void 0 : _b.value) || "plain";
+        const tableDetectionModeSelect = getElement("tableDetectionModeSelect");
+        const tableDetectionMode = typeof tableDetectionModeSelect.getValue === "function"
+            ? tableDetectionModeSelect.getValue()
+            : ((_c = document.getElementById("tableDetectionModeSelect")) === null || _c === void 0 ? void 0 : _c.value) || "balanced";
         return {
             treatFirstRowAsHeader: getSwitchValue("headerRowEnabled"),
             trimText: getSwitchValue("trimTextEnabled"),
@@ -11384,7 +11413,8 @@ if (!customElements.get("lht-page-menu")) {
             removeEmptyColumns: getSwitchValue("removeEmptyColumnsEnabled"),
             includeShapeDetails: getSwitchValue("includeShapeDetailsEnabled"),
             outputMode: outputMode === "raw" || outputMode === "both" ? outputMode : "display",
-            formattingMode: formattingMode === "github" ? "github" : "plain"
+            formattingMode: formattingMode === "github" ? "github" : "plain",
+            tableDetectionMode: tableDetectionMode === "border-priority" ? "border-priority" : "balanced"
         };
     }
     function getSelectedOutputMode() {
@@ -11558,7 +11588,7 @@ if (!customElements.get("lht-page-menu")) {
         }).join("")}`;
     }
     function renderAnalysisSummary(files, workbookName) {
-        var _a, _b;
+        var _a, _b, _c;
         if (files.length === 0) {
             return '<div class="md-summary-empty">No conversion yet.</div>';
         }
@@ -11570,7 +11600,8 @@ if (!customElements.get("lht-page-menu")) {
         const totalFormulas = files.reduce((sum, file) => sum + file.summary.formulaDiagnostics.length, 0);
         const outputMode = ((_a = files[0]) === null || _a === void 0 ? void 0 : _a.summary.outputMode) || "display";
         const formattingMode = ((_b = files[0]) === null || _b === void 0 ? void 0 : _b.summary.formattingMode) || "plain";
-        const overview = `<div class="md-summary-overview">Workbook ${escapeHtml(workbookName)} / ${files.length} sheet(s) / value mode ${escapeHtml(outputMode)} / formatting ${escapeHtml(formattingMode)}</div>`;
+        const tableDetectionMode = ((_c = files[0]) === null || _c === void 0 ? void 0 : _c.summary.tableDetectionMode) || "balanced";
+        const overview = `<div class="md-summary-overview">Workbook ${escapeHtml(workbookName)} / ${files.length} sheet(s) / value mode ${escapeHtml(outputMode)} / formatting ${escapeHtml(formattingMode)} / table detection ${escapeHtml(tableDetectionMode)}</div>`;
         const items = files.map((file) => (`<section class="md-summary-group"><div class="md-summary-group-head"><h3 class="md-summary-group-title">${escapeHtml(file.sheetName)}</h3><span class="md-summary-group-count">${file.summary.cells} cells</span></div><div class="md-summary-group-meta">tables ${file.summary.tables} / narrative ${file.summary.narrativeBlocks} / merges ${file.summary.merges} / images ${file.summary.images} / formulas ${file.summary.formulaDiagnostics.length}</div></section>`)).join("");
         const totals = `<section class="md-summary-group"><div class="md-summary-group-head"><h3 class="md-summary-group-title">Total</h3><span class="md-summary-group-count">${files.length} sheets</span></div><div class="md-summary-group-meta">tables ${totalTables} / narrative ${totalNarratives} / merges ${totalMerges} / images ${totalImages} / formulas ${totalFormulas} / analyzed cells ${totalCells}</div></section>`;
         return `${overview}${totals}${items}`;
@@ -11594,6 +11625,14 @@ if (!customElements.get("lht-page-menu")) {
             return;
         }
         notice.textContent = "`plain` strips Excel text emphasis and outputs plain Markdown text.";
+    }
+    function updateTableDetectionModeNotice(mode) {
+        const notice = getElement("tableDetectionModeNotice");
+        if (mode === "border-priority") {
+            notice.textContent = "`border-priority` prefers bordered table candidates and suppresses borderless fallback detection.";
+            return;
+        }
+        notice.textContent = "`balanced` uses both bordered candidates and value-density fallback detection.";
     }
     function updatePreviewModeBanner(mode) {
         const banner = getElement("previewModeBanner");
@@ -11801,6 +11840,9 @@ if (!customElements.get("lht-page-menu")) {
         getElement("formattingModeSelect").addEventListener("change", () => {
             updateFormattingModeNotice(getOptions().formattingMode);
         });
+        getElement("tableDetectionModeSelect").addEventListener("change", () => {
+            updateTableDetectionModeNotice(getOptions().tableDetectionMode);
+        });
     }
     function initialize() {
         clearError();
@@ -11810,6 +11852,7 @@ if (!customElements.get("lht-page-menu")) {
         setPreviewMarkdown("");
         updateOutputModeNotice(getSelectedOutputMode());
         updateFormattingModeNotice(getOptions().formattingMode);
+        updateTableDetectionModeNotice(getOptions().tableDetectionMode);
         updatePreviewModeBanner(getSelectedOutputMode());
         getElement("downloadBtn").disabled = true;
         getElement("exportZipBtn").disabled = true;
