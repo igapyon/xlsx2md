@@ -7,7 +7,7 @@
     includeShapeDetails: boolean;
     outputMode: "display" | "raw" | "both";
     formattingMode: "plain" | "github";
-    tableDetectionMode: "balanced" | "border-priority";
+    tableDetectionMode: "balanced" | "border";
   };
 
   type WorkbookFile = {
@@ -17,7 +17,7 @@
     summary: {
       outputMode: "display" | "raw" | "both";
       formattingMode: "plain" | "github";
-      tableDetectionMode: "balanced" | "border-priority";
+      tableDetectionMode: "balanced" | "border";
       tables: number;
       narrativeBlocks: number;
       merges: number;
@@ -93,7 +93,7 @@
       includeShapeDetails: getSwitchValue("includeShapeDetailsEnabled"),
       outputMode: outputMode === "raw" || outputMode === "both" ? outputMode : "display",
       formattingMode: formattingMode === "github" ? "github" : "plain",
-      tableDetectionMode: tableDetectionMode === "border-priority" ? "border-priority" : "balanced"
+      tableDetectionMode: tableDetectionMode === "border-priority" || tableDetectionMode === "border" ? "border" : "balanced"
     };
   }
 
@@ -334,10 +334,10 @@
     notice.textContent = "`plain` strips Excel text emphasis and outputs plain Markdown text.";
   }
 
-  function updateTableDetectionModeNotice(mode: "balanced" | "border-priority"): void {
+  function updateTableDetectionModeNotice(mode: "balanced" | "border"): void {
     const notice = getElement<HTMLElement>("tableDetectionModeNotice");
-    if (mode === "border-priority") {
-      notice.textContent = "`border-priority` prefers bordered table candidates and suppresses borderless fallback detection.";
+    if (mode === "border") {
+      notice.textContent = "`border` detects tables from bordered regions and suppresses borderless fallback detection.";
       return;
     }
     notice.textContent = "`balanced` uses both bordered candidates and value-density fallback detection.";

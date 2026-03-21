@@ -20,16 +20,16 @@
 - `balanced`
   - 現状相当
   - border seed と all seed の両方を使う
-- `border-priority`
+- `border`
   - 罫線 seed を優先
   - 基本は border seed 由来候補のみ採用
   - all seed fallback は無効、またはかなり限定して使う
 
-`balanced` を既定値として維持し、誤検知が辛い workbook / sheet では `border-priority` を選べるようにする案が第一候補。
+`balanced` を既定値として維持し、誤検知が辛い workbook / sheet では `border` を選べるようにする案が第一候補。
 
 ## 最小仕様
 
-`border-priority` では、少なくとも次を満たしたい。
+`border` では、少なくとも次を満たしたい。
 
 - border seed component から得た候補は現状どおり scoring する
 - all seed component 由来の fallback 候補は作らない
@@ -56,7 +56,7 @@
 - 内部名: `tableDetectionMode`
 - 値:
   - `balanced`
-  - `border-priority`
+  - `border`
 
 既存の `outputMode` / `formattingMode` と同じく、CLI / GUI / summary に出せる形が望ましい。
 
@@ -66,7 +66,7 @@ Step 2 では、まず誤検知しやすい最小 fixture または最小 unit t
 
 - 罫線なしで値が密集しているが、表として扱いたくないケース
 - 罫線ありの 2x2 以上で、表として扱いたいケース
-- 同一データで `balanced` は候補あり、`border-priority` は候補なしになるケース
+- 同一データで `balanced` は候補あり、`border` は候補なしになるケース
 
 ## 非目標
 
@@ -77,5 +77,5 @@ Step 2 では、まず誤検知しやすい最小 fixture または最小 unit t
 ## 次の一歩
 
 1. 誤検知する最小 fixture または unit test 用シートを決める
-2. `border-priority` 用の小テストを追加する
+2. `border` 用の小テストを追加する
 3. その後に最小実装を入れる

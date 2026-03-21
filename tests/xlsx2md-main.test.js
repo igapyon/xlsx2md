@@ -2490,7 +2490,7 @@ describe("xlsx2md core", () => {
     expect(markdownFile.markdown).toContain("たまに結合漏れのセルがあって、さらに複数文字が登場");
   });
 
-  it("parses the table-border-priority-sample01 fixture workbook differently between balanced and border-priority modes", async () => {
+  it("parses the table-border-priority-sample01 fixture workbook differently between balanced and border modes", async () => {
     const api = bootCore();
     const fixtureName = "table-border-priority-sample01.xlsx";
     const fixturePath = path.resolve(fixtureDir, "table", fixtureName);
@@ -2508,16 +2508,16 @@ describe("xlsx2md core", () => {
       removeEmptyColumns: true,
       tableDetectionMode: "balanced"
     });
-    const borderPriorityFiles = api.convertWorkbookToMarkdownFiles(workbook, {
+    const borderFiles = api.convertWorkbookToMarkdownFiles(workbook, {
       treatFirstRowAsHeader: true,
       trimText: true,
       removeEmptyRows: true,
       removeEmptyColumns: true,
-      tableDetectionMode: "border-priority"
+      tableDetectionMode: "border"
     });
     const sheet = workbook.sheets[0];
     const balancedFile = balancedFiles[0];
-    const borderPriorityFile = borderPriorityFiles[0];
+    const borderFile = borderFiles[0];
 
     expect(workbook.sheets).toHaveLength(1);
     expect(sheet.name).toBe("border-priority");
@@ -2537,15 +2537,15 @@ describe("xlsx2md core", () => {
     expect(balancedFile.markdown).toContain("| 項目 | 値 |");
     expect(balancedFile.markdown).toContain("| A | 100 |");
 
-    expect(borderPriorityFile.fileName).toBe("table-border-priority-sample01_001_border-priority.md");
-    expect(borderPriorityFile.summary.tables).toBe(0);
-    expect(borderPriorityFile.summary.tableDetectionMode).toBe("border-priority");
-    expect(borderPriorityFile.summary.tableScores).toHaveLength(0);
-    expect(borderPriorityFile.markdown).toContain("Workbook: table-border-priority-sample01.xlsx");
-    expect(borderPriorityFile.markdown).not.toContain("### Table 001");
-    expect(borderPriorityFile.markdown).toContain("項目");
-    expect(borderPriorityFile.markdown).toContain("100");
-    expect(borderPriorityFile.markdown).toContain("※罫線優先モード確認用");
+    expect(borderFile.fileName).toBe("table-border-priority-sample01_001_border-priority.md");
+    expect(borderFile.summary.tables).toBe(0);
+    expect(borderFile.summary.tableDetectionMode).toBe("border");
+    expect(borderFile.summary.tableScores).toHaveLength(0);
+    expect(borderFile.markdown).toContain("Workbook: table-border-priority-sample01.xlsx");
+    expect(borderFile.markdown).not.toContain("### Table 001");
+    expect(borderFile.markdown).toContain("項目");
+    expect(borderFile.markdown).toContain("100");
+    expect(borderFile.markdown).toContain("※罫線優先モード確認用");
   });
 
   it("expands merged cells with structural tokens", () => {

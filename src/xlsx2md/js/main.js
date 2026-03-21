@@ -39,7 +39,7 @@
             includeShapeDetails: getSwitchValue("includeShapeDetailsEnabled"),
             outputMode: outputMode === "raw" || outputMode === "both" ? outputMode : "display",
             formattingMode: formattingMode === "github" ? "github" : "plain",
-            tableDetectionMode: tableDetectionMode === "border-priority" ? "border-priority" : "balanced"
+            tableDetectionMode: tableDetectionMode === "border-priority" || tableDetectionMode === "border" ? "border" : "balanced"
         };
     }
     function getSelectedOutputMode() {
@@ -253,8 +253,8 @@
     }
     function updateTableDetectionModeNotice(mode) {
         const notice = getElement("tableDetectionModeNotice");
-        if (mode === "border-priority") {
-            notice.textContent = "`border-priority` prefers bordered table candidates and suppresses borderless fallback detection.";
+        if (mode === "border") {
+            notice.textContent = "`border` detects tables from bordered regions and suppresses borderless fallback detection.";
             return;
         }
         notice.textContent = "`balanced` uses both bordered candidates and value-density fallback detection.";

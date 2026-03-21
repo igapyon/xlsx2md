@@ -133,7 +133,7 @@ describe("xlsx2md cli", () => {
         "--formatting-mode",
         "github",
         "--table-detection-mode",
-        "border-priority",
+        "border",
         "--shape-details",
         "include"
       ], {

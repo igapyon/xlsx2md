@@ -23,7 +23,7 @@
     summary: {
       outputMode: "display" | "raw" | "both";
       formattingMode: "plain" | "github";
-      tableDetectionMode: "balanced" | "border-priority";
+      tableDetectionMode: "balanced" | "border";
       sections: number;
       tables: number;
       narrativeBlocks: number;

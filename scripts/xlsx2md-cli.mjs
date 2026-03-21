@@ -12,7 +12,7 @@ Options:
   --zip <file>                  Write ZIP export to this file
   --output-mode <mode>          display | raw | both (default: display)
   --formatting-mode <mode>      plain | github (default: plain)
-  --table-detection-mode <mode> balanced | border-priority (default: balanced)
+  --table-detection-mode <mode> balanced | border (default: balanced)
   --shape-details <mode>        include | exclude (default: exclude)
   --include-shape-details       Alias for --shape-details include
   --no-header-row               Do not treat the first row as a table header
@@ -100,10 +100,10 @@ function parseArgs(argv) {
         options.formattingMode = value;
       }
       if (arg === "--table-detection-mode") {
-        if (value !== "balanced" && value !== "border-priority") {
+        if (value !== "balanced" && value !== "border" && value !== "border-priority") {
           throw new Error(`Invalid table detection mode: ${value}`);
         }
-        options.tableDetectionMode = value;
+        options.tableDetectionMode = value === "border-priority" ? "border" : value;
       }
       if (arg === "--shape-details") {
         if (value !== "include" && value !== "exclude") {
