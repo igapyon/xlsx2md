@@ -18,9 +18,14 @@
 | --- | --- | --- |
 | `xlsx2md-basic-sample01.xlsx` | 総合サンプル | `xlsx2md-spec.md` 6, 7, 10, 13 | 表と地の文の崩れ、基本 Markdown 差分 |
 | `display/display-format-sample01.xlsx` | 表示形式 | `xlsx2md-spec.md` 12 | `display / raw / both` の見え方差分 |
+| `formula/formula-basic-sample01.xlsx` | 基本数式 | `xlsx2md-spec.md` 10, 11 | `cached / resolved / fallback` の差分 |
+| `formula/formula-crosssheet-sample01.xlsx` | 複数シート参照 | `xlsx2md-spec.md` 10, 19 | sheet 参照解決漏れ、参照先ずれ |
+| `formula/formula-shared-sample01.xlsx` | shared formula | `xlsx2md-spec.md` 10, 19 | shared formula 展開漏れ、連番列の崩れ |
+| `formula/formula-spill-sample01.xlsx` | dynamic array / spill | `xlsx2md-spec.md` 19 | spill 解決漏れ、`A1#` 参照崩れ |
 | `rich/rich-text-github-sample01.xlsx` | rich text / 文字装飾 | `xlsx2md-spec.md` 5, 6 | GitHub 互換の `bold / italic / strike / underline` 出力 |
 | `rich/rich-markdown-escape-sample01.xlsx` | Markdown 記号 / escape | `xlsx2md-spec.md` 5, 6 | Markdown 記号を含む文字列と rich text の混在 |
 | `merge/merge-pattern-sample01.xlsx` | 結合セル | `xlsx2md-spec.md` 13 | `[MERGED←] / [MERGED↑]` の崩れ |
+| `merge/merge-multiline-sample01.xlsx` | 結合セル内改行 | `xlsx2md-spec.md` 13 | multiline merged text の parse と Markdown 正規化 |
 | `table/table-basic-sample01.xlsx` | 隣接表(縦) | `xlsx2md-spec.md` 7, 8 | 縦に密接した独立表の誤結合 |
 | `table/table-basic-sample02.xlsx` | 隣接表(横) | `xlsx2md-spec.md` 7, 8 | 横に密接した独立表の誤結合 |
 | `table/table-basic-sample03.xlsx` | 隣接表(縦横) | `xlsx2md-spec.md` 7, 8 | 4表密集時の過剰な一体検出 |
@@ -29,6 +34,7 @@
 | `table/table-basic-sample13.xlsx` | 方眼紙表(縦横) | `xlsx2md-spec.md` 7, 8, 13 | merge 多用の方眼紙風 4 表の誤結合 |
 | `table/table-basic-sample14.xlsx` | 方眼紙表(結合漏れ) | `xlsx2md-spec.md` 7, 8, 13 | merge 多用表で一部だけ結合漏れがある場合の崩れ |
 | `table/table-basic-sample15.xlsx` | 方眼紙表(縦結合混在) | `xlsx2md-spec.md` 7, 8, 13 | merge 多用表で縦結合が混じる場合の崩れ |
+| `table/table-border-priority-sample01.xlsx` | 罫線優先モード | `xlsx2md-spec.md` 7, 8 | borderless dense block の誤検知と `border-priority` 差分 |
 
 ### ルート直下
 
@@ -46,6 +52,29 @@
   - 対応章: `xlsx2md-spec.md` 12
   - 主に確認する症状: `display / raw / both` の見え方差分
 
+### `formula/`
+
+- `formula-basic-sample01.xlsx`
+  - 基本数式専用
+  - `ref`、算術、`IF`、`SUM`、`COUNTIF`、`TEXT`、`DATE`、`VALUE` を確認する
+  - 対応章: `xlsx2md-spec.md` 10, 11
+  - 主に確認する症状: `cached / resolved / fallback` の差分
+- `formula-crosssheet-sample01.xlsx`
+  - 複数シート参照専用
+  - sheet 参照と日本語シート名参照を確認する
+  - 対応章: `xlsx2md-spec.md` 10, 19
+  - 主に確認する症状: sheet 参照解決漏れ、参照先ずれ
+- `formula-shared-sample01.xlsx`
+  - shared formula 専用
+  - オートフィル由来の連番列を確認する
+  - 対応章: `xlsx2md-spec.md` 10, 19
+  - 主に確認する症状: shared formula 展開漏れ、連番列の崩れ
+- `formula-spill-sample01.xlsx`
+  - dynamic array / spill 専用
+  - `_xlfn.SEQUENCE(3)` と `SUM(C4#)` の cached value を含めた最小ケース
+  - 対応章: `xlsx2md-spec.md` 19
+  - 主に確認する症状: spill 由来セルの取り扱い、`#` 参照の保持
+
 ### `rich/`
 
 - `rich-text-github-sample01.xlsx`
@@ -60,6 +89,10 @@
   - セル全体装飾、部分装飾、セル内改行、表セルを同時に含める
   - 対応章: `xlsx2md-spec.md` 5, 6
   - 主に確認する症状: Markdown 記号の誤解釈、`github` モードでの `<br>` 変換、表セル内の崩れ
+  - 期待観点:
+    - narrative では backtick や image 風文字列を literal のまま出す
+    - table では `|` だけを優先的に escape し、他の文字列は過剰変換しない
+    - `path\\to\\file` や `&lt;tag&gt;` のような断片が mode 差をまたいでも安定する
 
 ### `merge/`
 
@@ -68,6 +101,12 @@
   - 横結合、縦結合、2x2 結合と `[MERGED←] / [MERGED↑]` を確認する
   - 対応章: `xlsx2md-spec.md` 13
   - 主に確認する症状: `[MERGED←] / [MERGED↑]` の崩れ
+- `merge-multiline-sample01.xlsx`
+  - 結合セル内改行専用
+  - 2x2 結合セルの先頭セルに multiline text を入れて確認する
+  - parse では改行を保持し、Markdown では現状空白へ正規化されることを前提にする
+  - 対応章: `xlsx2md-spec.md` 13
+  - 主に確認する症状: multiline merged text の脱落、Markdown 正規化時の崩れ
 
 ### `table/`
 
@@ -111,6 +150,11 @@
   - `MERGED↑` を含む表でも Markdown 表として壊れないか確認する
   - 対応章: `xlsx2md-spec.md` 7, 8, 13
   - 主に確認する症状: merge 多用表で縦結合が混じる場合の崩れ
+- `table-border-priority-sample01.xlsx`
+  - 罫線のない dense な 2x2 値ブロック
+  - `balanced` では表候補になりやすく、`border-priority` では narrative に落ちる差分を確認する
+  - 対応章: `xlsx2md-spec.md` 7, 8
+  - 主に確認する症状: 非罫線 fallback による誤検知
 
 ## 作成予定 fixture
 
@@ -198,22 +242,6 @@
 - 補足:
   - コピー貼り付けではなく、Excel のオートフィルで増やす
 
-### `formula/formula-spill-sample01.xlsx`
-
-- 目的: dynamic array / spill
-- 対応章: `xlsx2md-spec.md` 19
-- 主に確認する症状: spill 解決漏れ、`A1#` 参照崩れ
-- 構成: 1シート
-- セル配置案:
-  - `A1`: `spill サンプル`
-  - `A3`: `src1`
-  - `A4`: `1`
-  - `A5`: `2`
-  - `A6`: `3`
-  - `C3`: `spill_ref`
-  - `C4`: `=A4:A6`
-  - 可能なら、Excel が dynamic array として保存する形で `C4#` を参照する式も追加
-  - `E3`: `spill_sum`
   - `E4`: `=SUM(C4#)`
 - 補足:
   - Excel で実際に spill させて保存する

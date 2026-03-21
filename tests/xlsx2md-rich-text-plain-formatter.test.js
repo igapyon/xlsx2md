@@ -54,4 +54,64 @@ describe("xlsx2md rich text plain formatter", () => {
     expect(api.renderStyledTextPart({ kind: "escaped", text: "\\*", rawText: "*" })).toBe("\\*");
     expect(api.renderStyledTextPart({ kind: "text", text: "a", rawText: "a" })).toBe("a");
   });
+
+  it("joins line breaks and repeated spaces conservatively in plain mode", () => {
+    const api = bootRichTextPlainFormatter();
+
+    expect(api.renderPlainTokens([
+      { kind: "text", text: "a  " },
+      { kind: "lineBreak" },
+      {
+        kind: "styledText",
+        parts: [{ kind: "text", text: "b", rawText: "b" }],
+        style: { bold: false, italic: true, strike: false, underline: false }
+      },
+      { kind: "text", text: "   c" }
+    ])).toBe("a b c");
+  });
+
+  it("collapses consecutive line breaks into single-space joins in plain mode", () => {
+    const api = bootRichTextPlainFormatter();
+
+    expect(api.renderPlainTokens([
+      { kind: "text", text: "top" },
+      { kind: "lineBreak" },
+      { kind: "lineBreak" },
+      {
+        kind: "styledText",
+        parts: [{ kind: "text", text: "next", rawText: "next" }],
+        style: { bold: false, italic: false, strike: false, underline: true }
+      }
+    ])).toBe("top next");
+  });
+
+  it("keeps escaped ampersands and image-like text as plain joined text", () => {
+    const api = bootRichTextPlainFormatter();
+
+    expect(api.renderPlainTokens([
+      {
+        kind: "styledText",
+        parts: [
+          { kind: "text", text: "a ", rawText: "a " },
+          { kind: "escaped", text: "&amp;", rawText: "&" },
+          { kind: "text", text: " b", rawText: " b" }
+        ],
+        style: { bold: true, italic: false, strike: false, underline: false }
+      },
+      { kind: "lineBreak" },
+      {
+        kind: "styledText",
+        parts: [
+          { kind: "escaped", text: "\\!", rawText: "!" },
+          { kind: "escaped", text: "\\[", rawText: "[" },
+          { kind: "text", text: "alt", rawText: "alt" },
+          { kind: "escaped", text: "\\]", rawText: "]" },
+          { kind: "escaped", text: "\\(", rawText: "(" },
+          { kind: "text", text: "img.png", rawText: "img.png" },
+          { kind: "escaped", text: "\\)", rawText: ")" }
+        ],
+        style: { bold: false, italic: false, strike: false, underline: false }
+      }
+    ])).toBe("a &amp; b \\!\\[alt\\]\\(img.png\\)");
+  });
 });

@@ -238,4 +238,274 @@ describe("xlsx2md sheet markdown", () => {
     expect(disabled.markdown).not.toContain("## Shape Blocks");
     expect(disabled.markdown).not.toContain("## Shapes");
   });
+
+  it("keeps line-start markdown markers literal in narrative output", () => {
+    const module = bootSheetMarkdown();
+    const api = module.createSheetMarkdownApi(createDeps({
+      renderNarrativeBlock: (block) => block.lines.join("\n")
+    }));
+    const workbook = { name: "book.xlsx", sheets: [] };
+    const sheet = {
+      name: "Sheet1",
+      index: 1,
+      cells: [
+        {
+          address: "A1",
+          row: 1,
+          col: 1,
+          outputValue: "# heading",
+          rawValue: "# heading",
+          formulaText: "",
+          resolutionStatus: null,
+          resolutionSource: null,
+          textStyle: { bold: false, italic: false, strike: false, underline: false },
+          richTextRuns: null
+        },
+        {
+          address: "A2",
+          row: 2,
+          col: 1,
+          outputValue: "- item",
+          rawValue: "- item",
+          formulaText: "",
+          resolutionStatus: null,
+          resolutionSource: null,
+          textStyle: { bold: false, italic: false, strike: false, underline: false },
+          richTextRuns: null
+        }
+      ],
+      merges: [],
+      images: [],
+      charts: [],
+      shapes: []
+    };
+
+    const result = api.convertSheetToMarkdown(workbook, sheet, {});
+
+    expect(result.markdown).toContain("\\# heading");
+    expect(result.markdown).toContain("\\- item");
+  });
+
+  it("keeps ordered-list and quote markers literal in narrative output", () => {
+    const module = bootSheetMarkdown();
+    const api = module.createSheetMarkdownApi(createDeps({
+      renderNarrativeBlock: (block) => block.lines.join("\n")
+    }));
+    const workbook = { name: "book.xlsx", sheets: [] };
+    const sheet = {
+      name: "Sheet1",
+      index: 1,
+      cells: [
+        {
+          address: "A1",
+          row: 1,
+          col: 1,
+          outputValue: "1. item",
+          rawValue: "1. item",
+          formulaText: "",
+          resolutionStatus: null,
+          resolutionSource: null,
+          textStyle: { bold: false, italic: false, strike: false, underline: false },
+          richTextRuns: null
+        },
+        {
+          address: "A2",
+          row: 2,
+          col: 1,
+          outputValue: "> quote",
+          rawValue: "> quote",
+          formulaText: "",
+          resolutionStatus: null,
+          resolutionSource: null,
+          textStyle: { bold: false, italic: false, strike: false, underline: false },
+          richTextRuns: null
+        }
+      ],
+      merges: [],
+      images: [],
+      charts: [],
+      shapes: []
+    };
+
+    const result = api.convertSheetToMarkdown(workbook, sheet, {});
+
+    expect(result.markdown).toContain("1\\. item");
+    expect(result.markdown).toContain("&gt; quote");
+  });
+
+  it("keeps image-like markdown and code spans literal in narrative output", () => {
+    const module = bootSheetMarkdown();
+    const api = module.createSheetMarkdownApi(createDeps({
+      renderNarrativeBlock: (block) => block.lines.join("\n")
+    }));
+    const workbook = { name: "book.xlsx", sheets: [] };
+    const sheet = {
+      name: "Sheet1",
+      index: 1,
+      cells: [
+        {
+          address: "A1",
+          row: 1,
+          col: 1,
+          outputValue: "![alt](img.png)",
+          rawValue: "![alt](img.png)",
+          formulaText: "",
+          resolutionStatus: null,
+          resolutionSource: null,
+          textStyle: { bold: false, italic: false, strike: false, underline: false },
+          richTextRuns: null
+        },
+        {
+          address: "A2",
+          row: 2,
+          col: 1,
+          outputValue: "`code`",
+          rawValue: "`code`",
+          formulaText: "",
+          resolutionStatus: null,
+          resolutionSource: null,
+          textStyle: { bold: false, italic: false, strike: false, underline: false },
+          richTextRuns: null
+        }
+      ],
+      merges: [],
+      images: [],
+      charts: [],
+      shapes: []
+    };
+
+    const result = api.convertSheetToMarkdown(workbook, sheet, {});
+
+    expect(result.markdown).toContain("\\!\\[alt\\]\\(img.png\\)");
+    expect(result.markdown).toContain("\\`code\\`");
+  });
+
+  it("keeps additional list markers and ampersands literal in narrative output", () => {
+    const module = bootSheetMarkdown();
+    const api = module.createSheetMarkdownApi(createDeps({
+      renderNarrativeBlock: (block) => block.lines.join("\n")
+    }));
+    const workbook = { name: "book.xlsx", sheets: [] };
+    const sheet = {
+      name: "Sheet1",
+      index: 1,
+      cells: [
+        {
+          address: "A1",
+          row: 1,
+          col: 1,
+          outputValue: "+ plus",
+          rawValue: "+ plus",
+          formulaText: "",
+          resolutionStatus: null,
+          resolutionSource: null,
+          textStyle: { bold: false, italic: false, strike: false, underline: false },
+          richTextRuns: null
+        },
+        {
+          address: "A2",
+          row: 2,
+          col: 1,
+          outputValue: "* star",
+          rawValue: "* star",
+          formulaText: "",
+          resolutionStatus: null,
+          resolutionSource: null,
+          textStyle: { bold: false, italic: false, strike: false, underline: false },
+          richTextRuns: null
+        },
+        {
+          address: "A3",
+          row: 3,
+          col: 1,
+          outputValue: "a & b",
+          rawValue: "a & b",
+          formulaText: "",
+          resolutionStatus: null,
+          resolutionSource: null,
+          textStyle: { bold: false, italic: false, strike: false, underline: false },
+          richTextRuns: null
+        }
+      ],
+      merges: [],
+      images: [],
+      charts: [],
+      shapes: []
+    };
+
+    const result = api.convertSheetToMarkdown(workbook, sheet, {});
+
+    expect(result.markdown).toContain("\\+ plus");
+    expect(result.markdown).toContain("\\* star");
+    expect(result.markdown).toContain("a &amp; b");
+  });
+
+  it("shows narrative-vs-table differences for the same markdown-like text", () => {
+    const module = bootSheetMarkdown();
+    const api = module.createSheetMarkdownApi(createDeps({
+      detectTableCandidates: () => [{
+        startRow: 2,
+        startCol: 1,
+        endRow: 3,
+        endCol: 1,
+        score: 1,
+        reasonSummary: ["test"]
+      }],
+      matrixFromCandidate: () => [["`code` ![alt](img.png)"], ["a | b"]],
+      renderNarrativeBlock: (block) => block.lines.join("\n")
+    }));
+    const workbook = { name: "book.xlsx", sheets: [] };
+    const sheet = {
+      name: "Sheet1",
+      index: 1,
+      cells: [
+        {
+          address: "A1",
+          row: 1,
+          col: 1,
+          outputValue: "`code` ![alt](img.png)",
+          rawValue: "`code` ![alt](img.png)",
+          formulaText: "",
+          resolutionStatus: null,
+          resolutionSource: null,
+          textStyle: { bold: false, italic: false, strike: false, underline: false },
+          richTextRuns: null
+        },
+        {
+          address: "A2",
+          row: 2,
+          col: 1,
+          outputValue: "`code` ![alt](img.png)",
+          rawValue: "`code` ![alt](img.png)",
+          formulaText: "",
+          resolutionStatus: null,
+          resolutionSource: null,
+          textStyle: { bold: false, italic: false, strike: false, underline: false },
+          richTextRuns: null
+        },
+        {
+          address: "A3",
+          row: 3,
+          col: 1,
+          outputValue: "a | b",
+          rawValue: "a | b",
+          formulaText: "",
+          resolutionStatus: null,
+          resolutionSource: null,
+          textStyle: { bold: false, italic: false, strike: false, underline: false },
+          richTextRuns: null
+        }
+      ],
+      merges: [],
+      images: [],
+      charts: [],
+      shapes: []
+    };
+
+    const result = api.convertSheetToMarkdown(workbook, sheet, {});
+
+    expect(result.markdown).toContain("\\`code\\` \\!\\[alt\\]\\(img.png\\)");
+    expect(result.markdown).toContain("| `code` ![alt](img.png) |");
+    expect(result.markdown).toContain("| a | b |");
+  });
 });

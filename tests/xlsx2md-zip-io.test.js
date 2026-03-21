@@ -57,6 +57,25 @@ describe("xlsx2md zip io", () => {
     expect(extracted.get("empty.txt")).toEqual(new Uint8Array([]));
   });
 
+  it("writes a fixed reproducible ZIP entry timestamp", () => {
+    const api = bootZipIo();
+    const encoder = new TextEncoder();
+    const zipBytes = api.createStoredZip([
+      { name: "output/test.md", data: encoder.encode("# Test\n") }
+    ]);
+    const view = new DataView(zipBytes.buffer, zipBytes.byteOffset, zipBytes.byteLength);
+
+    expect(view.getUint32(0, true)).toBe(0x04034b50);
+    expect(view.getUint16(10, true)).toBe(api.fixedZipEntryTimestamp.dosTime);
+    expect(view.getUint16(12, true)).toBe(api.fixedZipEntryTimestamp.dosDate);
+
+    const localNameLength = view.getUint16(26, true);
+    const centralOffset = 30 + localNameLength + encoder.encode("# Test\n").length;
+    expect(view.getUint32(centralOffset, true)).toBe(0x02014b50);
+    expect(view.getUint16(centralOffset + 12, true)).toBe(api.fixedZipEntryTimestamp.dosTime);
+    expect(view.getUint16(centralOffset + 14, true)).toBe(api.fixedZipEntryTimestamp.dosDate);
+  });
+
   it("throws for invalid zip input", async () => {
     const api = bootZipIo();
 

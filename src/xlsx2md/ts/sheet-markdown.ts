@@ -123,6 +123,7 @@
     includeShapeDetails?: boolean;
     outputMode?: "display" | "raw" | "both";
     formattingMode?: "plain" | "github";
+    tableDetectionMode?: "balanced" | "border-priority";
   };
 
   type TableCandidate = {
@@ -149,6 +150,7 @@
     summary: {
       outputMode: "display" | "raw" | "both";
       formattingMode: "plain" | "github";
+      tableDetectionMode: "balanced" | "border-priority";
       sections: number;
       tables: number;
       narrativeBlocks: number;
@@ -173,7 +175,11 @@
 
   type SheetMarkdownDeps = {
     renderNarrativeBlock: (block: NarrativeBlock) => string;
-    detectTableCandidates: (sheet: ParsedSheet, buildCellMap: (sheet: ParsedSheet) => Map<string, ParsedCell>) => TableCandidate[];
+    detectTableCandidates: (
+      sheet: ParsedSheet,
+      buildCellMap: (sheet: ParsedSheet) => Map<string, ParsedCell>,
+      tableDetectionMode?: "balanced" | "border-priority"
+    ) => TableCandidate[];
     matrixFromCandidate: (
       sheet: ParsedSheet,
       candidate: TableCandidate,
@@ -405,7 +411,8 @@
         shapeBlockGapYEmu: deps.shapeBlockGapYEmu
       });
       const treatFirstRowAsHeader = options.treatFirstRowAsHeader !== false;
-      const tables = deps.detectTableCandidates(sheet, buildCellMap);
+      const tableDetectionMode = options.tableDetectionMode || "balanced";
+      const tables = deps.detectTableCandidates(sheet, buildCellMap, tableDetectionMode);
       const narrativeBlocks = extractNarrativeBlocks(sheet, tables, options);
       const sectionBlocks = extractSectionBlocks(sheet, tables, narrativeBlocks);
       const formulaDiagnostics = sheet.cells
@@ -566,6 +573,7 @@
         summary: {
           outputMode: options.outputMode || "display",
           formattingMode: options.formattingMode || "plain",
+          tableDetectionMode,
           sections: sectionBlocks.length,
           tables: tables.length,
           narrativeBlocks: narrativeBlocks.length,
