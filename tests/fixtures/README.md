@@ -34,7 +34,7 @@
 | `table/table-basic-sample13.xlsx` | 方眼紙表(縦横) | `xlsx2md-spec.md` 7, 8, 13 | merge 多用の方眼紙風 4 表の誤結合 |
 | `table/table-basic-sample14.xlsx` | 方眼紙表(結合漏れ) | `xlsx2md-spec.md` 7, 8, 13 | merge 多用表で一部だけ結合漏れがある場合の崩れ |
 | `table/table-basic-sample15.xlsx` | 方眼紙表(縦結合混在) | `xlsx2md-spec.md` 7, 8, 13 | merge 多用表で縦結合が混じる場合の崩れ |
-| `table/table-border-priority-sample01.xlsx` | 罫線優先モード | `xlsx2md-spec.md` 7, 8 | borderless dense block の誤検知と `border-priority` 差分 |
+| `table/table-border-priority-sample01.xlsx` | border モード | `xlsx2md-spec.md` 7, 8 | borderless dense block の誤検知と `border` 差分 |
 
 ### ルート直下
 
@@ -152,7 +152,7 @@
   - 主に確認する症状: merge 多用表で縦結合が混じる場合の崩れ
 - `table-border-priority-sample01.xlsx`
   - 罫線のない dense な 2x2 値ブロック
-  - `balanced` では表候補になりやすく、`border-priority` では narrative に落ちる差分を確認する
+  - `balanced` では表候補になりやすく、`border` では narrative に落ちる差分を確認する
   - 対応章: `xlsx2md-spec.md` 7, 8
   - 主に確認する症状: 非罫線 fallback による誤検知
 

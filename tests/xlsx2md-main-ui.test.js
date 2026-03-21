@@ -37,7 +37,7 @@ function createDomFixture() {
     </select>
     <select id="tableDetectionModeSelect">
       <option value="balanced" selected>balanced</option>
-      <option value="border-priority">border-priority</option>
+      <option value="border">border</option>
     </select>
     <div id="outputModeNotice"></div>
     <div id="formattingModeNotice"></div>
@@ -164,7 +164,7 @@ describe("xlsx2md main ui", () => {
     document.getElementById("includeShapeDetailsEnabled").checked = false;
     document.getElementById("outputModeSelect").value = "both";
     document.getElementById("formattingModeSelect").value = "github";
-    document.getElementById("tableDetectionModeSelect").value = "border-priority";
+    document.getElementById("tableDetectionModeSelect").value = "border";
 
     const fileInput = document.getElementById("xlsxFileInput");
     const file = {
@@ -186,7 +186,7 @@ describe("xlsx2md main ui", () => {
         includeShapeDetails: false,
         outputMode: "both",
         formattingMode: "github",
-        tableDetectionMode: "border-priority",
+        tableDetectionMode: "border",
         treatFirstRowAsHeader: true,
         trimText: true,
         removeEmptyRows: true,

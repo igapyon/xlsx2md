@@ -42,7 +42,7 @@
     removeEmptyColumns?: boolean;
   };
 
-  type TableDetectionMode = "balanced" | "border-priority";
+  type TableDetectionMode = "balanced" | "border";
 
   type TableScoreWeights = {
     minGrid: number;
@@ -275,7 +275,7 @@
       maybePushCandidate(component);
     }
 
-    if (tableDetectionMode !== "border-priority") {
+    if (tableDetectionMode !== "border") {
       for (const component of collectConnectedComponents(allSeedCells)) {
         const rows = component.map((entry) => entry.row);
         const cols = component.map((entry) => entry.col);

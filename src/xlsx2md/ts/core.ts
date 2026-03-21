@@ -202,7 +202,7 @@
     includeShapeDetails?: boolean;
     outputMode?: "display" | "raw" | "both";
     formattingMode?: "plain" | "github";
-    tableDetectionMode?: "balanced" | "border-priority";
+    tableDetectionMode?: "balanced" | "border";
   };
 
   type MarkdownFile = {
@@ -212,7 +212,7 @@
     summary: {
       outputMode: "display" | "raw" | "both";
       formattingMode: "plain" | "github";
-      tableDetectionMode: "balanced" | "border-priority";
+      tableDetectionMode: "balanced" | "border";
       sections: number;
       tables: number;
       narrativeBlocks: number;
@@ -402,7 +402,7 @@
     detectTableCandidates: (
       sheet: ParsedSheet,
       buildCellMapForSheet: (sheet: ParsedSheet) => Map<string, ParsedCell>,
-      tableDetectionMode: "balanced" | "border-priority" = "balanced"
+      tableDetectionMode: "balanced" | "border" = "balanced"
     ) => tableDetectorHelper.detectTableCandidates(sheet, buildCellMapForSheet, undefined, tableDetectionMode),
     matrixFromCandidate: tableDetectorHelper.matrixFromCandidate,
     renderMarkdownTable: markdownExportHelper.renderMarkdownTable,
@@ -584,7 +584,7 @@
     applyMergeTokens: tableDetectorHelper.applyMergeTokens,
     detectTableCandidates: (
       sheet: ParsedSheet,
-      tableDetectionMode: "balanced" | "border-priority" = "balanced"
+      tableDetectionMode: "balanced" | "border" = "balanced"
     ) => tableDetectorHelper.detectTableCandidates(sheet, buildCellMap, undefined, tableDetectionMode),
     extractNarrativeBlocks,
     convertSheetToMarkdown,

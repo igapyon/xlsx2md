@@ -68,15 +68,6 @@ limitations under the License.
         </summary>
         <div class="md-accordion-body md-stack-md">
           <div class="md-grid md-grid--options">
-            <lht-select-help field-id="outputModeSelect" label="Output Mode" help-text="Choose whether Markdown should use displayed values, raw values, or both. The default is `display`, which stays close to Excel's rendered view.">
-              <script type="application/json" slot="options">
-                [
-                  { "value": "display", "label": "display: prefer displayed values", "selected": true },
-                  { "value": "raw", "label": "raw: prefer internal values" },
-                  { "value": "both", "label": "both: include both" }
-                ]
-              </script>
-            </lht-select-help>
             <lht-select-help field-id="formattingModeSelect" label="Formatting Mode" help-text="Choose how Excel text emphasis should be represented in Markdown. `github` preserves supported emphasis as GitHub-compatible Markdown or HTML.">
               <script type="application/json" slot="options">
                 [
@@ -85,11 +76,20 @@ limitations under the License.
                 ]
               </script>
             </lht-select-help>
-            <lht-select-help field-id="tableDetectionModeSelect" label="Table Detection" help-text="Choose how aggressively xlsx2md detects tables. `border-priority` prefers bordered regions and reduces borderless fallback detection.">
+            <lht-select-help field-id="tableDetectionModeSelect" label="Table Detection" help-text="Choose how aggressively xlsx2md detects tables. `border` detects tables from bordered regions and reduces borderless fallback detection.">
               <script type="application/json" slot="options">
                 [
                   { "value": "balanced", "label": "balanced: bordered + fallback detection", "selected": true },
-                  { "value": "border-priority", "label": "border-priority: prefer bordered regions" }
+                  { "value": "border", "label": "border: bordered regions only" }
+                ]
+              </script>
+            </lht-select-help>
+            <lht-select-help field-id="outputModeSelect" label="Output Mode" help-text="Choose whether Markdown should use displayed values, raw values, or both. The default is `display`, which stays close to Excel's rendered view.">
+              <script type="application/json" slot="options">
+                [
+                  { "value": "display", "label": "display: prefer displayed values", "selected": true },
+                  { "value": "raw", "label": "raw: prefer internal values" },
+                  { "value": "both", "label": "both: include both" }
                 ]
               </script>
             </lht-select-help>

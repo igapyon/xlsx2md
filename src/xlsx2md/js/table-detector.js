@@ -185,7 +185,7 @@
         for (const component of collectConnectedComponents(borderSeedCells)) {
             maybePushCandidate(component);
         }
-        if (tableDetectionMode !== "border-priority") {
+        if (tableDetectionMode !== "border") {
             for (const component of collectConnectedComponents(allSeedCells)) {
                 const rows = component.map((entry) => entry.row);
                 const cols = component.map((entry) => entry.col);

@@ -178,7 +178,7 @@
         prosePenalty: number;
         threshold: number;
       },
-      tableDetectionMode?: "balanced" | "border-priority"
+      tableDetectionMode?: "balanced" | "border"
     ) => TCandidate[];
     matrixFromCandidate: (
       sheet: TSheet,

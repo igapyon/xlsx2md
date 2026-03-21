@@ -299,7 +299,7 @@ describe("xlsx2md table detector", () => {
     expect(candidates).toHaveLength(1);
   });
 
-  it("border-priority mode excludes dense borderless blocks that are only detected by fallback seeds", () => {
+  it("border mode excludes dense borderless blocks that are only detected by fallback seeds", () => {
     const api = bootTableDetector();
     const sheet = {
       cells: [
@@ -311,12 +311,12 @@ describe("xlsx2md table detector", () => {
       merges: []
     };
 
-    const candidates = api.detectTableCandidates(sheet, buildCellMap, undefined, "border-priority");
+    const candidates = api.detectTableCandidates(sheet, buildCellMap, undefined, "border");
 
     expect(candidates).toHaveLength(0);
   });
 
-  it("border-priority mode still keeps bordered 2x2 tables", () => {
+  it("border mode still keeps bordered 2x2 tables", () => {
     const api = bootTableDetector();
     const sheet = {
       cells: [
@@ -328,7 +328,7 @@ describe("xlsx2md table detector", () => {
       merges: []
     };
 
-    const candidates = api.detectTableCandidates(sheet, buildCellMap, undefined, "border-priority");
+    const candidates = api.detectTableCandidates(sheet, buildCellMap, undefined, "border");
 
     expect(candidates).toHaveLength(1);
     expect(candidates[0]).toMatchObject({
