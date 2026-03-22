@@ -15,21 +15,27 @@
 
 ## Excel 保存メタデータの注意
 
-一部の `.xlsx` は、Excel 保存時に `xl/workbook.xml` へ `x15ac:absPath` のようなローカル環境依存メタデータを含むことがある。
+一部の `.xlsx` は、Excel 保存時に `xl/workbook.xml` や `docProps/*.xml` へ環境依存メタデータを含むことがある。
 
 - これは `xlsx2md` の実装由来ではなく、保存元 Excel が埋めるメタデータである
 - 変換処理では通常参照しないが、fixture としてはノイズなので残さない方がよい
-- 特に Git 管理する fixture では、作成者のローカル絶対パスが残るので削除を推奨する
+- 特に Git 管理する fixture では、ローカル絶対パス、作成者、更新者、作成日時、更新日時、保存アプリ情報が残ることがあるので削除を推奨する
+- fixture では、コメント、threaded comments、person 情報、custom properties、external links、connections、embeddings、VBA、printer settings も原則残さない
 
 対処方法:
 
 1. `.xlsx` を ZIP として展開する
 2. `xl/workbook.xml` から `x15ac:absPath` を含む `mc:AlternateContent` を削除する
-3. ZIP として再圧縮して `.xlsx` を置き換える
+3. `docProps/core.xml` から `dc:creator`、`cp:lastModifiedBy`、`dcterms:created`、`dcterms:modified` を削除する
+4. `docProps/app.xml` から `Application`、`AppVersion` を削除する
+5. ZIP として再圧縮して `.xlsx` を置き換える
 
 確認方法:
 
 - `unzip -p <file.xlsx> xl/workbook.xml | rg 'x15ac:absPath|absPath url='`
+- `unzip -p <file.xlsx> docProps/core.xml | rg 'dc:creator|cp:lastModifiedBy|dcterms:created|dcterms:modified'`
+- `unzip -p <file.xlsx> docProps/app.xml | rg '<Application>|<AppVersion>'`
+- `unzip -l <file.xlsx> | rg 'xl/comments[0-9]*\.xml|xl/threadedComments/|xl/persons/person\.xml|docProps/custom\.xml|xl/externalLinks/|xl/connections\.xml|xl/embeddings/|xl/vbaProject\.bin|xl/printerSettings/'`
 
 該当があれば、fixture 作成後に一度この確認を行う。
 
@@ -103,6 +109,7 @@
   - rich text / 文字装飾専用
   - セル全体装飾と部分装飾を使って、GitHub 互換の `bold / italic / strike / underline` 変換を確認する
   - `A9` は italic ベースに strike を一部上乗せした混在ケース、`B9` は `italic+strike` のセル全体装飾ケースとして使う
+  - `A12` は `underline / strike / bold` を同一セル内で混在させた日本語ケース、`B12` は `bold + italic + underline` の複合装飾ケースとして使う
   - 対応章: `xlsx2md-spec.md` 5, 6
   - 主に確認する症状: 文字装飾の脱落、run 境界での空白欠落、表セル内装飾の崩れ
 - `rich-markdown-escape-sample01.xlsx`

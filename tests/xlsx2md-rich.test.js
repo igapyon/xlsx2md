@@ -222,7 +222,7 @@ describe("xlsx2md rich fixtures", () => {
     expect(markdownFile.markdown).toContain("**<ins>bold+underline</ins>**");
     expect(markdownFile.markdown).toContain("*~~italic+strike~~*");
     expect(markdownFile.markdown).toContain("改行入り文字列で<br>**一部だけ太**字");
-    expect(markdownFile.markdown).toContain("重要, <ins>取消線</ins>, **強調**");
+    expect(markdownFile.markdown).toContain("重要, <ins>下線</ins>,~~取消線~~,**強調**");
     expect(markdownFile.markdown).toContain("**12345**");
     expect(markdownFile.markdown).toContain("<ins>24690</ins>");
   });
