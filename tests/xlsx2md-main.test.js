@@ -2586,7 +2586,7 @@ describe("xlsx2md core", () => {
     };
     const tables = [{ startRow: 5, startCol: 1, endRow: 6, endCol: 2 }];
 
-    const blocks = api.extractNarrativeBlocks(sheet, tables);
+    const blocks = api.extractNarrativeBlocks({ name: "narrative.xlsx", sheets: [] }, sheet, tables);
 
     expect(blocks).toHaveLength(1);
     expect(blocks[0].lines.join("\n")).toContain("このシステムは 受注を管理します。");
@@ -3469,6 +3469,97 @@ describe("xlsx2md core", () => {
     expect(markdownFile.summary.formulaDiagnostics).toEqual([
       { address: "A1", formulaText: "=IF(1=1,\"\",\"X\")", status: "resolved", source: "cached_value", outputValue: "" }
     ]);
+  });
+
+  it("renders external and workbook hyperlinks into markdown", async () => {
+    const api = bootCore();
+    const zip = createStoredZip([
+      {
+        name: "[Content_Types].xml",
+        data: `<?xml version="1.0" encoding="UTF-8"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+  <Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+  <Override PartName="/xl/worksheets/sheet2.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+</Types>`
+      },
+      {
+        name: "_rels/.rels",
+        data: `<?xml version="1.0" encoding="UTF-8"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+</Relationships>`
+      },
+      {
+        name: "xl/workbook.xml",
+        data: `<?xml version="1.0" encoding="UTF-8"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <sheets>
+    <sheet name="Summary" sheetId="1" r:id="rId1"/>
+    <sheet name="Other" sheetId="2" r:id="rId2"/>
+  </sheets>
+</workbook>`
+      },
+      {
+        name: "xl/_rels/workbook.xml.rels",
+        data: `<?xml version="1.0" encoding="UTF-8"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>
+  <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet2.xml"/>
+</Relationships>`
+      },
+      {
+        name: "xl/worksheets/sheet1.xml",
+        data: `<?xml version="1.0" encoding="UTF-8"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <sheetData>
+    <row r="1">
+      <c r="A1" t="inlineStr"><is><t>Open</t></is></c>
+    </row>
+    <row r="2">
+      <c r="A2" t="inlineStr"><is><t>Jump</t></is></c>
+    </row>
+  </sheetData>
+  <hyperlinks>
+    <hyperlink ref="A1" r:id="rId1"/>
+    <hyperlink ref="A2" location="Other!A1"/>
+  </hyperlinks>
+</worksheet>`
+      },
+      {
+        name: "xl/worksheets/_rels/sheet1.xml.rels",
+        data: `<?xml version="1.0" encoding="UTF-8"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="https://example.com/" TargetMode="External"/>
+</Relationships>`
+      },
+      {
+        name: "xl/worksheets/sheet2.xml",
+        data: `<?xml version="1.0" encoding="UTF-8"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <sheetData>
+    <row r="1">
+      <c r="A1" t="inlineStr"><is><t>Target</t></is></c>
+    </row>
+  </sheetData>
+</worksheet>`
+      }
+    ]);
+
+    const workbook = await api.parseWorkbook(zip, "link-book.xlsx");
+    const markdownFiles = api.convertWorkbookToMarkdownFiles(workbook, {
+      treatFirstRowAsHeader: true,
+      trimText: true,
+      removeEmptyRows: true,
+      removeEmptyColumns: true,
+      formattingMode: "github"
+    });
+
+    expect(markdownFiles[0].markdown).toContain("[Open](https://example.com/)");
+    expect(markdownFiles[0].markdown).toContain("[Jump](#link-book_002_Other_github) (Other!A1)");
+    expect(markdownFiles[1].markdown).toContain('<a id="link-book_002_Other_github"></a>');
   });
 
   it("preserves supported rich text as github-compatible markdown", async () => {

@@ -1,5 +1,60 @@
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
+    function expandRangeAddresses(ref, deps) {
+        const range = deps.parseRangeRef(ref);
+        const addresses = [];
+        for (let row = Math.max(1, range.startRow); row <= Math.max(range.startRow, range.endRow); row += 1) {
+            for (let col = Math.max(1, range.startCol); col <= Math.max(range.startCol, range.endCol); col += 1) {
+                addresses.push(`${deps.colToLetters(col)}${row}`);
+            }
+        }
+        return addresses;
+    }
+    function parseWorksheetHyperlinks(files, worksheetDoc, sheetPath, deps) {
+        var _a;
+        const hyperlinks = new Map();
+        const relsPath = deps.buildRelsPath(sheetPath);
+        const relEntries = deps.parseRelationshipEntries(files, relsPath, sheetPath);
+        const hyperlinkNodes = Array.from(worksheetDoc.getElementsByTagName("hyperlink"));
+        for (const node of hyperlinkNodes) {
+            const ref = (node.getAttribute("ref") || "").trim();
+            if (!ref)
+                continue;
+            const relId = (node.getAttribute("r:id") || node.getAttribute("id") || "").trim();
+            const relEntry = relId ? relEntries.get(relId) : null;
+            const display = (node.getAttribute("display") || "").trim();
+            const tooltip = (node.getAttribute("tooltip") || "").trim();
+            const location = (node.getAttribute("location") || "").trim().replace(/^#/, "");
+            const rawTarget = ((_a = relEntry === null || relEntry === void 0 ? void 0 : relEntry.target) === null || _a === void 0 ? void 0 : _a.trim()) || "";
+            const kind = (relEntry === null || relEntry === void 0 ? void 0 : relEntry.targetMode.toLowerCase()) === "external"
+                ? "external"
+                : location
+                    ? "internal"
+                    : rawTarget.startsWith("#")
+                        ? "internal"
+                        : rawTarget
+                            ? "external"
+                            : null;
+            if (!kind)
+                continue;
+            const target = kind === "internal"
+                ? (location || rawTarget.replace(/^#/, ""))
+                : rawTarget;
+            if (!target)
+                continue;
+            const hyperlink = {
+                kind,
+                target,
+                location: location || (kind === "internal" ? target : ""),
+                tooltip,
+                display
+            };
+            for (const address of expandRangeAddresses(ref, deps)) {
+                hyperlinks.set(address, hyperlink);
+            }
+        }
+        return hyperlinks;
+    }
     function hasEnabledBooleanValue(node) {
         if (!node)
             return false;
@@ -242,6 +297,7 @@
         }
         const doc = deps.xmlToDocument(deps.decodeXmlText(bytes));
         const sharedFormulaMap = new Map();
+        const hyperlinks = parseWorksheetHyperlinks(files, doc, sheetPath, deps);
         const cells = Array.from(doc.getElementsByTagName("c")).map((cellElement) => {
             const address = cellElement.getAttribute("r") || "";
             const position = deps.parseCellAddress(address);
@@ -295,7 +351,8 @@
                 textStyle: cellStyle.textStyle,
                 richTextRuns: output.richTextRuns,
                 formulaType,
-                spillRef
+                spillRef,
+                hyperlink: hyperlinks.get(address) || null
             };
         });
         const merges = Array.from(doc.getElementsByTagName("mergeCell")).map((mergeElement) => deps.parseRangeRef(mergeElement.getAttribute("ref") || ""));
@@ -334,6 +391,8 @@
     }
     const worksheetParserApi = {
         extractCellOutputValue,
+        expandRangeAddresses,
+        parseWorksheetHyperlinks,
         shiftReferenceAddress,
         translateSharedFormula,
         parseWorksheet

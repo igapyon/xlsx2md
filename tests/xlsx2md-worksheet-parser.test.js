@@ -60,6 +60,31 @@ function createDeps() {
     parseDrawingShapes() {
       return [];
     },
+    parseRelationshipEntries(files, relsPath, sourcePath) {
+      const relBytes = files.get(relsPath);
+      if (!relBytes) return new Map();
+      const doc = new DOMParser().parseFromString(new TextDecoder().decode(relBytes), "application/xml");
+      const entries = new Map();
+      for (const node of Array.from(doc.getElementsByTagName("Relationship"))) {
+        const id = node.getAttribute("Id") || "";
+        const target = node.getAttribute("Target") || "";
+        if (!id || !target) continue;
+        const targetMode = node.getAttribute("TargetMode") || "";
+        entries.set(id, {
+          target: targetMode === "External"
+            ? target
+            : `${String(sourcePath || "").split("/").slice(0, -1).join("/")}/${target}`.replace(/\/\.\//g, "/"),
+          targetMode,
+          type: node.getAttribute("Type") || ""
+        });
+      }
+      return entries;
+    },
+    buildRelsPath(sourcePath) {
+      const parts = String(sourcePath || "").split("/");
+      const fileName = parts.pop() || "";
+      return `${parts.join("/")}/_rels/${fileName}.rels`;
+    },
     formatCellDisplayValue(rawValue, style) {
       if (style.numFmtId === 10) {
         return `${(Number(rawValue) * 100).toFixed(1)}%`;
@@ -165,5 +190,55 @@ describe("xlsx2md worksheet parser", () => {
     expect(sheet.merges).toEqual([{ startRow: 1, startCol: 1, endRow: 2, endCol: 2, ref: "A1:B2" }]);
     expect(sheet.maxRow).toBe(2);
     expect(sheet.maxCol).toBe(3);
+  });
+
+  it("parses worksheet hyperlinks from local refs and external relationships", () => {
+    const api = bootWorksheetParser();
+    const deps = createDeps();
+    const worksheetXml = `<?xml version="1.0" encoding="UTF-8"?>
+      <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"
+                 xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+        <sheetData>
+          <row r="1">
+            <c r="A1" t="inlineStr"><is><t>Open</t></is></c>
+            <c r="B1" t="inlineStr"><is><t>Jump</t></is></c>
+          </row>
+        </sheetData>
+        <hyperlinks>
+          <hyperlink ref="A1" r:id="rId1"/>
+          <hyperlink ref="B1" location="'Other Sheet'!C3" tooltip="go"/>
+        </hyperlinks>
+      </worksheet>`;
+    const files = new Map([
+      ["xl/worksheets/sheet1.xml", new TextEncoder().encode(worksheetXml)],
+      ["xl/worksheets/_rels/sheet1.xml.rels", new TextEncoder().encode(
+        '<?xml version="1.0" encoding="UTF-8"?>' +
+        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+        '<Relationship Id="rId1" Target="https://example.com/" TargetMode="External"/>' +
+        "</Relationships>"
+      )]
+    ]);
+
+    const sheet = api.parseWorksheet(files, "Sheet1", "xl/worksheets/sheet1.xml", 1, [], [{
+      borders: { top: false, bottom: false, left: false, right: false },
+      numFmtId: 0,
+      formatCode: "General",
+      textStyle: { bold: false, italic: false, strike: false, underline: false }
+    }], deps);
+
+    expect(sheet.cells.find((cell) => cell.address === "A1")?.hyperlink).toEqual({
+      kind: "external",
+      target: "https://example.com/",
+      location: "",
+      tooltip: "",
+      display: ""
+    });
+    expect(sheet.cells.find((cell) => cell.address === "B1")?.hyperlink).toEqual({
+      kind: "internal",
+      target: "'Other Sheet'!C3",
+      location: "'Other Sheet'!C3",
+      tooltip: "go",
+      display: ""
+    });
   });
 });

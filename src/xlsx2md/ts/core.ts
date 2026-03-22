@@ -351,6 +351,7 @@
   });
   const {
     normalizeZipPath,
+    parseRelationshipEntries,
     parseRelationships,
     buildRelsPath
   } = relsParserHelper;
@@ -501,6 +502,8 @@
       parseDrawingImages: sheetAssetsHelper.parseDrawingImages,
       parseDrawingCharts: sheetAssetsHelper.parseDrawingCharts,
       parseDrawingShapes: sheetAssetsHelper.parseDrawingShapes,
+      parseRelationshipEntries,
+      buildRelsPath,
       formatCellDisplayValue: cellFormatHelper.formatCellDisplayValue,
       buildAssetDeps: () => ({
         parseRelationships,
