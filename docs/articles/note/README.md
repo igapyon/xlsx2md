@@ -1,6 +1,6 @@
-# Note Drafts
+# Note Articles
 
-Note 向けの記事作業場所です。
+Note 向けの記事管理用 Markdown 置き場です。公開済み記事の元原稿、記事メモ、構成案、下書きを含みます。
 
 ## Intended Style
 

@@ -43,6 +43,7 @@
 | `formula/formula-crosssheet-sample01.xlsx` | 複数シート参照 | `xlsx2md-spec.md` 10, 19 | sheet 参照解決漏れ、参照先ずれ |
 | `formula/formula-shared-sample01.xlsx` | shared formula | `xlsx2md-spec.md` 10, 19 | shared formula 展開漏れ、連番列の崩れ |
 | `formula/formula-spill-sample01.xlsx` | dynamic array / spill | `xlsx2md-spec.md` 19 | spill 解決漏れ、`A1#` 参照崩れ |
+| `link/hyperlink-basic-sample01.xlsx` | ハイパーリンク | `xlsx2md-spec.md` 5, 19 | 外部リンク / ブック内リンクの保持、リンクセルの下線出力 |
 | `rich/rich-text-github-sample01.xlsx` | rich text / 文字装飾 | `xlsx2md-spec.md` 5, 6 | GitHub 互換の `bold / italic / strike / underline` 出力 |
 | `rich/rich-markdown-escape-sample01.xlsx` | Markdown 記号 / escape | `xlsx2md-spec.md` 5, 6 | Markdown 記号を含む文字列と rich text の混在 |
 | `merge/merge-pattern-sample01.xlsx` | 結合セル | `xlsx2md-spec.md` 13 | `[MERGED←] / [MERGED↑]` の崩れ |
@@ -114,6 +115,14 @@
     - narrative では backtick や image 風文字列を literal のまま出す
     - table では `|` だけを優先的に escape し、他の文字列は過剰変換しない
     - `path\\to\\file` や `&lt;tag&gt;` のような断片が mode 差をまたいでも安定する
+
+### `link/`
+
+- `hyperlink-basic-sample01.xlsx`
+  - ハイパーリンク専用
+  - 外部 URL とブック内リンクを、narrative と table の両方で確認する
+  - 対応章: `xlsx2md-spec.md` 5, 19
+  - 主に確認する症状: 外部リンクの保持、ブック内リンクの保持、リンクセルの下線が Markdown 出力へ過剰反映されないこと
 
 ### `merge/`
 

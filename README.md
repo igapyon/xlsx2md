@@ -14,6 +14,7 @@
 - Converts all sheets in a workbook in one pass
 - Extracts prose, tables, and images
 - Preserves supported Excel rich text in `github` formatting mode
+- Preserves external links and workbook-internal links as Markdown links when supported
 - Detects tables and converts them into Markdown tables
 - Prefers cached formula values and parses formulas when needed
 - Extracts chart configuration data
@@ -80,7 +81,7 @@ You can also switch the Markdown output mode or include shape source details.
 npm run cli -- ./tests/fixtures/shape/shape-basic-sample01.xlsx --output-mode both --shape-details include
 ```
 
-You can also switch how Excel text emphasis is rendered. `github` formatting mode currently preserves supported `bold`, `italic`, `strike`, `underline`, and in-cell line breaks as `<br>`.
+You can also switch how Excel text emphasis is rendered. `github` formatting mode currently preserves supported `bold`, `italic`, `strike`, `underline`, and in-cell line breaks as `<br>`. Hyperlinks are emitted as Markdown links, and hyperlink cells suppress extra underline markup in output.
 
 ```bash
 npm run cli -- ./tests/fixtures/rich/rich-text-github-sample01.xlsx --formatting-mode github

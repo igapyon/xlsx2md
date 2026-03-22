@@ -304,9 +304,22 @@
       if (!cell) return "";
       const mode = options.outputMode || "display";
       const formattingMode = options.formattingMode || "plain";
+      const displayCell = formattingMode === "github" && cell.hyperlink
+        ? {
+          ...cell,
+          textStyle: {
+            ...cell.textStyle,
+            underline: false
+          },
+          richTextRuns: cell.richTextRuns?.map((run) => ({
+            ...run,
+            underline: false
+          })) || null
+        }
+        : cell;
       const displayValue = richTextRenderer.compactText(String(cell.outputValue || ""));
       const rawValue = richTextRenderer.compactText(String(cell.rawValue || ""));
-      const displayMarkdown = richTextRenderer.renderCellDisplayText(cell, formattingMode);
+      const displayMarkdown = richTextRenderer.renderCellDisplayText(displayCell, formattingMode);
       if (mode === "raw") {
         return renderHyperlinkMarkdown(cell, rawValue || displayValue, workbook, sheet, options);
       }

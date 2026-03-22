@@ -579,4 +579,51 @@ describe("xlsx2md sheet markdown", () => {
     expect(result.markdown).toContain("[Open](https://example.com/)");
     expect(result.markdown).toContain("[Jump](#2_Other Sheet_github) (Other Sheet!C3)");
   });
+
+  it("suppresses underline markup for hyperlink cells in github mode", () => {
+    const module = bootSheetMarkdown();
+    const api = module.createSheetMarkdownApi(createDeps({
+      renderNarrativeBlock: (block) => block.lines.join("\n")
+    }));
+    const workbook = {
+      name: "book.xlsx",
+      sheets: [
+        { name: "Sheet1", index: 1, cells: [], merges: [], images: [], charts: [], shapes: [] }
+      ]
+    };
+    const sheet = {
+      name: "Sheet1",
+      index: 1,
+      cells: [
+        {
+          address: "A1",
+          row: 1,
+          col: 1,
+          outputValue: "Linked",
+          rawValue: "Linked",
+          formulaText: "",
+          resolutionStatus: null,
+          resolutionSource: null,
+          textStyle: { bold: false, italic: false, strike: false, underline: true },
+          richTextRuns: null,
+          hyperlink: {
+            kind: "external",
+            target: "https://example.com/",
+            location: "",
+            tooltip: "",
+            display: ""
+          }
+        }
+      ],
+      merges: [],
+      images: [],
+      charts: [],
+      shapes: []
+    };
+
+    const result = api.convertSheetToMarkdown(workbook, sheet, { formattingMode: "github" });
+
+    expect(result.markdown).toContain("[Linked](https://example.com/)");
+    expect(result.markdown).not.toContain("<ins>Linked</ins>");
+  });
 });

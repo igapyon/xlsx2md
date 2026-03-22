@@ -53,13 +53,27 @@
                 : `[${label}](${href})`;
         }
         function formatCellForMarkdown(cell, options, workbook = null, sheet = null) {
+            var _a;
             if (!cell)
                 return "";
             const mode = options.outputMode || "display";
             const formattingMode = options.formattingMode || "plain";
+            const displayCell = formattingMode === "github" && cell.hyperlink
+                ? {
+                    ...cell,
+                    textStyle: {
+                        ...cell.textStyle,
+                        underline: false
+                    },
+                    richTextRuns: ((_a = cell.richTextRuns) === null || _a === void 0 ? void 0 : _a.map((run) => ({
+                        ...run,
+                        underline: false
+                    }))) || null
+                }
+                : cell;
             const displayValue = richTextRenderer.compactText(String(cell.outputValue || ""));
             const rawValue = richTextRenderer.compactText(String(cell.rawValue || ""));
-            const displayMarkdown = richTextRenderer.renderCellDisplayText(cell, formattingMode);
+            const displayMarkdown = richTextRenderer.renderCellDisplayText(displayCell, formattingMode);
             if (mode === "raw") {
                 return renderHyperlinkMarkdown(cell, rawValue || displayValue, workbook, sheet, options);
             }

@@ -47,6 +47,14 @@
   - rich fixture 回帰:
     - `tests/fixtures/rich/rich-text-github-sample01.xlsx`
     - `tests/fixtures/rich/rich-markdown-escape-sample01.xlsx`
+- Qiita 記事の新規作成を検討する
+  - 直近のハイパーリンク対応、GitHub 向け Markdown 出力方針、fixture hygiene (`x15ac:absPath`) の知見を記事化したい
+  - 実装断片だけでなく、なぜその出力方針にしたかも整理して残したい
+  - 候補は `docs/articles/qiita/` 配下へ新規記事を追加
+  - 既存記事と重複しにくい題材候補:
+    - rich text / Markdown escape / GitHub formatting mode の設計と割り切り
+    - `balanced / border` の table detection mode 差分と使い分け
+    - shape / chart を「見た目再現」ではなく意味情報として Markdown 化する方針
 
 ## 未対応事項
 
@@ -67,12 +75,12 @@
   - `DrawingML -> SVG` は将来候補
   - グラフは当面、意味情報のテキスト化で固定し、`Chart -> SVG` は保留とする
   - SmartArt は現時点では fallback とし、意味解釈や SVG 化の対象外とする
-- ハイパーリンク未対応の整理
-  - GitHub で自然に見える Markdown 表現へ落とせるため、優先度は高めに扱う
-  - セルのハイパーリンクを Markdown リンクとして保持する
-  - Excel ブック内リンクは、可能なら `sheet / cell / range` の追跡情報を保って出力する
-  - 外部 URL とブック内リンクで扱いを分ける必要がある
-  - rich text と共存する場合の出力方針は要整理
+- ハイパーリンク次段整理
+  - 外部 URL とブック内リンクの Markdown 出力は実装済み
+  - ブック内リンクは現時点では対象シート先頭アンカーへのリンクを基本とする
+  - Excel ブック内リンクの `sheet / cell / range` 追跡を、必要ならより厳密にする
+  - hyperlink セルは GitHub 出力で underline を重ねて出さない方針
+  - rich text と共存する場合の境界ケースは追加確認余地がある
 
 ## 方針未確定
 
