@@ -3559,6 +3559,8 @@ describe("xlsx2md core", () => {
 
     expect(markdownFiles[0].markdown).toContain("[Open](https://example.com/)");
     expect(markdownFiles[0].markdown).toContain("[Jump](#link-book_002_Other_github) (Other!A1)");
+    expect(markdownFiles[0].markdown).not.toContain("<ins>Open</ins>");
+    expect(markdownFiles[0].markdown).not.toContain("<ins>Jump</ins>");
     expect(markdownFiles[1].markdown).toContain('<a id="link-book_002_Other_github"></a>');
   });
 
