@@ -630,6 +630,52 @@ describe("xlsx2md core", () => {
     expect(markdownFile.markdown).toContain("[MERGED↑]");
   });
 
+  it("parses the merge-multiline fixture workbook with concrete multiline-merge expectations", async () => {
+    const api = bootCore();
+    const fixtureName = "merge-multiline-sample01.xlsx";
+    const fixturePath = path.resolve(fixtureDir, "merge", fixtureName);
+    const fixtureBytes = readFileSync(fixturePath);
+    const arrayBuffer = fixtureBytes.buffer.slice(
+      fixtureBytes.byteOffset,
+      fixtureBytes.byteOffset + fixtureBytes.byteLength
+    );
+
+    const workbook = await api.parseWorkbook(arrayBuffer, fixtureName);
+    const files = api.convertWorkbookToMarkdownFiles(workbook, {
+      treatFirstRowAsHeader: true,
+      trimText: true,
+      removeEmptyRows: true,
+      removeEmptyColumns: true
+    });
+    const sheet = workbook.sheets[0];
+    const markdownFile = files[0];
+
+    expect(workbook.sheets).toHaveLength(1);
+    expect(sheet.name).toBe("merge-multiline");
+    expect(sheet.maxRow).toBe(6);
+    expect(sheet.maxCol).toBe(3);
+    expect(sheet.cells).toHaveLength(11);
+    expect(sheet.merges.map((merge) => merge.ref)).toEqual(["B3:C4"]);
+
+    expect(sheet.cells.find((cell) => cell.address === "B3")?.outputValue).toBe("1行目\n2行目");
+    expect(sheet.cells.find((cell) => cell.address === "C3")?.outputValue).toBe("");
+    expect(sheet.cells.find((cell) => cell.address === "B4")?.outputValue).toBe("");
+    expect(sheet.cells.find((cell) => cell.address === "A6")?.outputValue).toBe("※結合セル内の改行確認用");
+
+    expect(markdownFile.fileName).toBe("merge-multiline-sample01_001_merge-multiline.md");
+    expect(markdownFile.summary.tables).toBe(1);
+    expect(markdownFile.summary.merges).toBe(1);
+    expect(markdownFile.summary.images).toBe(0);
+    expect(markdownFile.summary.formulaDiagnostics).toHaveLength(0);
+    expect(markdownFile.summary.tableScores.map((detail) => detail.range)).toEqual(["A1-C4"]);
+    expect(markdownFile.markdown).toContain("# merge-multiline");
+    expect(markdownFile.markdown).toContain("Workbook: merge-multiline-sample01.xlsx");
+    expect(markdownFile.markdown).toContain("### Table 001 (A1-C4)");
+    expect(markdownFile.markdown).toContain("| 1 | 1行目 2行目 | [MERGED←] |");
+    expect(markdownFile.markdown).toContain("| 2 | [MERGED↑] | [MERGED↑] |");
+    expect(markdownFile.markdown).toContain("※結合セル内の改行確認用");
+  });
+
   it("parses the formula-basic fixture workbook with concrete formula expectations", async () => {
     const api = bootCore();
     const fixtureName = "formula-basic-sample01.xlsx";
@@ -694,6 +740,59 @@ describe("xlsx2md core", () => {
     expect(markdownFile.markdown).toContain("| date | 2024/3/17 |");
     expect(markdownFile.markdown).toContain("| value\\_num | 1234.5 |");
     expect(markdownFile.markdown).toContain("| value\\_date | 45368 |");
+  });
+
+  it("parses the formula-spill fixture workbook with concrete spill-like expectations", async () => {
+    const api = bootCore();
+    const fixtureName = "formula-spill-sample01.xlsx";
+    const fixturePath = path.resolve(fixtureDir, "formula", fixtureName);
+    const fixtureBytes = readFileSync(fixturePath);
+    const arrayBuffer = fixtureBytes.buffer.slice(
+      fixtureBytes.byteOffset,
+      fixtureBytes.byteOffset + fixtureBytes.byteLength
+    );
+
+    const workbook = await api.parseWorkbook(arrayBuffer, fixtureName);
+    const files = api.convertWorkbookToMarkdownFiles(workbook, {
+      treatFirstRowAsHeader: true,
+      trimText: true,
+      removeEmptyRows: true,
+      removeEmptyColumns: true
+    });
+    const sheet = workbook.sheets[0];
+    const markdownFile = files[0];
+
+    expect(workbook.sheets).toHaveLength(1);
+    expect(sheet.name).toBe("spill-sample");
+    expect(sheet.maxRow).toBe(6);
+    expect(sheet.maxCol).toBe(5);
+    expect(sheet.cells).toHaveLength(11);
+
+    expect(sheet.cells.find((cell) => cell.address === "A4")?.outputValue).toBe("1");
+    expect(sheet.cells.find((cell) => cell.address === "A6")?.outputValue).toBe("3");
+    expect(sheet.cells.find((cell) => cell.address === "C4")?.formulaText).toBe("=_xlfn.SEQUENCE(3)");
+    expect(sheet.cells.find((cell) => cell.address === "C4")?.outputValue).toBe("1");
+    expect(sheet.cells.find((cell) => cell.address === "C4")?.resolutionStatus).toBe("resolved");
+    expect(sheet.cells.find((cell) => cell.address === "C5")?.outputValue).toBe("2");
+    expect(sheet.cells.find((cell) => cell.address === "C6")?.outputValue).toBe("3");
+    expect(sheet.cells.find((cell) => cell.address === "E4")?.formulaText).toBe("=SUM(_xlfn.ANCHORARRAY(C4))");
+    expect(sheet.cells.find((cell) => cell.address === "E4")?.outputValue).toBe("6");
+    expect(sheet.cells.find((cell) => cell.address === "E4")?.resolutionStatus).toBe("resolved");
+
+    expect(markdownFile.fileName).toBe("formula-spill-sample01_001_spill-sample.md");
+    expect(markdownFile.summary.tables).toBe(0);
+    expect(markdownFile.summary.merges).toBe(0);
+    expect(markdownFile.summary.images).toBe(0);
+    expect(markdownFile.summary.formulaDiagnostics).toHaveLength(2);
+    expect(markdownFile.summary.formulaDiagnostics.every((diagnostic) => diagnostic.source === "cached_value")).toBe(true);
+    expect(markdownFile.summary.tableScores).toHaveLength(0);
+    expect(markdownFile.markdown).toContain("# spill-sample");
+    expect(markdownFile.markdown).toContain("Workbook: formula-spill-sample01.xlsx");
+    expect(markdownFile.markdown).toContain("spill サンプル");
+    expect(markdownFile.markdown).toContain("src1 spill\\_ref spill\\_sum");
+    expect(markdownFile.markdown).toContain("1 1 6");
+    expect(markdownFile.markdown).toContain("2 2");
+    expect(markdownFile.markdown).toContain("3 3");
   });
 
   it("parses the formula-crosssheet fixture workbook with concrete cross-sheet expectations", async () => {
@@ -2391,6 +2490,64 @@ describe("xlsx2md core", () => {
     expect(markdownFile.markdown).toContain("たまに結合漏れのセルがあって、さらに複数文字が登場");
   });
 
+  it("parses the table-border-priority-sample01 fixture workbook differently between balanced and border modes", async () => {
+    const api = bootCore();
+    const fixtureName = "table-border-priority-sample01.xlsx";
+    const fixturePath = path.resolve(fixtureDir, "table", fixtureName);
+    const fixtureBytes = readFileSync(fixturePath);
+    const arrayBuffer = fixtureBytes.buffer.slice(
+      fixtureBytes.byteOffset,
+      fixtureBytes.byteOffset + fixtureBytes.byteLength
+    );
+
+    const workbook = await api.parseWorkbook(arrayBuffer, fixtureName);
+    const balancedFiles = api.convertWorkbookToMarkdownFiles(workbook, {
+      treatFirstRowAsHeader: true,
+      trimText: true,
+      removeEmptyRows: true,
+      removeEmptyColumns: true,
+      tableDetectionMode: "balanced"
+    });
+    const borderFiles = api.convertWorkbookToMarkdownFiles(workbook, {
+      treatFirstRowAsHeader: true,
+      trimText: true,
+      removeEmptyRows: true,
+      removeEmptyColumns: true,
+      tableDetectionMode: "border"
+    });
+    const sheet = workbook.sheets[0];
+    const balancedFile = balancedFiles[0];
+    const borderFile = borderFiles[0];
+
+    expect(workbook.sheets).toHaveLength(1);
+    expect(sheet.name).toBe("border-priority");
+    expect(sheet.maxRow).toBe(6);
+    expect(sheet.maxCol).toBe(2);
+    expect(sheet.cells).toHaveLength(6);
+    expect(sheet.cells.find((cell) => cell.address === "A1")?.outputValue).toBe("border-priority fixture");
+    expect(sheet.cells.find((cell) => cell.address === "A3")?.outputValue).toBe("項目");
+    expect(sheet.cells.find((cell) => cell.address === "B4")?.outputValue).toBe("100");
+
+    expect(balancedFile.fileName).toBe("table-border-priority-sample01_001_border-priority.md");
+    expect(balancedFile.summary.tables).toBe(1);
+    expect(balancedFile.summary.tableDetectionMode).toBe("balanced");
+    expect(balancedFile.summary.tableScores.map((detail) => detail.range)).toEqual(["A3-B4"]);
+    expect(balancedFile.markdown).toContain("Workbook: table-border-priority-sample01.xlsx");
+    expect(balancedFile.markdown).toContain("### Table 001 (A3-B4)");
+    expect(balancedFile.markdown).toContain("| 項目 | 値 |");
+    expect(balancedFile.markdown).toContain("| A | 100 |");
+
+    expect(borderFile.fileName).toBe("table-border-priority-sample01_001_border-priority.md");
+    expect(borderFile.summary.tables).toBe(0);
+    expect(borderFile.summary.tableDetectionMode).toBe("border");
+    expect(borderFile.summary.tableScores).toHaveLength(0);
+    expect(borderFile.markdown).toContain("Workbook: table-border-priority-sample01.xlsx");
+    expect(borderFile.markdown).not.toContain("### Table 001");
+    expect(borderFile.markdown).toContain("項目");
+    expect(borderFile.markdown).toContain("100");
+    expect(borderFile.markdown).toContain("※罫線優先モード確認用");
+  });
+
   it("expands merged cells with structural tokens", () => {
     const api = bootCore();
     const matrix = [
@@ -2429,7 +2586,7 @@ describe("xlsx2md core", () => {
     };
     const tables = [{ startRow: 5, startCol: 1, endRow: 6, endCol: 2 }];
 
-    const blocks = api.extractNarrativeBlocks(sheet, tables);
+    const blocks = api.extractNarrativeBlocks({ name: "narrative.xlsx", sheets: [] }, sheet, tables);
 
     expect(blocks).toHaveLength(1);
     expect(blocks[0].lines.join("\n")).toContain("このシステムは 受注を管理します。");
@@ -3312,6 +3469,99 @@ describe("xlsx2md core", () => {
     expect(markdownFile.summary.formulaDiagnostics).toEqual([
       { address: "A1", formulaText: "=IF(1=1,\"\",\"X\")", status: "resolved", source: "cached_value", outputValue: "" }
     ]);
+  });
+
+  it("renders external and workbook hyperlinks into markdown", async () => {
+    const api = bootCore();
+    const zip = createStoredZip([
+      {
+        name: "[Content_Types].xml",
+        data: `<?xml version="1.0" encoding="UTF-8"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+  <Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+  <Override PartName="/xl/worksheets/sheet2.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+</Types>`
+      },
+      {
+        name: "_rels/.rels",
+        data: `<?xml version="1.0" encoding="UTF-8"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+</Relationships>`
+      },
+      {
+        name: "xl/workbook.xml",
+        data: `<?xml version="1.0" encoding="UTF-8"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <sheets>
+    <sheet name="Summary" sheetId="1" r:id="rId1"/>
+    <sheet name="Other" sheetId="2" r:id="rId2"/>
+  </sheets>
+</workbook>`
+      },
+      {
+        name: "xl/_rels/workbook.xml.rels",
+        data: `<?xml version="1.0" encoding="UTF-8"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>
+  <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet2.xml"/>
+</Relationships>`
+      },
+      {
+        name: "xl/worksheets/sheet1.xml",
+        data: `<?xml version="1.0" encoding="UTF-8"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <sheetData>
+    <row r="1">
+      <c r="A1" t="inlineStr"><is><t>Open</t></is></c>
+    </row>
+    <row r="2">
+      <c r="A2" t="inlineStr"><is><t>Jump</t></is></c>
+    </row>
+  </sheetData>
+  <hyperlinks>
+    <hyperlink ref="A1" r:id="rId1"/>
+    <hyperlink ref="A2" location="Other!A1"/>
+  </hyperlinks>
+</worksheet>`
+      },
+      {
+        name: "xl/worksheets/_rels/sheet1.xml.rels",
+        data: `<?xml version="1.0" encoding="UTF-8"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="https://example.com/" TargetMode="External"/>
+</Relationships>`
+      },
+      {
+        name: "xl/worksheets/sheet2.xml",
+        data: `<?xml version="1.0" encoding="UTF-8"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <sheetData>
+    <row r="1">
+      <c r="A1" t="inlineStr"><is><t>Target</t></is></c>
+    </row>
+  </sheetData>
+</worksheet>`
+      }
+    ]);
+
+    const workbook = await api.parseWorkbook(zip, "link-book.xlsx");
+    const markdownFiles = api.convertWorkbookToMarkdownFiles(workbook, {
+      treatFirstRowAsHeader: true,
+      trimText: true,
+      removeEmptyRows: true,
+      removeEmptyColumns: true,
+      formattingMode: "github"
+    });
+
+    expect(markdownFiles[0].markdown).toContain("[Open](https://example.com/)");
+    expect(markdownFiles[0].markdown).toContain("[Jump](#link-book_002_Other_github) (Other!A1)");
+    expect(markdownFiles[0].markdown).not.toContain("<ins>Open</ins>");
+    expect(markdownFiles[0].markdown).not.toContain("<ins>Jump</ins>");
+    expect(markdownFiles[1].markdown).toContain('<a id="link-book_002_Other_github"></a>');
   });
 
   it("preserves supported rich text as github-compatible markdown", async () => {

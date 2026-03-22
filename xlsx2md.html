@@ -1542,20 +1542,28 @@ lht-preview-output {
         </summary>
         <div class="md-accordion-body md-stack-md">
           <div class="md-grid md-grid--options">
+            <lht-select-help field-id="formattingModeSelect" label="Formatting Mode" help-text="Choose how Excel text emphasis should be represented in Markdown. `github` preserves supported emphasis as GitHub-compatible Markdown or HTML.">
+              <script type="application/json" slot="options">
+                [
+                  { "value": "plain", "label": "plain: output plain text" },
+                  { "value": "github", "label": "github: preserve supported emphasis", "selected": true }
+                ]
+              </script>
+            </lht-select-help>
+            <lht-select-help field-id="tableDetectionModeSelect" label="Table Detection" help-text="Choose how aggressively xlsx2md detects tables. `border` detects tables from bordered regions and reduces borderless fallback detection.">
+              <script type="application/json" slot="options">
+                [
+                  { "value": "balanced", "label": "balanced: bordered + fallback detection", "selected": true },
+                  { "value": "border", "label": "border: bordered regions only" }
+                ]
+              </script>
+            </lht-select-help>
             <lht-select-help field-id="outputModeSelect" label="Output Mode" help-text="Choose whether Markdown should use displayed values, raw values, or both. The default is `display`, which stays close to Excel's rendered view.">
               <script type="application/json" slot="options">
                 [
                   { "value": "display", "label": "display: prefer displayed values", "selected": true },
                   { "value": "raw", "label": "raw: prefer internal values" },
                   { "value": "both", "label": "both: include both" }
-                ]
-              </script>
-            </lht-select-help>
-            <lht-select-help field-id="formattingModeSelect" label="Formatting Mode" help-text="Choose how Excel text emphasis should be represented in Markdown. `github` preserves supported emphasis as GitHub-compatible Markdown or HTML.">
-              <script type="application/json" slot="options">
-                [
-                  { "value": "plain", "label": "plain: output plain text" },
-                  { "value": "github", "label": "github: preserve supported emphasis", "selected": true }
                 ]
               </script>
             </lht-select-help>
@@ -1577,6 +1585,7 @@ lht-preview-output {
           </div>
           <div id="outputModeNotice" class="md-caption">`display` outputs values close to what Excel shows.</div>
           <div id="formattingModeNotice" class="md-caption">`github` preserves supported Excel emphasis as GitHub-compatible Markdown: bold, italic, strike, underline, and in-cell line breaks as `&lt;br&gt;`.</div>
+          <div id="tableDetectionModeNotice" class="md-caption">`balanced` uses both bordered candidates and value-density fallback detection.</div>
         </div>
       </details>
 
@@ -4127,6 +4136,7 @@ if (!customElements.get("lht-page-menu")) {
     const textDecoder = new TextDecoder("utf-8");
     const textEncoder = new TextEncoder();
     const crcTable = buildCrc32Table();
+    const fixedZipEntryTimestamp = toDosDateTime(2025, 1, 1, 0, 0, 0);
     function buildCrc32Table() {
         const table = new Uint32Array(256);
         for (let i = 0; i < 256; i += 1) {
@@ -4147,6 +4157,15 @@ if (!customElements.get("lht-page-menu")) {
     }
     function decodeXmlText(bytes) {
         return textDecoder.decode(bytes);
+    }
+    function toDosDateTime(year, month, day, hour, minute, second) {
+        const clampedYear = Math.max(1980, Math.min(2107, year));
+        const dosTime = ((hour & 0x1f) << 11) | ((minute & 0x3f) << 5) | (Math.floor(second / 2) & 0x1f);
+        const dosDate = (((clampedYear - 1980) & 0x7f) << 9) | ((month & 0x0f) << 5) | (day & 0x1f);
+        return {
+            dosTime,
+            dosDate
+        };
     }
     function readUint16LE(view, offset) {
         return view.getUint16(offset, true);
@@ -4239,8 +4258,8 @@ if (!customElements.get("lht-page-menu")) {
             localView.setUint16(4, 20, true);
             localView.setUint16(6, 0, true);
             localView.setUint16(8, 0, true);
-            localView.setUint16(10, 0, true);
-            localView.setUint16(12, 0, true);
+            localView.setUint16(10, fixedZipEntryTimestamp.dosTime, true);
+            localView.setUint16(12, fixedZipEntryTimestamp.dosDate, true);
             localView.setUint32(14, entryCrc32, true);
             localView.setUint32(18, dataBytes.length, true);
             localView.setUint32(22, dataBytes.length, true);
@@ -4255,8 +4274,8 @@ if (!customElements.get("lht-page-menu")) {
             centralView.setUint16(6, 20, true);
             centralView.setUint16(8, 0, true);
             centralView.setUint16(10, 0, true);
-            centralView.setUint16(12, 0, true);
-            centralView.setUint16(14, 0, true);
+            centralView.setUint16(12, fixedZipEntryTimestamp.dosTime, true);
+            centralView.setUint16(14, fixedZipEntryTimestamp.dosDate, true);
             centralView.setUint32(16, entryCrc32, true);
             centralView.setUint32(20, dataBytes.length, true);
             centralView.setUint32(24, dataBytes.length, true);
@@ -4299,7 +4318,8 @@ if (!customElements.get("lht-page-menu")) {
     }
     const zipIoApi = {
         unzipEntries,
-        createStoredZip
+        createStoredZip,
+        fixedZipEntryTimestamp
     };
     moduleRegistry.registerModule("zipIo", zipIoApi);
 })();
@@ -4860,7 +4880,20 @@ if (!customElements.get("lht-page-menu")) {
     function collectBorderSeedCells(sheet) {
         return sheet.cells.filter((cell) => (cell.borders.top || cell.borders.bottom || cell.borders.left || cell.borders.right));
     }
-    function collectConnectedComponents(seedCells) {
+    function areBorderAdjacent(current, next) {
+        if (current.row === next.row && Math.abs(current.col - next.col) === 1) {
+            return (current.borders.top && next.borders.top)
+                || (current.borders.bottom && next.borders.bottom)
+                || (current.col < next.col ? current.borders.right && next.borders.left : current.borders.left && next.borders.right);
+        }
+        if (current.col === next.col && Math.abs(current.row - next.row) === 1) {
+            return (current.borders.left && next.borders.left)
+                || (current.borders.right && next.borders.right)
+                || (current.row < next.row ? current.borders.bottom && next.borders.top : current.borders.top && next.borders.bottom);
+        }
+        return false;
+    }
+    function collectConnectedComponents(seedCells, adjacencyMode = "grid") {
         const positionMap = new Map();
         for (const cell of seedCells) {
             positionMap.set(`${cell.row}:${cell.col}`, cell);
@@ -4881,6 +4914,8 @@ if (!customElements.get("lht-page-menu")) {
                     const nextKey = `${current.row + rowDelta}:${current.col + colDelta}`;
                     const nextCell = positionMap.get(nextKey);
                     if (!nextCell || visited.has(nextKey))
+                        continue;
+                    if (adjacencyMode === "border" && !areBorderAdjacent(current, nextCell))
                         continue;
                     visited.add(nextKey);
                     queue.push(nextCell);
@@ -4931,7 +4966,7 @@ if (!customElements.get("lht-page-menu")) {
             return true;
         });
     }
-    function detectTableCandidates(sheet, buildCellMap, scoreWeights = DEFAULT_TABLE_SCORE_WEIGHTS) {
+    function detectTableCandidates(sheet, buildCellMap, scoreWeights = DEFAULT_TABLE_SCORE_WEIGHTS, tableDetectionMode = "balanced") {
         const cellMap = buildCellMap(sheet);
         const allSeedCells = collectTableSeedCells(sheet);
         const borderSeedCells = collectBorderSeedCells(sheet);
@@ -5018,27 +5053,29 @@ if (!customElements.get("lht-page-menu")) {
                 });
             }
         }
-        for (const component of collectConnectedComponents(borderSeedCells)) {
+        for (const component of collectConnectedComponents(borderSeedCells, tableDetectionMode === "border" ? "border" : "grid")) {
             maybePushCandidate(component);
         }
-        for (const component of collectConnectedComponents(allSeedCells)) {
-            const rows = component.map((entry) => entry.row);
-            const cols = component.map((entry) => entry.col);
-            const bounds = {
-                startRow: Math.min(...rows),
-                startCol: Math.min(...cols),
-                endRow: Math.max(...rows),
-                endCol: Math.max(...cols)
-            };
-            const containingBorderCandidates = candidates.filter((candidate) => isWithinBounds(candidate, bounds));
-            const fallbackArea = getBoundsArea(bounds);
-            const shadowedByBorderCandidate = containingBorderCandidates.some((candidate) => (getBoundsArea(candidate) >= fallbackArea * 0.4));
-            const shadowedByMultipleBorderCandidates = containingBorderCandidates.length >= 2
-                && getCombinedCandidateArea(containingBorderCandidates) >= fallbackArea * 0.6;
-            if (shadowedByBorderCandidate || shadowedByMultipleBorderCandidates) {
-                continue;
+        if (tableDetectionMode !== "border") {
+            for (const component of collectConnectedComponents(allSeedCells)) {
+                const rows = component.map((entry) => entry.row);
+                const cols = component.map((entry) => entry.col);
+                const bounds = {
+                    startRow: Math.min(...rows),
+                    startCol: Math.min(...cols),
+                    endRow: Math.max(...rows),
+                    endCol: Math.max(...cols)
+                };
+                const containingBorderCandidates = candidates.filter((candidate) => isWithinBounds(candidate, bounds));
+                const fallbackArea = getBoundsArea(bounds);
+                const shadowedByBorderCandidate = containingBorderCandidates.some((candidate) => (getBoundsArea(candidate) >= fallbackArea * 0.4));
+                const shadowedByMultipleBorderCandidates = containingBorderCandidates.length >= 2
+                    && getCombinedCandidateArea(containingBorderCandidates) >= fallbackArea * 0.6;
+                if (shadowedByBorderCandidate || shadowedByMultipleBorderCandidates) {
+                    continue;
+                }
+                maybePushCandidate(component);
             }
-            maybePushCandidate(component);
         }
         return pruneRedundantCandidates(candidates).sort((left, right) => {
             if (left.startRow !== right.startRow)
@@ -5214,6 +5251,7 @@ if (!customElements.get("lht-page-menu")) {
             `Output file: ${markdownFile.fileName}`,
             `Output mode: ${markdownFile.summary.outputMode}`,
             `Formatting mode: ${markdownFile.summary.formattingMode}`,
+            `Table detection mode: ${markdownFile.summary.tableDetectionMode}`,
             `Sections: ${markdownFile.summary.sections}`,
             `Tables: ${markdownFile.summary.tables}`,
             `Narrative blocks: ${markdownFile.summary.narrativeBlocks}`,
@@ -5298,36 +5336,91 @@ if (!customElements.get("lht-page-menu")) {
             }
             return map;
         }
-        function formatCellForMarkdown(cell, options) {
+        function createSheetAnchorId(workbookName, sheetIndex, sheetName, options = {}) {
+            return deps.createOutputFileName(workbookName, sheetIndex, sheetName, options.outputMode || "display", options.formattingMode || "plain").replace(/\.md$/i, "");
+        }
+        function parseInternalHyperlinkLocation(location, currentSheetName) {
+            const normalized = String(location || "").trim().replace(/^#/, "");
+            if (!normalized) {
+                return { sheetName: currentSheetName, refText: "" };
+            }
+            const match = normalized.match(/^(?:'((?:[^']|'')+)'|([^!]+))!(.+)$/);
+            if (match) {
+                return {
+                    sheetName: (match[1] || match[2] || currentSheetName).replace(/''/g, "'"),
+                    refText: (match[3] || "").trim()
+                };
+            }
+            return {
+                sheetName: currentSheetName,
+                refText: normalized
+            };
+        }
+        function renderHyperlinkMarkdown(cell, text, workbook, sheet, options) {
+            const hyperlink = cell.hyperlink;
+            const label = String(text || "").trim();
+            if (!hyperlink || !label)
+                return text;
+            if (hyperlink.kind === "external") {
+                const href = String(hyperlink.target || "").trim();
+                return href ? `[${label}](${href})` : label;
+            }
+            const currentSheetName = (sheet === null || sheet === void 0 ? void 0 : sheet.name) || "";
+            const { sheetName, refText } = parseInternalHyperlinkLocation(hyperlink.location || hyperlink.target, currentSheetName);
+            const traceText = [sheetName, refText].filter(Boolean).join("!");
+            const targetSheet = (workbook === null || workbook === void 0 ? void 0 : workbook.sheets.find((entry) => entry.name === sheetName)) || null;
+            if (!targetSheet || !workbook) {
+                return traceText ? `${label} (${traceText})` : label;
+            }
+            const href = `#${createSheetAnchorId(workbook.name, targetSheet.index, targetSheet.name, options)}`;
+            return traceText && traceText !== targetSheet.name
+                ? `[${label}](${href}) (${traceText})`
+                : `[${label}](${href})`;
+        }
+        function formatCellForMarkdown(cell, options, workbook = null, sheet = null) {
+            var _a;
             if (!cell)
                 return "";
             const mode = options.outputMode || "display";
             const formattingMode = options.formattingMode || "plain";
+            const displayCell = formattingMode === "github" && cell.hyperlink
+                ? {
+                    ...cell,
+                    textStyle: {
+                        ...cell.textStyle,
+                        underline: false
+                    },
+                    richTextRuns: ((_a = cell.richTextRuns) === null || _a === void 0 ? void 0 : _a.map((run) => ({
+                        ...run,
+                        underline: false
+                    }))) || null
+                }
+                : cell;
             const displayValue = richTextRenderer.compactText(String(cell.outputValue || ""));
             const rawValue = richTextRenderer.compactText(String(cell.rawValue || ""));
-            const displayMarkdown = richTextRenderer.renderCellDisplayText(cell, formattingMode);
+            const displayMarkdown = richTextRenderer.renderCellDisplayText(displayCell, formattingMode);
             if (mode === "raw") {
-                return rawValue || displayValue;
+                return renderHyperlinkMarkdown(cell, rawValue || displayValue, workbook, sheet, options);
             }
             if (mode === "both") {
                 if (rawValue && rawValue !== displayValue) {
                     if (displayMarkdown) {
-                        return `${displayMarkdown} [raw=${rawValue}]`;
+                        return `${renderHyperlinkMarkdown(cell, displayMarkdown, workbook, sheet, options)} [raw=${rawValue}]`;
                     }
                     return `[raw=${rawValue}]`;
                 }
-                return displayMarkdown || rawValue;
+                return renderHyperlinkMarkdown(cell, displayMarkdown || rawValue, workbook, sheet, options);
             }
-            return displayMarkdown;
+            return renderHyperlinkMarkdown(cell, displayMarkdown, workbook, sheet, options);
         }
         function isCellInAnyTable(row, col, tables) {
             return tables.some((table) => row >= table.startRow && row <= table.endRow && col >= table.startCol && col <= table.endCol);
         }
-        function splitNarrativeRowSegments(cells, options) {
+        function splitNarrativeRowSegments(cells, options, workbook = null, sheet = null) {
             const segments = [];
             let current = null;
             for (const cell of cells) {
-                const value = formatCellForMarkdown(cell, options).trim();
+                const value = formatCellForMarkdown(cell, options, workbook, sheet).trim();
                 if (!value)
                     continue;
                 if (!current || cell.col - current.lastCol > 4) {
@@ -5348,7 +5441,7 @@ if (!customElements.get("lht-page-menu")) {
                 values: segment.values
             }));
         }
-        function extractNarrativeBlocks(sheet, tables, options = {}) {
+        function extractNarrativeBlocks(workbook, sheet, tables, options = {}) {
             const rowMap = new Map();
             for (const cell of sheet.cells) {
                 if (!cell.outputValue)
@@ -5365,7 +5458,7 @@ if (!customElements.get("lht-page-menu")) {
             let previousRow = -100;
             for (const rowNumber of rowNumbers) {
                 const cells = (rowMap.get(rowNumber) || []).slice().sort((a, b) => a.col - b.col);
-                const rowSegments = splitNarrativeRowSegments(cells, options);
+                const rowSegments = splitNarrativeRowSegments(cells, options, workbook, sheet);
                 for (const segment of rowSegments) {
                     const rowText = segment.values.join(" ").trim();
                     if (!rowText)
@@ -5476,8 +5569,9 @@ if (!customElements.get("lht-page-menu")) {
                 shapeBlockGapYEmu: deps.shapeBlockGapYEmu
             });
             const treatFirstRowAsHeader = options.treatFirstRowAsHeader !== false;
-            const tables = deps.detectTableCandidates(sheet, buildCellMap);
-            const narrativeBlocks = extractNarrativeBlocks(sheet, tables, options);
+            const tableDetectionMode = options.tableDetectionMode || "balanced";
+            const tables = deps.detectTableCandidates(sheet, buildCellMap, tableDetectionMode);
+            const narrativeBlocks = extractNarrativeBlocks(workbook, sheet, tables, options);
             const sectionBlocks = extractSectionBlocks(sheet, tables, narrativeBlocks);
             const formulaDiagnostics = sheet.cells
                 .filter((cell) => !!cell.formulaText && cell.resolutionStatus !== null)
@@ -5498,9 +5592,11 @@ if (!customElements.get("lht-page-menu")) {
                     narrativeBlock: block
                 });
             }
+            const fileName = deps.createOutputFileName(workbook.name, sheet.index, sheet.name, options.outputMode || "display", options.formattingMode || "plain");
+            const sheetAnchorId = createSheetAnchorId(workbook.name, sheet.index, sheet.name, options);
             let tableCounter = 1;
             for (const table of tables) {
-                const rows = deps.matrixFromCandidate(sheet, table, options, buildCellMap, formatCellForMarkdown);
+                const rows = deps.matrixFromCandidate(sheet, table, options, buildCellMap, (cell, tableOptions) => formatCellForMarkdown(cell, tableOptions, workbook, sheet));
                 if (rows.length === 0 || ((_a = rows[0]) === null || _a === void 0 ? void 0 : _a.length) === 0)
                     continue;
                 const tableMarkdown = deps.renderMarkdownTable(rows, treatFirstRowAsHeader);
@@ -5603,6 +5699,8 @@ if (!customElements.get("lht-page-menu")) {
                 ].join("\n")
                 : "";
             const markdown = [
+                `<a id="${sheetAnchorId}"></a>`,
+                "",
                 `# ${sheet.name}`,
                 "",
                 "## Source Information",
@@ -5617,12 +5715,13 @@ if (!customElements.get("lht-page-menu")) {
                 imageSection
             ].join("\n");
             return {
-                fileName: deps.createOutputFileName(workbook.name, sheet.index, sheet.name, options.outputMode || "display", options.formattingMode || "plain"),
+                fileName,
                 sheetName: sheet.name,
                 markdown,
                 summary: {
                     outputMode: options.outputMode || "display",
                     formattingMode: options.formattingMode || "plain",
+                    tableDetectionMode,
                     sections: sectionBlocks.length,
                     tables: tables.length,
                     narrativeBlocks: narrativeBlocks.length,
@@ -5979,6 +6078,12 @@ if (!customElements.get("lht-page-menu")) {
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     function createRelsParserApi(deps) {
+        function normalizeRelationshipTarget(baseFilePath, targetPath, targetMode = "") {
+            if ((targetMode || "").toLowerCase() === "external") {
+                return targetPath;
+            }
+            return normalizeZipPath(baseFilePath, targetPath);
+        }
         function normalizeZipPath(baseFilePath, targetPath) {
             const baseDirParts = baseFilePath.split("/").slice(0, -1);
             const inputParts = targetPath.split("/");
@@ -5995,7 +6100,7 @@ if (!customElements.get("lht-page-menu")) {
             }
             return parts.join("/");
         }
-        function parseRelationships(files, relsPath, sourcePath) {
+        function parseRelationshipEntries(files, relsPath, sourcePath) {
             const relBytes = files.get(relsPath);
             const relations = new Map();
             if (!relBytes) {
@@ -6008,7 +6113,20 @@ if (!customElements.get("lht-page-menu")) {
                 const target = node.getAttribute("Target") || "";
                 if (!id || !target)
                     continue;
-                relations.set(id, normalizeZipPath(sourcePath, target));
+                const targetMode = node.getAttribute("TargetMode") || "";
+                relations.set(id, {
+                    target: normalizeRelationshipTarget(sourcePath, target, targetMode),
+                    targetMode,
+                    type: node.getAttribute("Type") || ""
+                });
+            }
+            return relations;
+        }
+        function parseRelationships(files, relsPath, sourcePath) {
+            const relations = new Map();
+            const entries = parseRelationshipEntries(files, relsPath, sourcePath);
+            for (const [id, entry] of entries.entries()) {
+                relations.set(id, entry.target);
             }
             return relations;
         }
@@ -6019,7 +6137,9 @@ if (!customElements.get("lht-page-menu")) {
             return `${dir}/_rels/${fileName}.rels`;
         }
         return {
+            normalizeRelationshipTarget,
             normalizeZipPath,
+            parseRelationshipEntries,
             parseRelationships,
             buildRelsPath
         };
@@ -7039,6 +7159,61 @@ if (!customElements.get("lht-page-menu")) {
   <script>
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
+    function expandRangeAddresses(ref, deps) {
+        const range = deps.parseRangeRef(ref);
+        const addresses = [];
+        for (let row = Math.max(1, range.startRow); row <= Math.max(range.startRow, range.endRow); row += 1) {
+            for (let col = Math.max(1, range.startCol); col <= Math.max(range.startCol, range.endCol); col += 1) {
+                addresses.push(`${deps.colToLetters(col)}${row}`);
+            }
+        }
+        return addresses;
+    }
+    function parseWorksheetHyperlinks(files, worksheetDoc, sheetPath, deps) {
+        var _a;
+        const hyperlinks = new Map();
+        const relsPath = deps.buildRelsPath(sheetPath);
+        const relEntries = deps.parseRelationshipEntries(files, relsPath, sheetPath);
+        const hyperlinkNodes = Array.from(worksheetDoc.getElementsByTagName("hyperlink"));
+        for (const node of hyperlinkNodes) {
+            const ref = (node.getAttribute("ref") || "").trim();
+            if (!ref)
+                continue;
+            const relId = (node.getAttribute("r:id") || node.getAttribute("id") || "").trim();
+            const relEntry = relId ? relEntries.get(relId) : null;
+            const display = (node.getAttribute("display") || "").trim();
+            const tooltip = (node.getAttribute("tooltip") || "").trim();
+            const location = (node.getAttribute("location") || "").trim().replace(/^#/, "");
+            const rawTarget = ((_a = relEntry === null || relEntry === void 0 ? void 0 : relEntry.target) === null || _a === void 0 ? void 0 : _a.trim()) || "";
+            const kind = (relEntry === null || relEntry === void 0 ? void 0 : relEntry.targetMode.toLowerCase()) === "external"
+                ? "external"
+                : location
+                    ? "internal"
+                    : rawTarget.startsWith("#")
+                        ? "internal"
+                        : rawTarget
+                            ? "external"
+                            : null;
+            if (!kind)
+                continue;
+            const target = kind === "internal"
+                ? (location || rawTarget.replace(/^#/, ""))
+                : rawTarget;
+            if (!target)
+                continue;
+            const hyperlink = {
+                kind,
+                target,
+                location: location || (kind === "internal" ? target : ""),
+                tooltip,
+                display
+            };
+            for (const address of expandRangeAddresses(ref, deps)) {
+                hyperlinks.set(address, hyperlink);
+            }
+        }
+        return hyperlinks;
+    }
     function hasEnabledBooleanValue(node) {
         if (!node)
             return false;
@@ -7281,6 +7456,7 @@ if (!customElements.get("lht-page-menu")) {
         }
         const doc = deps.xmlToDocument(deps.decodeXmlText(bytes));
         const sharedFormulaMap = new Map();
+        const hyperlinks = parseWorksheetHyperlinks(files, doc, sheetPath, deps);
         const cells = Array.from(doc.getElementsByTagName("c")).map((cellElement) => {
             const address = cellElement.getAttribute("r") || "";
             const position = deps.parseCellAddress(address);
@@ -7334,7 +7510,8 @@ if (!customElements.get("lht-page-menu")) {
                 textStyle: cellStyle.textStyle,
                 richTextRuns: output.richTextRuns,
                 formulaType,
-                spillRef
+                spillRef,
+                hyperlink: hyperlinks.get(address) || null
             };
         });
         const merges = Array.from(doc.getElementsByTagName("mergeCell")).map((mergeElement) => deps.parseRangeRef(mergeElement.getAttribute("ref") || ""));
@@ -7373,6 +7550,8 @@ if (!customElements.get("lht-page-menu")) {
     }
     const worksheetParserApi = {
         extractCellOutputValue,
+        expandRangeAddresses,
+        parseWorksheetHyperlinks,
         shiftReferenceAddress,
         translateSharedFormula,
         parseWorksheet
@@ -11195,7 +11374,7 @@ if (!customElements.get("lht-page-menu")) {
         xmlToDocument,
         decodeXmlText
     });
-    const { normalizeZipPath, parseRelationships, buildRelsPath } = relsParserHelper;
+    const { normalizeZipPath, parseRelationshipEntries, parseRelationships, buildRelsPath } = relsParserHelper;
     const formulaReferenceUtilsHelper = formulaReferenceUtilsModule.createFormulaReferenceUtilsApi({
         normalizeFormulaAddress
     });
@@ -11222,7 +11401,7 @@ if (!customElements.get("lht-page-menu")) {
     });
     const sheetMarkdownHelper = sheetMarkdownModule.createSheetMarkdownApi({
         renderNarrativeBlock: narrativeStructureHelper.renderNarrativeBlock,
-        detectTableCandidates: tableDetectorHelper.detectTableCandidates,
+        detectTableCandidates: (sheet, buildCellMapForSheet, tableDetectionMode = "balanced") => tableDetectorHelper.detectTableCandidates(sheet, buildCellMapForSheet, undefined, tableDetectionMode),
         matrixFromCandidate: tableDetectorHelper.matrixFromCandidate,
         renderMarkdownTable: markdownExportHelper.renderMarkdownTable,
         createOutputFileName: markdownExportHelper.createOutputFileName,
@@ -11263,6 +11442,8 @@ if (!customElements.get("lht-page-menu")) {
             parseDrawingImages: sheetAssetsHelper.parseDrawingImages,
             parseDrawingCharts: sheetAssetsHelper.parseDrawingCharts,
             parseDrawingShapes: sheetAssetsHelper.parseDrawingShapes,
+            parseRelationshipEntries,
+            buildRelsPath,
             formatCellDisplayValue: cellFormatHelper.formatCellDisplayValue,
             buildAssetDeps: () => ({
                 parseRelationships,
@@ -11330,7 +11511,7 @@ if (!customElements.get("lht-page-menu")) {
         unzipEntries: zipIoHelper.unzipEntries,
         parseRangeRef,
         applyMergeTokens: tableDetectorHelper.applyMergeTokens,
-        detectTableCandidates: (sheet) => tableDetectorHelper.detectTableCandidates(sheet, buildCellMap),
+        detectTableCandidates: (sheet, tableDetectionMode = "balanced") => tableDetectorHelper.detectTableCandidates(sheet, buildCellMap, undefined, tableDetectionMode),
         extractNarrativeBlocks,
         convertSheetToMarkdown,
         convertWorkbookToMarkdownFiles,
@@ -11368,7 +11549,7 @@ if (!customElements.get("lht-page-menu")) {
         return !!element.checked;
     }
     function getOptions() {
-        var _a, _b;
+        var _a, _b, _c;
         const outputModeSelect = getElement("outputModeSelect");
         const outputMode = typeof outputModeSelect.getValue === "function"
             ? outputModeSelect.getValue()
@@ -11377,6 +11558,10 @@ if (!customElements.get("lht-page-menu")) {
         const formattingMode = typeof formattingModeSelect.getValue === "function"
             ? formattingModeSelect.getValue()
             : ((_b = document.getElementById("formattingModeSelect")) === null || _b === void 0 ? void 0 : _b.value) || "plain";
+        const tableDetectionModeSelect = getElement("tableDetectionModeSelect");
+        const tableDetectionMode = typeof tableDetectionModeSelect.getValue === "function"
+            ? tableDetectionModeSelect.getValue()
+            : ((_c = document.getElementById("tableDetectionModeSelect")) === null || _c === void 0 ? void 0 : _c.value) || "balanced";
         return {
             treatFirstRowAsHeader: getSwitchValue("headerRowEnabled"),
             trimText: getSwitchValue("trimTextEnabled"),
@@ -11384,7 +11569,8 @@ if (!customElements.get("lht-page-menu")) {
             removeEmptyColumns: getSwitchValue("removeEmptyColumnsEnabled"),
             includeShapeDetails: getSwitchValue("includeShapeDetailsEnabled"),
             outputMode: outputMode === "raw" || outputMode === "both" ? outputMode : "display",
-            formattingMode: formattingMode === "github" ? "github" : "plain"
+            formattingMode: formattingMode === "github" ? "github" : "plain",
+            tableDetectionMode: tableDetectionMode === "border-priority" || tableDetectionMode === "border" ? "border" : "balanced"
         };
     }
     function getSelectedOutputMode() {
@@ -11558,7 +11744,7 @@ if (!customElements.get("lht-page-menu")) {
         }).join("")}`;
     }
     function renderAnalysisSummary(files, workbookName) {
-        var _a, _b;
+        var _a, _b, _c;
         if (files.length === 0) {
             return '<div class="md-summary-empty">No conversion yet.</div>';
         }
@@ -11570,7 +11756,8 @@ if (!customElements.get("lht-page-menu")) {
         const totalFormulas = files.reduce((sum, file) => sum + file.summary.formulaDiagnostics.length, 0);
         const outputMode = ((_a = files[0]) === null || _a === void 0 ? void 0 : _a.summary.outputMode) || "display";
         const formattingMode = ((_b = files[0]) === null || _b === void 0 ? void 0 : _b.summary.formattingMode) || "plain";
-        const overview = `<div class="md-summary-overview">Workbook ${escapeHtml(workbookName)} / ${files.length} sheet(s) / value mode ${escapeHtml(outputMode)} / formatting ${escapeHtml(formattingMode)}</div>`;
+        const tableDetectionMode = ((_c = files[0]) === null || _c === void 0 ? void 0 : _c.summary.tableDetectionMode) || "balanced";
+        const overview = `<div class="md-summary-overview">Workbook ${escapeHtml(workbookName)} / ${files.length} sheet(s) / value mode ${escapeHtml(outputMode)} / formatting ${escapeHtml(formattingMode)} / table detection ${escapeHtml(tableDetectionMode)}</div>`;
         const items = files.map((file) => (`<section class="md-summary-group"><div class="md-summary-group-head"><h3 class="md-summary-group-title">${escapeHtml(file.sheetName)}</h3><span class="md-summary-group-count">${file.summary.cells} cells</span></div><div class="md-summary-group-meta">tables ${file.summary.tables} / narrative ${file.summary.narrativeBlocks} / merges ${file.summary.merges} / images ${file.summary.images} / formulas ${file.summary.formulaDiagnostics.length}</div></section>`)).join("");
         const totals = `<section class="md-summary-group"><div class="md-summary-group-head"><h3 class="md-summary-group-title">Total</h3><span class="md-summary-group-count">${files.length} sheets</span></div><div class="md-summary-group-meta">tables ${totalTables} / narrative ${totalNarratives} / merges ${totalMerges} / images ${totalImages} / formulas ${totalFormulas} / analyzed cells ${totalCells}</div></section>`;
         return `${overview}${totals}${items}`;
@@ -11594,6 +11781,14 @@ if (!customElements.get("lht-page-menu")) {
             return;
         }
         notice.textContent = "`plain` strips Excel text emphasis and outputs plain Markdown text.";
+    }
+    function updateTableDetectionModeNotice(mode) {
+        const notice = getElement("tableDetectionModeNotice");
+        if (mode === "border") {
+            notice.textContent = "`border` detects tables from bordered regions and suppresses borderless fallback detection.";
+            return;
+        }
+        notice.textContent = "`balanced` uses both bordered candidates and value-density fallback detection.";
     }
     function updatePreviewModeBanner(mode) {
         const banner = getElement("previewModeBanner");
@@ -11801,6 +11996,9 @@ if (!customElements.get("lht-page-menu")) {
         getElement("formattingModeSelect").addEventListener("change", () => {
             updateFormattingModeNotice(getOptions().formattingMode);
         });
+        getElement("tableDetectionModeSelect").addEventListener("change", () => {
+            updateTableDetectionModeNotice(getOptions().tableDetectionMode);
+        });
     }
     function initialize() {
         clearError();
@@ -11810,6 +12008,7 @@ if (!customElements.get("lht-page-menu")) {
         setPreviewMarkdown("");
         updateOutputModeNotice(getSelectedOutputMode());
         updateFormattingModeNotice(getOptions().formattingMode);
+        updateTableDetectionModeNotice(getOptions().tableDetectionMode);
         updatePreviewModeBanner(getSelectedOutputMode());
         getElement("downloadBtn").disabled = true;
         getElement("exportZipBtn").disabled = true;

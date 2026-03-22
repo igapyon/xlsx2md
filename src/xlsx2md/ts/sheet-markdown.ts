@@ -38,6 +38,13 @@
     }> | null;
     formulaType: string;
     spillRef: string;
+    hyperlink: {
+      kind: "external" | "internal";
+      target: string;
+      location: string;
+      tooltip: string;
+      display: string;
+    } | null;
   };
 
   type MergeRange = {
@@ -123,6 +130,7 @@
     includeShapeDetails?: boolean;
     outputMode?: "display" | "raw" | "both";
     formattingMode?: "plain" | "github";
+    tableDetectionMode?: "balanced" | "border";
   };
 
   type TableCandidate = {
@@ -149,6 +157,7 @@
     summary: {
       outputMode: "display" | "raw" | "both";
       formattingMode: "plain" | "github";
+      tableDetectionMode: "balanced" | "border";
       sections: number;
       tables: number;
       narrativeBlocks: number;
@@ -173,7 +182,11 @@
 
   type SheetMarkdownDeps = {
     renderNarrativeBlock: (block: NarrativeBlock) => string;
-    detectTableCandidates: (sheet: ParsedSheet, buildCellMap: (sheet: ParsedSheet) => Map<string, ParsedCell>) => TableCandidate[];
+    detectTableCandidates: (
+      sheet: ParsedSheet,
+      buildCellMap: (sheet: ParsedSheet) => Map<string, ParsedCell>,
+      tableDetectionMode?: "balanced" | "border"
+    ) => TableCandidate[];
     matrixFromCandidate: (
       sheet: ParsedSheet,
       candidate: TableCandidate,
@@ -222,37 +235,120 @@
       return map;
     }
 
-    function formatCellForMarkdown(cell: ParsedCell | undefined, options: MarkdownOptions): string {
+    function createSheetAnchorId(
+      workbookName: string,
+      sheetIndex: number,
+      sheetName: string,
+      options: MarkdownOptions = {}
+    ): string {
+      return deps.createOutputFileName(
+        workbookName,
+        sheetIndex,
+        sheetName,
+        options.outputMode || "display",
+        options.formattingMode || "plain"
+      ).replace(/\.md$/i, "");
+    }
+
+    function parseInternalHyperlinkLocation(location: string, currentSheetName: string): { sheetName: string; refText: string } {
+      const normalized = String(location || "").trim().replace(/^#/, "");
+      if (!normalized) {
+        return { sheetName: currentSheetName, refText: "" };
+      }
+      const match = normalized.match(/^(?:'((?:[^']|'')+)'|([^!]+))!(.+)$/);
+      if (match) {
+        return {
+          sheetName: (match[1] || match[2] || currentSheetName).replace(/''/g, "'"),
+          refText: (match[3] || "").trim()
+        };
+      }
+      return {
+        sheetName: currentSheetName,
+        refText: normalized
+      };
+    }
+
+    function renderHyperlinkMarkdown(
+      cell: ParsedCell,
+      text: string,
+      workbook: ParsedWorkbook | null,
+      sheet: ParsedSheet | null,
+      options: MarkdownOptions
+    ): string {
+      const hyperlink = cell.hyperlink;
+      const label = String(text || "").trim();
+      if (!hyperlink || !label) return text;
+      if (hyperlink.kind === "external") {
+        const href = String(hyperlink.target || "").trim();
+        return href ? `[${label}](${href})` : label;
+      }
+      const currentSheetName = sheet?.name || "";
+      const { sheetName, refText } = parseInternalHyperlinkLocation(hyperlink.location || hyperlink.target, currentSheetName);
+      const traceText = [sheetName, refText].filter(Boolean).join("!");
+      const targetSheet = workbook?.sheets.find((entry) => entry.name === sheetName) || null;
+      if (!targetSheet || !workbook) {
+        return traceText ? `${label} (${traceText})` : label;
+      }
+      const href = `#${createSheetAnchorId(workbook.name, targetSheet.index, targetSheet.name, options)}`;
+      return traceText && traceText !== targetSheet.name
+        ? `[${label}](${href}) (${traceText})`
+        : `[${label}](${href})`;
+    }
+
+    function formatCellForMarkdown(
+      cell: ParsedCell | undefined,
+      options: MarkdownOptions,
+      workbook: ParsedWorkbook | null = null,
+      sheet: ParsedSheet | null = null
+    ): string {
       if (!cell) return "";
       const mode = options.outputMode || "display";
       const formattingMode = options.formattingMode || "plain";
+      const displayCell = formattingMode === "github" && cell.hyperlink
+        ? {
+          ...cell,
+          textStyle: {
+            ...cell.textStyle,
+            underline: false
+          },
+          richTextRuns: cell.richTextRuns?.map((run) => ({
+            ...run,
+            underline: false
+          })) || null
+        }
+        : cell;
       const displayValue = richTextRenderer.compactText(String(cell.outputValue || ""));
       const rawValue = richTextRenderer.compactText(String(cell.rawValue || ""));
-      const displayMarkdown = richTextRenderer.renderCellDisplayText(cell, formattingMode);
+      const displayMarkdown = richTextRenderer.renderCellDisplayText(displayCell, formattingMode);
       if (mode === "raw") {
-        return rawValue || displayValue;
+        return renderHyperlinkMarkdown(cell, rawValue || displayValue, workbook, sheet, options);
       }
       if (mode === "both") {
         if (rawValue && rawValue !== displayValue) {
           if (displayMarkdown) {
-            return `${displayMarkdown} [raw=${rawValue}]`;
+            return `${renderHyperlinkMarkdown(cell, displayMarkdown, workbook, sheet, options)} [raw=${rawValue}]`;
           }
           return `[raw=${rawValue}]`;
         }
-        return displayMarkdown || rawValue;
+        return renderHyperlinkMarkdown(cell, displayMarkdown || rawValue, workbook, sheet, options);
       }
-      return displayMarkdown;
+      return renderHyperlinkMarkdown(cell, displayMarkdown, workbook, sheet, options);
     }
 
     function isCellInAnyTable(row: number, col: number, tables: TableCandidate[]): boolean {
       return tables.some((table) => row >= table.startRow && row <= table.endRow && col >= table.startCol && col <= table.endCol);
     }
 
-    function splitNarrativeRowSegments(cells: ParsedCell[], options: MarkdownOptions): Array<{ startCol: number; values: string[] }> {
+    function splitNarrativeRowSegments(
+      cells: ParsedCell[],
+      options: MarkdownOptions,
+      workbook: ParsedWorkbook | null = null,
+      sheet: ParsedSheet | null = null
+    ): Array<{ startCol: number; values: string[] }> {
       const segments: Array<{ startCol: number; values: string[] }> = [];
       let current: { startCol: number; values: string[]; lastCol: number } | null = null;
       for (const cell of cells) {
-        const value = formatCellForMarkdown(cell, options).trim();
+        const value = formatCellForMarkdown(cell, options, workbook, sheet).trim();
         if (!value) continue;
         if (!current || cell.col - current.lastCol > 4) {
           current = {
@@ -272,7 +368,12 @@
       }));
     }
 
-    function extractNarrativeBlocks(sheet: ParsedSheet, tables: TableCandidate[], options: MarkdownOptions = {}): NarrativeBlock[] {
+    function extractNarrativeBlocks(
+      workbook: ParsedWorkbook,
+      sheet: ParsedSheet,
+      tables: TableCandidate[],
+      options: MarkdownOptions = {}
+    ): NarrativeBlock[] {
       const rowMap = new Map<number, ParsedCell[]>();
       for (const cell of sheet.cells) {
         if (!cell.outputValue) continue;
@@ -288,7 +389,7 @@
 
       for (const rowNumber of rowNumbers) {
         const cells = (rowMap.get(rowNumber) || []).slice().sort((a, b) => a.col - b.col);
-        const rowSegments = splitNarrativeRowSegments(cells, options);
+        const rowSegments = splitNarrativeRowSegments(cells, options, workbook, sheet);
         for (const segment of rowSegments) {
           const rowText = segment.values.join(" ").trim();
           if (!rowText) continue;
@@ -405,8 +506,9 @@
         shapeBlockGapYEmu: deps.shapeBlockGapYEmu
       });
       const treatFirstRowAsHeader = options.treatFirstRowAsHeader !== false;
-      const tables = deps.detectTableCandidates(sheet, buildCellMap);
-      const narrativeBlocks = extractNarrativeBlocks(sheet, tables, options);
+      const tableDetectionMode = options.tableDetectionMode || "balanced";
+      const tables = deps.detectTableCandidates(sheet, buildCellMap, tableDetectionMode);
+      const narrativeBlocks = extractNarrativeBlocks(workbook, sheet, tables, options);
       const sectionBlocks = extractSectionBlocks(sheet, tables, narrativeBlocks);
       const formulaDiagnostics = sheet.cells
         .filter((cell) => !!cell.formulaText && cell.resolutionStatus !== null)
@@ -435,9 +537,23 @@
         });
       }
 
+      const fileName = deps.createOutputFileName(
+        workbook.name,
+        sheet.index,
+        sheet.name,
+        options.outputMode || "display",
+        options.formattingMode || "plain"
+      );
+      const sheetAnchorId = createSheetAnchorId(workbook.name, sheet.index, sheet.name, options);
       let tableCounter = 1;
       for (const table of tables) {
-        const rows = deps.matrixFromCandidate(sheet, table, options, buildCellMap, formatCellForMarkdown);
+        const rows = deps.matrixFromCandidate(
+          sheet,
+          table,
+          options,
+          buildCellMap,
+          (cell, tableOptions) => formatCellForMarkdown(cell, tableOptions, workbook, sheet)
+        );
         if (rows.length === 0 || rows[0]?.length === 0) continue;
         const tableMarkdown = deps.renderMarkdownTable(rows, treatFirstRowAsHeader);
         sections.push({
@@ -539,6 +655,8 @@
         ].join("\n")
         : "";
       const markdown = [
+        `<a id="${sheetAnchorId}"></a>`,
+        "",
         `# ${sheet.name}`,
         "",
         "## Source Information",
@@ -554,18 +672,13 @@
       ].join("\n");
 
       return {
-        fileName: deps.createOutputFileName(
-          workbook.name,
-          sheet.index,
-          sheet.name,
-          options.outputMode || "display",
-          options.formattingMode || "plain"
-        ),
+        fileName,
         sheetName: sheet.name,
         markdown,
         summary: {
           outputMode: options.outputMode || "display",
           formattingMode: options.formattingMode || "plain",
+          tableDetectionMode,
           sections: sectionBlocks.length,
           tables: tables.length,
           narrativeBlocks: narrativeBlocks.length,

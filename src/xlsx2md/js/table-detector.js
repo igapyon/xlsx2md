@@ -24,7 +24,20 @@
     function collectBorderSeedCells(sheet) {
         return sheet.cells.filter((cell) => (cell.borders.top || cell.borders.bottom || cell.borders.left || cell.borders.right));
     }
-    function collectConnectedComponents(seedCells) {
+    function areBorderAdjacent(current, next) {
+        if (current.row === next.row && Math.abs(current.col - next.col) === 1) {
+            return (current.borders.top && next.borders.top)
+                || (current.borders.bottom && next.borders.bottom)
+                || (current.col < next.col ? current.borders.right && next.borders.left : current.borders.left && next.borders.right);
+        }
+        if (current.col === next.col && Math.abs(current.row - next.row) === 1) {
+            return (current.borders.left && next.borders.left)
+                || (current.borders.right && next.borders.right)
+                || (current.row < next.row ? current.borders.bottom && next.borders.top : current.borders.top && next.borders.bottom);
+        }
+        return false;
+    }
+    function collectConnectedComponents(seedCells, adjacencyMode = "grid") {
         const positionMap = new Map();
         for (const cell of seedCells) {
             positionMap.set(`${cell.row}:${cell.col}`, cell);
@@ -45,6 +58,8 @@
                     const nextKey = `${current.row + rowDelta}:${current.col + colDelta}`;
                     const nextCell = positionMap.get(nextKey);
                     if (!nextCell || visited.has(nextKey))
+                        continue;
+                    if (adjacencyMode === "border" && !areBorderAdjacent(current, nextCell))
                         continue;
                     visited.add(nextKey);
                     queue.push(nextCell);
@@ -95,7 +110,7 @@
             return true;
         });
     }
-    function detectTableCandidates(sheet, buildCellMap, scoreWeights = DEFAULT_TABLE_SCORE_WEIGHTS) {
+    function detectTableCandidates(sheet, buildCellMap, scoreWeights = DEFAULT_TABLE_SCORE_WEIGHTS, tableDetectionMode = "balanced") {
         const cellMap = buildCellMap(sheet);
         const allSeedCells = collectTableSeedCells(sheet);
         const borderSeedCells = collectBorderSeedCells(sheet);
@@ -182,27 +197,29 @@
                 });
             }
         }
-        for (const component of collectConnectedComponents(borderSeedCells)) {
+        for (const component of collectConnectedComponents(borderSeedCells, tableDetectionMode === "border" ? "border" : "grid")) {
             maybePushCandidate(component);
         }
-        for (const component of collectConnectedComponents(allSeedCells)) {
-            const rows = component.map((entry) => entry.row);
-            const cols = component.map((entry) => entry.col);
-            const bounds = {
-                startRow: Math.min(...rows),
-                startCol: Math.min(...cols),
-                endRow: Math.max(...rows),
-                endCol: Math.max(...cols)
-            };
-            const containingBorderCandidates = candidates.filter((candidate) => isWithinBounds(candidate, bounds));
-            const fallbackArea = getBoundsArea(bounds);
-            const shadowedByBorderCandidate = containingBorderCandidates.some((candidate) => (getBoundsArea(candidate) >= fallbackArea * 0.4));
-            const shadowedByMultipleBorderCandidates = containingBorderCandidates.length >= 2
-                && getCombinedCandidateArea(containingBorderCandidates) >= fallbackArea * 0.6;
-            if (shadowedByBorderCandidate || shadowedByMultipleBorderCandidates) {
-                continue;
+        if (tableDetectionMode !== "border") {
+            for (const component of collectConnectedComponents(allSeedCells)) {
+                const rows = component.map((entry) => entry.row);
+                const cols = component.map((entry) => entry.col);
+                const bounds = {
+                    startRow: Math.min(...rows),
+                    startCol: Math.min(...cols),
+                    endRow: Math.max(...rows),
+                    endCol: Math.max(...cols)
+                };
+                const containingBorderCandidates = candidates.filter((candidate) => isWithinBounds(candidate, bounds));
+                const fallbackArea = getBoundsArea(bounds);
+                const shadowedByBorderCandidate = containingBorderCandidates.some((candidate) => (getBoundsArea(candidate) >= fallbackArea * 0.4));
+                const shadowedByMultipleBorderCandidates = containingBorderCandidates.length >= 2
+                    && getCombinedCandidateArea(containingBorderCandidates) >= fallbackArea * 0.6;
+                if (shadowedByBorderCandidate || shadowedByMultipleBorderCandidates) {
+                    continue;
+                }
+                maybePushCandidate(component);
             }
-            maybePushCandidate(component);
         }
         return pruneRedundantCandidates(candidates).sort((left, right) => {
             if (left.startRow !== right.startRow)

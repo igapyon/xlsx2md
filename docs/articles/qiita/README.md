@@ -1,6 +1,6 @@
-# Qiita Drafts
+# Qiita Articles
 
-Qiita 向けの記事作業場所です。
+Qiita 向けの記事管理用 Markdown 置き場です。公開済み記事の元原稿、記事メモ、構成案、下書きを含みます。
 
 ## Intended Style
 
@@ -19,4 +19,6 @@ Qiita 向けの記事作業場所です。
 ## Files
 
 - `20260320-xlsx2md-intro.md`
-  - 1 本目の Qiita 記事メモです
+  - 公開済み Qiita 記事の元原稿メモです
+- `xlsx2md-feature-list-memo.md`
+  - `xlsx2md` の機能一覧を、Qiita 記事向けに丸い粒度で整理したメモです

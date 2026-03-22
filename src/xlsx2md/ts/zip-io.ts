@@ -13,9 +13,15 @@
     data: Uint8Array;
   };
 
+  type ZipEntryTimestamp = {
+    dosTime: number;
+    dosDate: number;
+  };
+
   const textDecoder = new TextDecoder("utf-8");
   const textEncoder = new TextEncoder();
   const crcTable = buildCrc32Table();
+  const fixedZipEntryTimestamp = toDosDateTime(2025, 1, 1, 0, 0, 0);
 
   function buildCrc32Table(): Uint32Array {
     const table = new Uint32Array(256);
@@ -39,6 +45,23 @@
 
   function decodeXmlText(bytes: Uint8Array): string {
     return textDecoder.decode(bytes);
+  }
+
+  function toDosDateTime(
+    year: number,
+    month: number,
+    day: number,
+    hour: number,
+    minute: number,
+    second: number
+  ): ZipEntryTimestamp {
+    const clampedYear = Math.max(1980, Math.min(2107, year));
+    const dosTime = ((hour & 0x1f) << 11) | ((minute & 0x3f) << 5) | (Math.floor(second / 2) & 0x1f);
+    const dosDate = (((clampedYear - 1980) & 0x7f) << 9) | ((month & 0x0f) << 5) | (day & 0x1f);
+    return {
+      dosTime,
+      dosDate
+    };
   }
 
   function readUint16LE(view: DataView, offset: number): number {
@@ -142,8 +165,8 @@
       localView.setUint16(4, 20, true);
       localView.setUint16(6, 0, true);
       localView.setUint16(8, 0, true);
-      localView.setUint16(10, 0, true);
-      localView.setUint16(12, 0, true);
+      localView.setUint16(10, fixedZipEntryTimestamp.dosTime, true);
+      localView.setUint16(12, fixedZipEntryTimestamp.dosDate, true);
       localView.setUint32(14, entryCrc32, true);
       localView.setUint32(18, dataBytes.length, true);
       localView.setUint32(22, dataBytes.length, true);
@@ -159,8 +182,8 @@
       centralView.setUint16(6, 20, true);
       centralView.setUint16(8, 0, true);
       centralView.setUint16(10, 0, true);
-      centralView.setUint16(12, 0, true);
-      centralView.setUint16(14, 0, true);
+      centralView.setUint16(12, fixedZipEntryTimestamp.dosTime, true);
+      centralView.setUint16(14, fixedZipEntryTimestamp.dosDate, true);
       centralView.setUint32(16, entryCrc32, true);
       centralView.setUint32(20, dataBytes.length, true);
       centralView.setUint32(24, dataBytes.length, true);
@@ -207,7 +230,8 @@
 
   const zipIoApi = {
     unzipEntries,
-    createStoredZip
+    createStoredZip,
+    fixedZipEntryTimestamp
   };
 
   moduleRegistry.registerModule("zipIo", zipIoApi);

@@ -82,6 +82,7 @@ describe("xlsx2md cli", () => {
     expect(result.stdout).toContain("--shape-details");
     expect(result.stdout).toContain("--include-shape-details");
     expect(result.stdout).toContain("--formatting-mode");
+    expect(result.stdout).toContain("--table-detection-mode");
     expect(result.stdout).toContain("Exit codes:");
   });
 
@@ -131,6 +132,8 @@ describe("xlsx2md cli", () => {
         "both",
         "--formatting-mode",
         "github",
+        "--table-detection-mode",
+        "border",
         "--shape-details",
         "include"
       ], {
@@ -203,6 +206,19 @@ describe("xlsx2md cli", () => {
       cwd: path.resolve(__dirname, "..")
     })).rejects.toMatchObject({
       stderr: expect.stringContaining("Invalid shape details mode: invalid")
+    });
+  });
+
+  it("fails for an invalid table detection mode", async () => {
+    await expect(execFileAsync(process.execPath, [
+      path.resolve(__dirname, "../scripts/xlsx2md-cli.mjs"),
+      path.resolve(__dirname, "./fixtures/xlsx2md-basic-sample01.xlsx"),
+      "--table-detection-mode",
+      "invalid"
+    ], {
+      cwd: path.resolve(__dirname, "..")
+    })).rejects.toMatchObject({
+      stderr: expect.stringContaining("Invalid table detection mode: invalid")
     });
   });
 });

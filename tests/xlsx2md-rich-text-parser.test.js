@@ -5,6 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
+import { expectModeResults } from "./helpers/mode-assertions.js";
 import { loadModuleRegistry } from "./helpers/module-registry.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -91,5 +92,124 @@ describe("xlsx2md rich text parser", () => {
         style: { bold: false, italic: false, strike: false, underline: false }
       }
     ]);
+  });
+
+  it("preserves run-boundary spaces while escaping markdown literals", () => {
+    const api = bootRichTextParser();
+
+    expect(api.tokenizeCellDisplayText({
+      outputValue: "plain bold text",
+      textStyle: { bold: false, italic: false, strike: false, underline: false },
+      richTextRuns: [
+        { text: "plain ", bold: false, italic: false, strike: false, underline: false },
+        { text: "bold", bold: true, italic: false, strike: false, underline: false },
+        { text: " text", bold: false, italic: false, strike: false, underline: false }
+      ]
+    }, "github")).toEqual([
+      {
+        kind: "styledText",
+        parts: [{ kind: "text", text: "plain ", rawText: "plain " }],
+        style: { bold: false, italic: false, strike: false, underline: false }
+      },
+      {
+        kind: "styledText",
+        parts: [{ kind: "text", text: "bold", rawText: "bold" }],
+        style: { bold: true, italic: false, strike: false, underline: false }
+      },
+      {
+        kind: "styledText",
+        parts: [{ kind: "text", text: " text", rawText: " text" }],
+        style: { bold: false, italic: false, strike: false, underline: false }
+      }
+    ]);
+  });
+
+  it("tokenizes image-like markdown text into escaped parts inside styled runs", () => {
+    const api = bootRichTextParser();
+
+    expect(api.tokenizeCellDisplayText({
+      outputValue: "![alt](img.png)",
+      textStyle: { bold: false, italic: false, strike: false, underline: false },
+      richTextRuns: [
+        { text: "![alt](img.png)", bold: false, italic: false, strike: false, underline: true }
+      ]
+    }, "github")).toEqual([
+      {
+        kind: "styledText",
+        parts: [
+          { kind: "escaped", text: "\\!", rawText: "!" },
+          { kind: "escaped", text: "\\[", rawText: "[" },
+          { kind: "text", text: "alt", rawText: "alt" },
+          { kind: "escaped", text: "\\]", rawText: "]" },
+          { kind: "escaped", text: "\\(", rawText: "(" },
+          { kind: "text", text: "img.png", rawText: "img.png" },
+          { kind: "escaped", text: "\\)", rawText: ")" }
+        ],
+        style: { bold: false, italic: false, strike: false, underline: true }
+      }
+    ]);
+  });
+
+  it("shows plain-vs-github token differences for the same fallback cell", () => {
+    const api = bootRichTextParser();
+    const cell = {
+      outputValue: "a*b\nnext",
+      textStyle: { bold: true, italic: false, strike: false, underline: false },
+      richTextRuns: null
+    };
+
+    expectModeResults(
+      (mode) => api.tokenizeCellDisplayText(cell, mode),
+      {
+        plain: [
+          { kind: "text", text: "a\\*b next" }
+        ],
+        github: [
+          {
+            kind: "styledText",
+            parts: [
+              { kind: "text", text: "a", rawText: "a" },
+              { kind: "escaped", text: "\\*", rawText: "*" },
+              { kind: "text", text: "b", rawText: "b" }
+            ],
+            style: { bold: true, italic: false, strike: false, underline: false }
+          },
+          { kind: "lineBreak" },
+          {
+            kind: "styledText",
+            parts: [{ kind: "text", text: "next", rawText: "next" }],
+            style: { bold: true, italic: false, strike: false, underline: false }
+          }
+        ]
+      }
+    );
+  });
+
+  it("shows plain-vs-github token differences for the same escaped line-start text", () => {
+    const api = bootRichTextParser();
+    const cell = {
+      outputValue: "# head",
+      textStyle: { bold: false, italic: true, strike: false, underline: false },
+      richTextRuns: null
+    };
+
+    expectModeResults(
+      (mode) => api.tokenizeCellDisplayText(cell, mode),
+      {
+        plain: [
+          { kind: "text", text: "\\# head" }
+        ],
+        github: [
+          {
+            kind: "styledText",
+            parts: [
+              { kind: "escaped", text: "\\#", rawText: "#" },
+              { kind: "text", text: " head", rawText: " head" }
+            ],
+            style: { bold: false, italic: true, strike: false, underline: false }
+          }
+        ]
+      }
+    );
   });
 });

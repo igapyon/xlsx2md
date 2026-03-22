@@ -41,6 +41,12 @@ describe("xlsx2md markdown normalize", () => {
     expect(api.normalizeMarkdownTableCell("A|\nB")).toBe("A\\| B");
   });
 
+  it("preserves surrounding spaces while normalizing tabs and pipes in table cells", () => {
+    const api = bootMarkdownNormalize();
+
+    expect(api.normalizeMarkdownTableCell("  A\t|\tB  ")).toBe("  A \\| B  ");
+  });
+
   it("removes heading and list markers from normalized text", () => {
     const api = bootMarkdownNormalize();
 

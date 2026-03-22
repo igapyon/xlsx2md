@@ -202,6 +202,7 @@
     includeShapeDetails?: boolean;
     outputMode?: "display" | "raw" | "both";
     formattingMode?: "plain" | "github";
+    tableDetectionMode?: "balanced" | "border";
   };
 
   type MarkdownFile = {
@@ -211,6 +212,7 @@
     summary: {
       outputMode: "display" | "raw" | "both";
       formattingMode: "plain" | "github";
+      tableDetectionMode: "balanced" | "border";
       sections: number;
       tables: number;
       narrativeBlocks: number;
@@ -349,6 +351,7 @@
   });
   const {
     normalizeZipPath,
+    parseRelationshipEntries,
     parseRelationships,
     buildRelsPath
   } = relsParserHelper;
@@ -397,7 +400,11 @@
   });
   const sheetMarkdownHelper = sheetMarkdownModule.createSheetMarkdownApi({
     renderNarrativeBlock: narrativeStructureHelper.renderNarrativeBlock,
-    detectTableCandidates: tableDetectorHelper.detectTableCandidates,
+    detectTableCandidates: (
+      sheet: ParsedSheet,
+      buildCellMapForSheet: (sheet: ParsedSheet) => Map<string, ParsedCell>,
+      tableDetectionMode: "balanced" | "border" = "balanced"
+    ) => tableDetectorHelper.detectTableCandidates(sheet, buildCellMapForSheet, undefined, tableDetectionMode),
     matrixFromCandidate: tableDetectorHelper.matrixFromCandidate,
     renderMarkdownTable: markdownExportHelper.renderMarkdownTable,
     createOutputFileName: markdownExportHelper.createOutputFileName,
@@ -495,6 +502,8 @@
       parseDrawingImages: sheetAssetsHelper.parseDrawingImages,
       parseDrawingCharts: sheetAssetsHelper.parseDrawingCharts,
       parseDrawingShapes: sheetAssetsHelper.parseDrawingShapes,
+      parseRelationshipEntries,
+      buildRelsPath,
       formatCellDisplayValue: cellFormatHelper.formatCellDisplayValue,
       buildAssetDeps: () => ({
         parseRelationships,
@@ -576,7 +585,10 @@
     unzipEntries: zipIoHelper.unzipEntries,
     parseRangeRef,
     applyMergeTokens: tableDetectorHelper.applyMergeTokens,
-    detectTableCandidates: (sheet: ParsedSheet) => tableDetectorHelper.detectTableCandidates(sheet, buildCellMap),
+    detectTableCandidates: (
+      sheet: ParsedSheet,
+      tableDetectionMode: "balanced" | "border" = "balanced"
+    ) => tableDetectorHelper.detectTableCandidates(sheet, buildCellMap, undefined, tableDetectionMode),
     extractNarrativeBlocks,
     convertSheetToMarkdown,
     convertWorkbookToMarkdownFiles,

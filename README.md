@@ -14,6 +14,7 @@
 - Converts all sheets in a workbook in one pass
 - Extracts prose, tables, and images
 - Preserves supported Excel rich text in `github` formatting mode
+- Preserves external links and workbook-internal links as Markdown links when supported
 - Detects tables and converts them into Markdown tables
 - Prefers cached formula values and parses formulas when needed
 - Extracts chart configuration data
@@ -47,6 +48,7 @@ Options:
 - `--zip <file>`: Write ZIP export to a file
 - `--output-mode <mode>`: `display`, `raw`, or `both`
 - `--formatting-mode <mode>`: `plain` or `github`
+- `--table-detection-mode <mode>`: `balanced` or `border`
 - `--shape-details <mode>`: `include` or `exclude`
 - `--include-shape-details`: Alias for `--shape-details include`
 - `--no-header-row`: Do not treat the first row as a table header
@@ -71,16 +73,24 @@ ZIP export is also available.
 npm run cli -- ./tests/fixtures/xlsx2md-basic-sample01.xlsx --zip /tmp/xlsx2md-basic.zip
 ```
 
+ZIP entry timestamps are intentionally fixed to `2025-01-01 00:00:00`. This keeps ZIP output reproducible across runs instead of embedding the current time and changing the archive bytes every time.
+
 You can also switch the Markdown output mode or include shape source details.
 
 ```bash
 npm run cli -- ./tests/fixtures/shape/shape-basic-sample01.xlsx --output-mode both --shape-details include
 ```
 
-You can also switch how Excel text emphasis is rendered. `github` formatting mode currently preserves supported `bold`, `italic`, `strike`, `underline`, and in-cell line breaks as `<br>`.
+You can also switch how Excel text emphasis is rendered. `github` formatting mode currently preserves supported `bold`, `italic`, `strike`, `underline`, and in-cell line breaks as `<br>`. Hyperlinks are emitted as Markdown links, and hyperlink cells suppress extra underline markup in output.
 
 ```bash
 npm run cli -- ./tests/fixtures/rich/rich-text-github-sample01.xlsx --formatting-mode github
+```
+
+You can also switch table detection behavior. `balanced` keeps the existing heuristic, while `border` detects tables from bordered regions and suppresses borderless fallback detection.
+
+```bash
+npm run cli -- ./tests/fixtures/table/table-border-priority-sample01.xlsx --table-detection-mode border
 ```
 
 ## Tech Stack
@@ -186,6 +196,7 @@ CLI interface may change.
 - `--zip <file>`: ZIP をファイルへ出力
 - `--output-mode <mode>`: `display` / `raw` / `both`
 - `--formatting-mode <mode>`: `plain` / `github`
+- `--table-detection-mode <mode>`: `balanced` / `border`
 - `--shape-details <mode>`: `include` / `exclude`
 - `--include-shape-details`: `--shape-details include` の互換 alias
 - `--no-header-row`: 先頭行を表ヘッダーとして扱わない
@@ -210,6 +221,8 @@ ZIP 出力にも対応しています。
 npm run cli -- ./tests/fixtures/xlsx2md-basic-sample01.xlsx --zip /tmp/xlsx2md-basic.zip
 ```
 
+ZIP 内 entry の timestamp は、意図的に `2025-01-01 00:00:00` へ固定しています。毎回の現在時刻を埋め込むと、内容が同じでも ZIP バイナリが毎回変わってしまうため、再現性を優先しています。
+
 Markdown の出力モードを切り替えたり、図形の source details を含めたりすることもできます。
 
 ```bash
@@ -222,10 +235,18 @@ Excel の文字装飾の出し方も切り替えられます。`github` formatti
 npm run cli -- ./tests/fixtures/rich/rich-text-github-sample01.xlsx --formatting-mode github
 ```
 
+表検出の挙動も切り替えられます。`balanced` は既定のヒューリスティックを維持し、`border` は罫線のある領域からだけ表を検出し、borderless fallback 検知を抑えます。
+
+```bash
+npm run cli -- ./tests/fixtures/table/table-border-priority-sample01.xlsx --table-detection-mode border
+```
+
 補足:
 
 - `plain` は装飾を落として素朴なテキストへ寄せるモードです
 - `github` は GitHub 上の見え方を優先して Markdown / HTML を使うモードです
+- `balanced` は従来どおりの表検出モードです
+- `border` は非罫線ベースの誤検知が辛いシート向けの表検出モードです
 - 内部的には `markdown escape -> rich text parser -> plain/github formatter -> table escape` の段階分離を進めています
 - Markdown 記号を含む生文字の escape は段階的に整理中です。現状の設計メモは [docs/rich-text-markdown-rendering.md](./docs/rich-text-markdown-rendering.md) を参照してください
 

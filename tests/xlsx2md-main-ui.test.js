@@ -35,8 +35,13 @@ function createDomFixture() {
       <option value="plain">plain</option>
       <option value="github" selected>github</option>
     </select>
+    <select id="tableDetectionModeSelect">
+      <option value="balanced" selected>balanced</option>
+      <option value="border">border</option>
+    </select>
     <div id="outputModeNotice"></div>
     <div id="formattingModeNotice"></div>
+    <div id="tableDetectionModeNotice"></div>
     <div id="previewModeBanner" hidden></div>
     <div id="analysisSummary"></div>
     <div id="scoreSummary"></div>
@@ -54,6 +59,10 @@ function createDomFixture() {
   };
   const formattingModeSelect = document.getElementById("formattingModeSelect");
   formattingModeSelect.getValue = function getValue() {
+    return this.value;
+  };
+  const tableDetectionModeSelect = document.getElementById("tableDetectionModeSelect");
+  tableDetectionModeSelect.getValue = function getValue() {
     return this.value;
   };
 
@@ -96,6 +105,7 @@ function createWorkbookFile() {
     summary: {
       outputMode: "display",
       formattingMode: "github",
+      tableDetectionMode: "balanced",
       tables: 1,
       narrativeBlocks: 1,
       merges: 0,
@@ -137,6 +147,7 @@ describe("xlsx2md main ui", () => {
     expect(document.getElementById("exportZipBtn").disabled).toBe(true);
     expect(document.getElementById("outputModeNotice").textContent).toContain("`display`");
     expect(document.getElementById("formattingModeNotice").textContent).toContain("`github`");
+    expect(document.getElementById("tableDetectionModeNotice").textContent).toContain("`balanced`");
     expect(document.getElementById("analysisSummary").textContent).toContain("No conversion yet.");
   });
 
@@ -153,6 +164,7 @@ describe("xlsx2md main ui", () => {
     document.getElementById("includeShapeDetailsEnabled").checked = false;
     document.getElementById("outputModeSelect").value = "both";
     document.getElementById("formattingModeSelect").value = "github";
+    document.getElementById("tableDetectionModeSelect").value = "border";
 
     const fileInput = document.getElementById("xlsxFileInput");
     const file = {
@@ -174,6 +186,7 @@ describe("xlsx2md main ui", () => {
         includeShapeDetails: false,
         outputMode: "both",
         formattingMode: "github",
+        tableDetectionMode: "border",
         treatFirstRowAsHeader: true,
         trimText: true,
         removeEmptyRows: true,

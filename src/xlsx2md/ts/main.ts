@@ -7,6 +7,7 @@
     includeShapeDetails: boolean;
     outputMode: "display" | "raw" | "both";
     formattingMode: "plain" | "github";
+    tableDetectionMode: "balanced" | "border";
   };
 
   type WorkbookFile = {
@@ -16,6 +17,7 @@
     summary: {
       outputMode: "display" | "raw" | "both";
       formattingMode: "plain" | "github";
+      tableDetectionMode: "balanced" | "border";
       tables: number;
       narrativeBlocks: number;
       merges: number;
@@ -79,6 +81,10 @@
     const formattingMode = typeof formattingModeSelect.getValue === "function"
       ? formattingModeSelect.getValue()
       : (document.getElementById("formattingModeSelect") as HTMLSelectElement | null)?.value || "plain";
+    const tableDetectionModeSelect = getElement<HTMLElement>("tableDetectionModeSelect") as HTMLElement & { getValue?: () => string };
+    const tableDetectionMode = typeof tableDetectionModeSelect.getValue === "function"
+      ? tableDetectionModeSelect.getValue()
+      : (document.getElementById("tableDetectionModeSelect") as HTMLSelectElement | null)?.value || "balanced";
     return {
       treatFirstRowAsHeader: getSwitchValue("headerRowEnabled"),
       trimText: getSwitchValue("trimTextEnabled"),
@@ -86,7 +92,8 @@
       removeEmptyColumns: getSwitchValue("removeEmptyColumnsEnabled"),
       includeShapeDetails: getSwitchValue("includeShapeDetailsEnabled"),
       outputMode: outputMode === "raw" || outputMode === "both" ? outputMode : "display",
-      formattingMode: formattingMode === "github" ? "github" : "plain"
+      formattingMode: formattingMode === "github" ? "github" : "plain",
+      tableDetectionMode: tableDetectionMode === "border-priority" || tableDetectionMode === "border" ? "border" : "balanced"
     };
   }
 
@@ -296,7 +303,8 @@
     const totalFormulas = files.reduce((sum, file) => sum + file.summary.formulaDiagnostics.length, 0);
     const outputMode = files[0]?.summary.outputMode || "display";
     const formattingMode = files[0]?.summary.formattingMode || "plain";
-    const overview = `<div class="md-summary-overview">Workbook ${escapeHtml(workbookName)} / ${files.length} sheet(s) / value mode ${escapeHtml(outputMode)} / formatting ${escapeHtml(formattingMode)}</div>`;
+    const tableDetectionMode = files[0]?.summary.tableDetectionMode || "balanced";
+    const overview = `<div class="md-summary-overview">Workbook ${escapeHtml(workbookName)} / ${files.length} sheet(s) / value mode ${escapeHtml(outputMode)} / formatting ${escapeHtml(formattingMode)} / table detection ${escapeHtml(tableDetectionMode)}</div>`;
     const items = files.map((file) => (
       `<section class="md-summary-group"><div class="md-summary-group-head"><h3 class="md-summary-group-title">${escapeHtml(file.sheetName)}</h3><span class="md-summary-group-count">${file.summary.cells} cells</span></div><div class="md-summary-group-meta">tables ${file.summary.tables} / narrative ${file.summary.narrativeBlocks} / merges ${file.summary.merges} / images ${file.summary.images} / formulas ${file.summary.formulaDiagnostics.length}</div></section>`
     )).join("");
@@ -324,6 +332,15 @@
       return;
     }
     notice.textContent = "`plain` strips Excel text emphasis and outputs plain Markdown text.";
+  }
+
+  function updateTableDetectionModeNotice(mode: "balanced" | "border"): void {
+    const notice = getElement<HTMLElement>("tableDetectionModeNotice");
+    if (mode === "border") {
+      notice.textContent = "`border` detects tables from bordered regions and suppresses borderless fallback detection.";
+      return;
+    }
+    notice.textContent = "`balanced` uses both bordered candidates and value-density fallback detection.";
   }
 
   function updatePreviewModeBanner(mode: "display" | "raw" | "both"): void {
@@ -532,6 +549,9 @@
     getElement<HTMLElement>("formattingModeSelect").addEventListener("change", () => {
       updateFormattingModeNotice(getOptions().formattingMode);
     });
+    getElement<HTMLElement>("tableDetectionModeSelect").addEventListener("change", () => {
+      updateTableDetectionModeNotice(getOptions().tableDetectionMode);
+    });
   }
 
   function initialize(): void {
@@ -542,6 +562,7 @@
     setPreviewMarkdown("");
     updateOutputModeNotice(getSelectedOutputMode());
     updateFormattingModeNotice(getOptions().formattingMode);
+    updateTableDetectionModeNotice(getOptions().tableDetectionMode);
     updatePreviewModeBanner(getSelectedOutputMode());
     getElement<HTMLButtonElement>("downloadBtn").disabled = true;
     getElement<HTMLButtonElement>("exportZipBtn").disabled = true;

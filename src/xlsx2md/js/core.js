@@ -80,7 +80,7 @@
         xmlToDocument,
         decodeXmlText
     });
-    const { normalizeZipPath, parseRelationships, buildRelsPath } = relsParserHelper;
+    const { normalizeZipPath, parseRelationshipEntries, parseRelationships, buildRelsPath } = relsParserHelper;
     const formulaReferenceUtilsHelper = formulaReferenceUtilsModule.createFormulaReferenceUtilsApi({
         normalizeFormulaAddress
     });
@@ -107,7 +107,7 @@
     });
     const sheetMarkdownHelper = sheetMarkdownModule.createSheetMarkdownApi({
         renderNarrativeBlock: narrativeStructureHelper.renderNarrativeBlock,
-        detectTableCandidates: tableDetectorHelper.detectTableCandidates,
+        detectTableCandidates: (sheet, buildCellMapForSheet, tableDetectionMode = "balanced") => tableDetectorHelper.detectTableCandidates(sheet, buildCellMapForSheet, undefined, tableDetectionMode),
         matrixFromCandidate: tableDetectorHelper.matrixFromCandidate,
         renderMarkdownTable: markdownExportHelper.renderMarkdownTable,
         createOutputFileName: markdownExportHelper.createOutputFileName,
@@ -148,6 +148,8 @@
             parseDrawingImages: sheetAssetsHelper.parseDrawingImages,
             parseDrawingCharts: sheetAssetsHelper.parseDrawingCharts,
             parseDrawingShapes: sheetAssetsHelper.parseDrawingShapes,
+            parseRelationshipEntries,
+            buildRelsPath,
             formatCellDisplayValue: cellFormatHelper.formatCellDisplayValue,
             buildAssetDeps: () => ({
                 parseRelationships,
@@ -215,7 +217,7 @@
         unzipEntries: zipIoHelper.unzipEntries,
         parseRangeRef,
         applyMergeTokens: tableDetectorHelper.applyMergeTokens,
-        detectTableCandidates: (sheet) => tableDetectorHelper.detectTableCandidates(sheet, buildCellMap),
+        detectTableCandidates: (sheet, tableDetectionMode = "balanced") => tableDetectorHelper.detectTableCandidates(sheet, buildCellMap, undefined, tableDetectionMode),
         extractNarrativeBlocks,
         convertSheetToMarkdown,
         convertWorkbookToMarkdownFiles,

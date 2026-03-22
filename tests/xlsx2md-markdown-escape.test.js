@@ -44,4 +44,16 @@ describe("xlsx2md markdown escape", () => {
     expect(api.escapeMarkdownLiteralText("# h\n- item\n1. num\n> quote"))
       .toBe("\\# h\n\\- item\n1\\. num\n&gt; quote");
   });
+
+  it("escapes additional list markers and ampersands", () => {
+    const api = bootMarkdownEscape();
+
+    expect(api.escapeMarkdownLiteralText("+ plus\n* star\na & b"))
+      .toBe("\\+ plus\n\\* star\na &amp; b");
+    expect(api.escapeMarkdownLiteralParts("a & b")).toEqual([
+      { kind: "text", text: "a ", rawText: "a " },
+      { kind: "escaped", text: "&amp;", rawText: "&" },
+      { kind: "text", text: " b", rawText: " b" }
+    ]);
+  });
 });

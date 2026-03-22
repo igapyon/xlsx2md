@@ -177,7 +177,8 @@
         mergeHeavyPenalty: number;
         prosePenalty: number;
         threshold: number;
-      }
+      },
+      tableDetectionMode?: "balanced" | "border"
     ) => TCandidate[];
     matrixFromCandidate: (
       sheet: TSheet,

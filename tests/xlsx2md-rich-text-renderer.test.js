@@ -5,6 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
+import { expectModeResults } from "./helpers/mode-assertions.js";
 import { loadModuleRegistry } from "./helpers/module-registry.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -138,5 +139,106 @@ describe("xlsx2md rich text renderer", () => {
         style: { bold: true, italic: false, strike: false, underline: false }
       }
     ])).toBe("\\# h x");
+  });
+
+  it("keeps escaped list markers literal inside github-styled text", () => {
+    const api = bootRichTextRenderer();
+    const cell = {
+      outputValue: "- item",
+      textStyle: { bold: true, italic: false, strike: false, underline: false },
+      richTextRuns: null
+    };
+
+    expect(api.renderCellDisplayText(cell, "github")).toBe("**\\- item**");
+  });
+
+  it("keeps escaped ordered-list and quote markers literal inside github-styled text", () => {
+    const api = bootRichTextRenderer();
+
+    expect(api.renderCellDisplayText({
+      outputValue: "1. item",
+      textStyle: { bold: false, italic: true, strike: false, underline: false },
+      richTextRuns: null
+    }, "github")).toBe("*1\\. item*");
+
+    expect(api.renderCellDisplayText({
+      outputValue: "> quote",
+      textStyle: { bold: false, italic: false, strike: true, underline: false },
+      richTextRuns: null
+    }, "github")).toBe("~~&gt; quote~~");
+  });
+
+  it("renders escaped markdown link-like text safely inside styled runs", () => {
+    const api = bootRichTextRenderer();
+    const cell = {
+      outputValue: "[x](y) `code` <tag>",
+      textStyle: { bold: false, italic: false, strike: false, underline: false },
+      richTextRuns: [
+        { text: "[x](y) ", bold: true, italic: false, strike: false, underline: false },
+        { text: "`code` ", bold: false, italic: true, strike: false, underline: false },
+        { text: "<tag>", bold: false, italic: false, strike: false, underline: true }
+      ]
+    };
+
+    expect(api.renderCellDisplayText(cell, "github")).toBe("**\\[x\\]\\(y\\) ***\\`code\\` *<ins>&lt;tag&gt;</ins>");
+  });
+
+  it("renders escaped ampersands and image-like text across styled rich runs", () => {
+    const api = bootRichTextRenderer();
+    const cell = {
+      outputValue: "a & b ![alt](img.png)",
+      textStyle: { bold: false, italic: false, strike: false, underline: false },
+      richTextRuns: [
+        { text: "a & b ", bold: true, italic: false, strike: false, underline: false },
+        { text: "![alt](img.png)", bold: false, italic: true, strike: true, underline: true }
+      ]
+    };
+
+    expect(api.renderCellDisplayText(cell, "github")).toBe("**a &amp; b ***~~<ins>\\!\\[alt\\]\\(img.png\\)</ins>~~*");
+  });
+
+  it("renders consecutive line breaks across styled rich runs", () => {
+    const api = bootRichTextRenderer();
+    const cell = {
+      outputValue: "top\n\nnext",
+      textStyle: { bold: false, italic: false, strike: false, underline: false },
+      richTextRuns: [
+        { text: "top\n", bold: true, italic: false, strike: false, underline: false },
+        { text: "\nnext", bold: false, italic: true, strike: false, underline: true }
+      ]
+    };
+
+    expect(api.renderCellDisplayText(cell, "github")).toBe("**top**<br><br>*<ins>next</ins>*");
+  });
+
+  it("renders plus and star markers literally across styled rich runs", () => {
+    const api = bootRichTextRenderer();
+    const cell = {
+      outputValue: "+ plus * star",
+      textStyle: { bold: false, italic: false, strike: false, underline: false },
+      richTextRuns: [
+        { text: "+ plus ", bold: true, italic: false, strike: false, underline: false },
+        { text: "* star", bold: false, italic: true, strike: false, underline: false }
+      ]
+    };
+
+    expect(api.renderCellDisplayText(cell, "github")).toBe("**\\+ plus ***\\* star*");
+  });
+
+  it("shows plain-vs-github differences for the same rich-text input", () => {
+    const api = bootRichTextRenderer();
+    const cell = {
+      outputValue: "a*b\nnext",
+      textStyle: { bold: true, italic: false, strike: false, underline: false },
+      richTextRuns: null
+    };
+
+    expectModeResults(
+      (mode) => api.renderCellDisplayText(cell, mode),
+      {
+        plain: "a\\*b next",
+        github: "**a\\*b**<br>**next**"
+      }
+    );
   });
 });
