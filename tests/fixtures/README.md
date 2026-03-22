@@ -11,6 +11,27 @@
 - 可能ならファイル名に `sample01` を付ける
 - 通常は普通に Excel 保存して `cached value` を残す
 - 未計算保存を試す場合だけ、別ファイルへ分ける
+- Excel 保存由来の環境依存メタデータはできるだけ落とす
+
+## Excel 保存メタデータの注意
+
+一部の `.xlsx` は、Excel 保存時に `xl/workbook.xml` へ `x15ac:absPath` のようなローカル環境依存メタデータを含むことがある。
+
+- これは `xlsx2md` の実装由来ではなく、保存元 Excel が埋めるメタデータである
+- 変換処理では通常参照しないが、fixture としてはノイズなので残さない方がよい
+- 特に Git 管理する fixture では、作成者のローカル絶対パスが残るので削除を推奨する
+
+対処方法:
+
+1. `.xlsx` を ZIP として展開する
+2. `xl/workbook.xml` から `x15ac:absPath` を含む `mc:AlternateContent` を削除する
+3. ZIP として再圧縮して `.xlsx` を置き換える
+
+確認方法:
+
+- `unzip -p <file.xlsx> xl/workbook.xml | rg 'x15ac:absPath|absPath url='`
+
+該当があれば、fixture 作成後に一度この確認を行う。
 
 ## 既存 fixture
 

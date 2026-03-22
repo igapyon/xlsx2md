@@ -11,7 +11,48 @@
             }
             return map;
         }
-        function formatCellForMarkdown(cell, options) {
+        function createSheetAnchorId(workbookName, sheetIndex, sheetName, options = {}) {
+            return deps.createOutputFileName(workbookName, sheetIndex, sheetName, options.outputMode || "display", options.formattingMode || "plain").replace(/\.md$/i, "");
+        }
+        function parseInternalHyperlinkLocation(location, currentSheetName) {
+            const normalized = String(location || "").trim().replace(/^#/, "");
+            if (!normalized) {
+                return { sheetName: currentSheetName, refText: "" };
+            }
+            const match = normalized.match(/^(?:'((?:[^']|'')+)'|([^!]+))!(.+)$/);
+            if (match) {
+                return {
+                    sheetName: (match[1] || match[2] || currentSheetName).replace(/''/g, "'"),
+                    refText: (match[3] || "").trim()
+                };
+            }
+            return {
+                sheetName: currentSheetName,
+                refText: normalized
+            };
+        }
+        function renderHyperlinkMarkdown(cell, text, workbook, sheet, options) {
+            const hyperlink = cell.hyperlink;
+            const label = String(text || "").trim();
+            if (!hyperlink || !label)
+                return text;
+            if (hyperlink.kind === "external") {
+                const href = String(hyperlink.target || "").trim();
+                return href ? `[${label}](${href})` : label;
+            }
+            const currentSheetName = (sheet === null || sheet === void 0 ? void 0 : sheet.name) || "";
+            const { sheetName, refText } = parseInternalHyperlinkLocation(hyperlink.location || hyperlink.target, currentSheetName);
+            const traceText = [sheetName, refText].filter(Boolean).join("!");
+            const targetSheet = (workbook === null || workbook === void 0 ? void 0 : workbook.sheets.find((entry) => entry.name === sheetName)) || null;
+            if (!targetSheet || !workbook) {
+                return traceText ? `${label} (${traceText})` : label;
+            }
+            const href = `#${createSheetAnchorId(workbook.name, targetSheet.index, targetSheet.name, options)}`;
+            return traceText && traceText !== targetSheet.name
+                ? `[${label}](${href}) (${traceText})`
+                : `[${label}](${href})`;
+        }
+        function formatCellForMarkdown(cell, options, workbook = null, sheet = null) {
             if (!cell)
                 return "";
             const mode = options.outputMode || "display";
@@ -20,27 +61,27 @@
             const rawValue = richTextRenderer.compactText(String(cell.rawValue || ""));
             const displayMarkdown = richTextRenderer.renderCellDisplayText(cell, formattingMode);
             if (mode === "raw") {
-                return rawValue || displayValue;
+                return renderHyperlinkMarkdown(cell, rawValue || displayValue, workbook, sheet, options);
             }
             if (mode === "both") {
                 if (rawValue && rawValue !== displayValue) {
                     if (displayMarkdown) {
-                        return `${displayMarkdown} [raw=${rawValue}]`;
+                        return `${renderHyperlinkMarkdown(cell, displayMarkdown, workbook, sheet, options)} [raw=${rawValue}]`;
                     }
                     return `[raw=${rawValue}]`;
                 }
-                return displayMarkdown || rawValue;
+                return renderHyperlinkMarkdown(cell, displayMarkdown || rawValue, workbook, sheet, options);
             }
-            return displayMarkdown;
+            return renderHyperlinkMarkdown(cell, displayMarkdown, workbook, sheet, options);
         }
         function isCellInAnyTable(row, col, tables) {
             return tables.some((table) => row >= table.startRow && row <= table.endRow && col >= table.startCol && col <= table.endCol);
         }
-        function splitNarrativeRowSegments(cells, options) {
+        function splitNarrativeRowSegments(cells, options, workbook = null, sheet = null) {
             const segments = [];
             let current = null;
             for (const cell of cells) {
-                const value = formatCellForMarkdown(cell, options).trim();
+                const value = formatCellForMarkdown(cell, options, workbook, sheet).trim();
                 if (!value)
                     continue;
                 if (!current || cell.col - current.lastCol > 4) {
@@ -61,7 +102,7 @@
                 values: segment.values
             }));
         }
-        function extractNarrativeBlocks(sheet, tables, options = {}) {
+        function extractNarrativeBlocks(workbook, sheet, tables, options = {}) {
             const rowMap = new Map();
             for (const cell of sheet.cells) {
                 if (!cell.outputValue)
@@ -78,7 +119,7 @@
             let previousRow = -100;
             for (const rowNumber of rowNumbers) {
                 const cells = (rowMap.get(rowNumber) || []).slice().sort((a, b) => a.col - b.col);
-                const rowSegments = splitNarrativeRowSegments(cells, options);
+                const rowSegments = splitNarrativeRowSegments(cells, options, workbook, sheet);
                 for (const segment of rowSegments) {
                     const rowText = segment.values.join(" ").trim();
                     if (!rowText)
@@ -191,7 +232,7 @@
             const treatFirstRowAsHeader = options.treatFirstRowAsHeader !== false;
             const tableDetectionMode = options.tableDetectionMode || "balanced";
             const tables = deps.detectTableCandidates(sheet, buildCellMap, tableDetectionMode);
-            const narrativeBlocks = extractNarrativeBlocks(sheet, tables, options);
+            const narrativeBlocks = extractNarrativeBlocks(workbook, sheet, tables, options);
             const sectionBlocks = extractSectionBlocks(sheet, tables, narrativeBlocks);
             const formulaDiagnostics = sheet.cells
                 .filter((cell) => !!cell.formulaText && cell.resolutionStatus !== null)
@@ -212,9 +253,11 @@
                     narrativeBlock: block
                 });
             }
+            const fileName = deps.createOutputFileName(workbook.name, sheet.index, sheet.name, options.outputMode || "display", options.formattingMode || "plain");
+            const sheetAnchorId = createSheetAnchorId(workbook.name, sheet.index, sheet.name, options);
             let tableCounter = 1;
             for (const table of tables) {
-                const rows = deps.matrixFromCandidate(sheet, table, options, buildCellMap, formatCellForMarkdown);
+                const rows = deps.matrixFromCandidate(sheet, table, options, buildCellMap, (cell, tableOptions) => formatCellForMarkdown(cell, tableOptions, workbook, sheet));
                 if (rows.length === 0 || ((_a = rows[0]) === null || _a === void 0 ? void 0 : _a.length) === 0)
                     continue;
                 const tableMarkdown = deps.renderMarkdownTable(rows, treatFirstRowAsHeader);
@@ -317,6 +360,8 @@
                 ].join("\n")
                 : "";
             const markdown = [
+                `<a id="${sheetAnchorId}"></a>`,
+                "",
                 `# ${sheet.name}`,
                 "",
                 "## Source Information",
@@ -331,7 +376,7 @@
                 imageSection
             ].join("\n");
             return {
-                fileName: deps.createOutputFileName(workbook.name, sheet.index, sheet.name, options.outputMode || "display", options.formattingMode || "plain"),
+                fileName,
                 sheetName: sheet.name,
                 markdown,
                 summary: {

@@ -63,7 +63,9 @@ function createDeps(overrides = {}) {
     detectTableCandidates: () => [],
     matrixFromCandidate: () => [],
     renderMarkdownTable: (rows) => rows.map((row) => `| ${row.join(" | ")} |`).join("\n"),
-    createOutputFileName: (_workbookName, sheetIndex, sheetName) => `${sheetIndex}_${sheetName}.md`,
+    createOutputFileName: (_workbookName, sheetIndex, sheetName, _outputMode = "display", formattingMode = "plain") => (
+      `${sheetIndex}_${sheetName}${formattingMode === "plain" ? "" : `_${formattingMode}`}.md`
+    ),
     extractShapeBlocks: () => [],
     renderHierarchicalRawEntries: () => [],
     parseCellAddress: (address) => {
@@ -106,6 +108,7 @@ describe("xlsx2md sheet markdown", () => {
   it("extracts narrative blocks outside detected tables", () => {
     const module = bootSheetMarkdown();
     const api = module.createSheetMarkdownApi(createDeps());
+    const workbook = { name: "book.xlsx", sheets: [] };
     const sheet = {
       cells: [
         { row: 1, col: 1, outputValue: "Heading", rawValue: "Heading" },
@@ -117,8 +120,8 @@ describe("xlsx2md sheet markdown", () => {
     };
     const tables = [{ startRow: 5, startCol: 1, endRow: 5, endCol: 1 }];
 
-    expect(api.extractNarrativeBlocks(sheet, tables, {})).toHaveLength(1);
-    expect(api.extractNarrativeBlocks(sheet, tables, {})[0].lines).toEqual(["Heading", "Detail"]);
+    expect(api.extractNarrativeBlocks(workbook, sheet, tables, {})).toHaveLength(1);
+    expect(api.extractNarrativeBlocks(workbook, sheet, tables, {})[0].lines).toEqual(["Heading", "Detail"]);
   });
 
   it("converts a minimal sheet into markdown", () => {
@@ -146,6 +149,7 @@ describe("xlsx2md sheet markdown", () => {
     expect(result.markdown).toContain("# Sheet1");
     expect(result.markdown).toContain("Workbook: book.xlsx");
     expect(result.summary.narrativeBlocks).toBe(1);
+    expect(result.markdown).toContain('<a id="1_Sheet1"></a>');
   });
 
   it("normalizes cell line breaks into spaces in plain mode", () => {
@@ -507,5 +511,72 @@ describe("xlsx2md sheet markdown", () => {
     expect(result.markdown).toContain("\\`code\\` \\!\\[alt\\]\\(img.png\\)");
     expect(result.markdown).toContain("| `code` ![alt](img.png) |");
     expect(result.markdown).toContain("| a | b |");
+  });
+
+  it("renders external and workbook hyperlinks as markdown links", () => {
+    const module = bootSheetMarkdown();
+    const api = module.createSheetMarkdownApi(createDeps({
+      renderNarrativeBlock: (block) => block.lines.join("\n")
+    }));
+    const workbook = {
+      name: "book.xlsx",
+      sheets: [
+        { name: "Sheet1", index: 1, cells: [], merges: [], images: [], charts: [], shapes: [] },
+        { name: "Other Sheet", index: 2, cells: [], merges: [], images: [], charts: [], shapes: [] }
+      ]
+    };
+    const sheet = {
+      name: "Sheet1",
+      index: 1,
+      cells: [
+        {
+          address: "A1",
+          row: 1,
+          col: 1,
+          outputValue: "Open",
+          rawValue: "Open",
+          formulaText: "",
+          resolutionStatus: null,
+          resolutionSource: null,
+          textStyle: { bold: false, italic: false, strike: false, underline: false },
+          richTextRuns: null,
+          hyperlink: {
+            kind: "external",
+            target: "https://example.com/",
+            location: "",
+            tooltip: "",
+            display: ""
+          }
+        },
+        {
+          address: "A2",
+          row: 2,
+          col: 1,
+          outputValue: "Jump",
+          rawValue: "Jump",
+          formulaText: "",
+          resolutionStatus: null,
+          resolutionSource: null,
+          textStyle: { bold: false, italic: false, strike: false, underline: false },
+          richTextRuns: null,
+          hyperlink: {
+            kind: "internal",
+            target: "'Other Sheet'!C3",
+            location: "'Other Sheet'!C3",
+            tooltip: "",
+            display: ""
+          }
+        }
+      ],
+      merges: [],
+      images: [],
+      charts: [],
+      shapes: []
+    };
+
+    const result = api.convertSheetToMarkdown(workbook, sheet, { formattingMode: "github" });
+
+    expect(result.markdown).toContain("[Open](https://example.com/)");
+    expect(result.markdown).toContain("[Jump](#2_Other Sheet_github) (Other Sheet!C3)");
   });
 });

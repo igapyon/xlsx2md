@@ -80,7 +80,7 @@
         xmlToDocument,
         decodeXmlText
     });
-    const { normalizeZipPath, parseRelationships, buildRelsPath } = relsParserHelper;
+    const { normalizeZipPath, parseRelationshipEntries, parseRelationships, buildRelsPath } = relsParserHelper;
     const formulaReferenceUtilsHelper = formulaReferenceUtilsModule.createFormulaReferenceUtilsApi({
         normalizeFormulaAddress
     });
@@ -148,6 +148,8 @@
             parseDrawingImages: sheetAssetsHelper.parseDrawingImages,
             parseDrawingCharts: sheetAssetsHelper.parseDrawingCharts,
             parseDrawingShapes: sheetAssetsHelper.parseDrawingShapes,
+            parseRelationshipEntries,
+            buildRelsPath,
             formatCellDisplayValue: cellFormatHelper.formatCellDisplayValue,
             buildAssetDeps: () => ({
                 parseRelationships,

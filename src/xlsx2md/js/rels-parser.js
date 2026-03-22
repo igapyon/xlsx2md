@@ -1,6 +1,12 @@
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     function createRelsParserApi(deps) {
+        function normalizeRelationshipTarget(baseFilePath, targetPath, targetMode = "") {
+            if ((targetMode || "").toLowerCase() === "external") {
+                return targetPath;
+            }
+            return normalizeZipPath(baseFilePath, targetPath);
+        }
         function normalizeZipPath(baseFilePath, targetPath) {
             const baseDirParts = baseFilePath.split("/").slice(0, -1);
             const inputParts = targetPath.split("/");
@@ -17,7 +23,7 @@
             }
             return parts.join("/");
         }
-        function parseRelationships(files, relsPath, sourcePath) {
+        function parseRelationshipEntries(files, relsPath, sourcePath) {
             const relBytes = files.get(relsPath);
             const relations = new Map();
             if (!relBytes) {
@@ -30,7 +36,20 @@
                 const target = node.getAttribute("Target") || "";
                 if (!id || !target)
                     continue;
-                relations.set(id, normalizeZipPath(sourcePath, target));
+                const targetMode = node.getAttribute("TargetMode") || "";
+                relations.set(id, {
+                    target: normalizeRelationshipTarget(sourcePath, target, targetMode),
+                    targetMode,
+                    type: node.getAttribute("Type") || ""
+                });
+            }
+            return relations;
+        }
+        function parseRelationships(files, relsPath, sourcePath) {
+            const relations = new Map();
+            const entries = parseRelationshipEntries(files, relsPath, sourcePath);
+            for (const [id, entry] of entries.entries()) {
+                relations.set(id, entry.target);
             }
             return relations;
         }
@@ -41,7 +60,9 @@
             return `${dir}/_rels/${fileName}.rels`;
         }
         return {
+            normalizeRelationshipTarget,
             normalizeZipPath,
+            parseRelationshipEntries,
             parseRelationships,
             buildRelsPath
         };

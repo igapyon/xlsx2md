@@ -5,7 +5,20 @@
     decodeXmlText: (bytes: Uint8Array) => string;
   };
 
+  type RelationshipEntry = {
+    target: string;
+    targetMode: string;
+    type: string;
+  };
+
   function createRelsParserApi(deps: RelsParserDeps) {
+    function normalizeRelationshipTarget(baseFilePath: string, targetPath: string, targetMode = ""): string {
+      if ((targetMode || "").toLowerCase() === "external") {
+        return targetPath;
+      }
+      return normalizeZipPath(baseFilePath, targetPath);
+    }
+
     function normalizeZipPath(baseFilePath: string, targetPath: string): string {
       const baseDirParts = baseFilePath.split("/").slice(0, -1);
       const inputParts = targetPath.split("/");
@@ -21,9 +34,9 @@
       return parts.join("/");
     }
 
-    function parseRelationships(files: Map<string, Uint8Array>, relsPath: string, sourcePath: string): Map<string, string> {
+    function parseRelationshipEntries(files: Map<string, Uint8Array>, relsPath: string, sourcePath: string): Map<string, RelationshipEntry> {
       const relBytes = files.get(relsPath);
-      const relations = new Map<string, string>();
+      const relations = new Map<string, RelationshipEntry>();
       if (!relBytes) {
         return relations;
       }
@@ -33,7 +46,21 @@
         const id = node.getAttribute("Id") || "";
         const target = node.getAttribute("Target") || "";
         if (!id || !target) continue;
-        relations.set(id, normalizeZipPath(sourcePath, target));
+        const targetMode = node.getAttribute("TargetMode") || "";
+        relations.set(id, {
+          target: normalizeRelationshipTarget(sourcePath, target, targetMode),
+          targetMode,
+          type: node.getAttribute("Type") || ""
+        });
+      }
+      return relations;
+    }
+
+    function parseRelationships(files: Map<string, Uint8Array>, relsPath: string, sourcePath: string): Map<string, string> {
+      const relations = new Map<string, string>();
+      const entries = parseRelationshipEntries(files, relsPath, sourcePath);
+      for (const [id, entry] of entries.entries()) {
+        relations.set(id, entry.target);
       }
       return relations;
     }
@@ -46,7 +73,9 @@
     }
 
     return {
+      normalizeRelationshipTarget,
       normalizeZipPath,
+      parseRelationshipEntries,
       parseRelationships,
       buildRelsPath
     };
