@@ -1739,13 +1739,22 @@ function createCombinedMarkdownExportFile(workbook: ParsedWorkbook, markdownFile
   return { fileName, content };
 }
 
+function encodeUtf8TextFile(text: string): Uint8Array {
+  const bom = new Uint8Array([0xef, 0xbb, 0xbf]);
+  const body = textEncoder.encode(text);
+  const output = new Uint8Array(bom.length + body.length);
+  output.set(bom, 0);
+  output.set(body, bom.length);
+  return output;
+}
+
 function createExportEntries(workbook: ParsedWorkbook, markdownFiles: MarkdownFile[]): ExportEntry[] {
   const entries: ExportEntry[] = [];
   if (markdownFiles.length > 0) {
     const combined = createCombinedMarkdownExportFile(workbook, markdownFiles);
     entries.push({
       name: `output/${combined.fileName}`,
-      data: textEncoder.encode(`${combined.content}\n`)
+      data: encodeUtf8TextFile(`${combined.content}\n`)
     });
   }
   for (const sheet of workbook.sheets) {
@@ -1766,6 +1775,8 @@ function createExportEntries(workbook: ParsedWorkbook, markdownFiles: MarkdownFi
   return entries;
 }
 ```
+
+ZIP 内の Markdown 本体は UTF-8 BOM 付きで保存する。これにより、日本語を含む Markdown を Windows 系の解凍後既定アプリで開いた場合でも文字化けしにくくする。さらに、非 ASCII の entry name を含む場合は ZIP header の UTF-8 filename flag を立て、中央ディレクトリの `version made by` は `Unix` として書き出して互換性を上げる。
 
 ### 22.7 今後の付録追加候補
 

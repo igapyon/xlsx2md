@@ -53,6 +53,7 @@
   };
 
   const textEncoder = new TextEncoder();
+  const utf8BomBytes = new Uint8Array([0xef, 0xbb, 0xbf]);
   const zipIoHelper = requireXlsx2mdZipIo();
   const markdownNormalizeHelper = requireXlsx2mdMarkdownNormalize();
   const markdownTableEscapeHelper = requireXlsx2mdMarkdownTableEscape();
@@ -63,6 +64,14 @@
 
   function escapeMarkdownCell(text: string): string {
     return markdownTableEscapeHelper.escapeMarkdownTableCell(text);
+  }
+
+  function encodeUtf8TextFile(text: string): Uint8Array {
+    const textBytes = textEncoder.encode(text);
+    const output = new Uint8Array(utf8BomBytes.length + textBytes.length);
+    output.set(utf8BomBytes, 0);
+    output.set(textBytes, utf8BomBytes.length);
+    return output;
   }
 
   function renderMarkdownTable(rows: string[][], treatFirstRowAsHeader: boolean): string {
@@ -149,7 +158,7 @@
       const combined = createCombinedMarkdownExportFile(workbook, markdownFiles);
       entries.push({
         name: `output/${combined.fileName}`,
-        data: textEncoder.encode(`${combined.content}\n`)
+        data: encodeUtf8TextFile(`${combined.content}\n`)
       });
     }
     for (const sheet of workbook.sheets) {
@@ -184,6 +193,7 @@
     createExportEntries,
     createWorkbookExportArchive,
     normalizeMarkdownLineBreaks,
+    encodeUtf8TextFile,
     textEncoder
   };
 

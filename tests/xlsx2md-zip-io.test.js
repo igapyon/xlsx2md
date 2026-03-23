@@ -76,6 +76,29 @@ describe("xlsx2md zip io", () => {
     expect(view.getUint16(centralOffset + 14, true)).toBe(api.fixedZipEntryTimestamp.dosDate);
   });
 
+  it("sets the UTF-8 filename flag for non-ASCII entry names", async () => {
+    const api = bootZipIo();
+    const encoder = new TextEncoder();
+    const zipBytes = api.createStoredZip([
+      { name: "output/日本語.md", data: encoder.encode("# 日本語\n") }
+    ]);
+    const view = new DataView(zipBytes.buffer, zipBytes.byteOffset, zipBytes.byteLength);
+    const utf8Flag = 1 << 11;
+    const unixMadeByVersion = (3 << 8) | 20;
+
+    expect(view.getUint32(0, true)).toBe(0x04034b50);
+    expect(view.getUint16(6, true) & utf8Flag).toBe(utf8Flag);
+
+    const localNameLength = view.getUint16(26, true);
+    const centralOffset = 30 + localNameLength + encoder.encode("# 日本語\n").length;
+    expect(view.getUint32(centralOffset, true)).toBe(0x02014b50);
+    expect(view.getUint16(centralOffset + 4, true)).toBe(unixMadeByVersion);
+    expect(view.getUint16(centralOffset + 8, true) & utf8Flag).toBe(utf8Flag);
+
+    const extracted = await api.unzipEntries(zipBytes.buffer.slice(zipBytes.byteOffset, zipBytes.byteOffset + zipBytes.byteLength));
+    expect(Array.from(extracted.keys())).toEqual(["output/日本語.md"]);
+  });
+
   it("throws for invalid zip input", async () => {
     const api = bootZipIo();
 

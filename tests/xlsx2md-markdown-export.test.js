@@ -192,6 +192,43 @@ describe("xlsx2md markdown export", () => {
     expect(extracted.get("output/shapes/shape_001.svg")).toEqual(new Uint8Array([4, 5]));
   });
 
+  it("prefixes zip-exported markdown with a UTF-8 BOM for Japanese text", async () => {
+    const api = bootMarkdownExport();
+    const workbook = {
+      name: "sample.xlsx",
+      sheets: [{ images: [], shapes: [] }]
+    };
+    const markdownFiles = [
+      {
+        fileName: "sample_001_日本語.md",
+        sheetName: "日本語",
+        markdown: "# 日本語\n\n本文です。",
+        summary: {
+          outputMode: "display",
+          formattingMode: "plain",
+          tableDetectionMode: "balanced",
+          sections: 1,
+          tables: 0,
+          narrativeBlocks: 1,
+          merges: 0,
+          images: 0,
+          charts: 0,
+          cells: 1,
+          tableScores: [],
+          formulaDiagnostics: []
+        }
+      }
+    ];
+
+    const archive = api.createWorkbookExportArchive(workbook, markdownFiles);
+    const zipIo = globalThis.__xlsx2mdModuleRegistry.getModule("zipIo");
+    const extracted = await zipIo.unzipEntries(archive.buffer.slice(archive.byteOffset, archive.byteOffset + archive.byteLength));
+    const markdownBytes = extracted.get("output/sample.md");
+
+    expect(Array.from(markdownBytes.slice(0, 3))).toEqual([0xef, 0xbb, 0xbf]);
+    expect(new TextDecoder().decode(markdownBytes)).toContain("本文です。");
+  });
+
   it("uses formatting mode suffixes in combined export file names", () => {
     const api = bootMarkdownExport();
     const payload = api.createCombinedMarkdownExportFile(
