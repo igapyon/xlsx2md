@@ -12,14 +12,40 @@
 
 - Reads `.xlsx` files directly in the browser and processes them locally
 - Converts all sheets in a workbook in one pass
+- Converts workbook content without sheet-by-sheet manual copy-and-paste work
 - Extracts prose, tables, and images
+- Detects table-like regions and converts them into Markdown tables
+- Handles spreadsheet-grid-style sheets by using borders and value groupings as cues
 - Preserves supported Excel rich text in `github` formatting mode
 - Preserves external links and workbook-internal links as Markdown links when supported
-- Detects tables and converts them into Markdown tables
 - Prefers cached formula values and parses formulas when needed
 - Extracts chart configuration data
 - Extracts shape source data as text and outputs SVG when supported
 - Saves output as Markdown or ZIP
+- Also supports batch conversion from the Node.js CLI
+
+## Feature Support Overview
+
+`xlsx2md` prioritizes extracting workbook content into meaningful Markdown rather than reproducing Excel's visual appearance exactly. The support status for common expectations is as follows.
+
+| Item | `xlsx2md` status | Notes |
+| --- | --- | --- |
+| Read `.xlsx` files | Supported | Runs locally in the browser |
+| Convert a whole workbook in one pass | Supported | Processes all sheets together |
+| Convert without manual copy-and-paste work | Supported | Does not assume sheet-by-sheet manual handling |
+| Extract prose | Supported | Targets descriptive text as well as tables |
+| Extract tables | Supported | Detects table-like regions using borders and value groupings |
+| Handle spreadsheet-grid-style sheets | Supported | Uses borders and value groupings to pick up tables and text |
+| Extract images | Supported | Can be handled as Markdown plus assets |
+| Preserve rich text | Partially supported | `github` formatting mode preserves `bold`, `italic`, `strike`, `underline`, and in-cell line breaks |
+| Preserve hyperlinks | Partially supported | External links and workbook-internal links are emitted as Markdown links when supported |
+| Handle formula cells | Supported | Prefers cached values and derives results by parsing formulas when needed |
+| Handle charts | Supported | Extracts semantic information rather than reproducing chart images |
+| Handle shapes | Partially supported | Extracts source-oriented data and outputs SVG when supported |
+| Save output as ZIP | Supported | Saves Markdown and assets together |
+| Run batch conversion from CLI | Supported | Can be executed from the Node.js CLI |
+| Use without uploading files to a server | Supported | Works locally without server upload |
+| Reproduce Excel appearance exactly | Not supported | The goal is meaningful Markdown conversion, not visual fidelity |
 
 ## Use Cases
 
@@ -161,13 +187,40 @@ The generated Markdown can then be previewed as a readable document.
 
 - `.xlsx` ファイルをブラウザ内で読み込み、ローカル環境だけで処理
 - 全シートをまとめて一括変換
+- シートごとの手作業やコピペを前提にせず変換
 - 地の文・表・画像を抽出
+- 表らしい領域を検知して Markdown の表へ変換
+- 罫線や値のまとまりを手がかりに、Excel 方眼紙っぽいシートも扱える
 - `github` formatting mode では、対応する Excel の rich text を Markdown / HTML へ反映
-- 表を検知して Markdown の表へ変換
+- 外部リンクやブック内リンクを、対応できる範囲で Markdown リンクとして出力
 - 数式は保存済みの値を優先し、必要に応じて数式も解析
 - グラフは設定情報を抽出
 - 図形は元データをテキストとして抽出し、対応できるものは SVG も出力
 - Markdown または ZIP として保存可能
+- Node.js CLI からのバッチ変換にも対応
+
+## 主な機能の対応状況
+
+`xlsx2md` は、Excel の見た目をそのまま再現することよりも、ブック内の情報を意味のある Markdown として取り出すことを重視しています。代表的な観点での対応状況は次のとおりです。
+
+| 項目 | `xlsx2md` の状況 | 補足 |
+| --- | --- | --- |
+| `.xlsx` を読み込める | 対応 | ブラウザ内でローカル実行できる |
+| ブック全体を一括変換できる | 対応 | 全シートをまとめて処理できる |
+| 人手を介さずに変換できる | 対応 | シートごとの手作業やコピペを前提にしない |
+| 地の文を抽出できる | 対応 | 表だけでなく説明文や本文も対象にする |
+| 表を抽出できる | 対応 | 罫線や値のまとまりを手がかりに表らしい領域を検知する |
+| Excel 方眼紙っぽいシートを扱える | 対応 | 罫線や値のまとまりを手がかりに表やテキストを拾う |
+| 画像を抽出できる | 対応 | Markdown と assets の組み合わせで扱える |
+| rich text を反映できる | 一部対応 | `github` formatting mode で `bold`、`italic`、`strike`、`underline`、セル内改行を反映する |
+| ハイパーリンクを反映できる | 一部対応 | 外部リンクやブック内リンクを Markdown リンクとして出力する |
+| 数式セルを扱える | 対応 | 保存済みの値を優先し、値がない場合は可能な範囲で解析して導出する |
+| グラフを扱える | 対応 | 画像再現ではなく、意味情報として抽出する |
+| 図形を扱える | 一部対応 | raw 寄りの情報を抽出し、対応できるものは SVG として出力する |
+| ZIP でまとめて保存できる | 対応 | Markdown と assets をまとめて保存できる |
+| CLI からバッチ変換できる | 対応 | Node.js CLI から実行できる |
+| サーバへアップロードせずに使える | 対応 | ローカル完結で使える |
+| Excel の見た目を完全再現できる | 非対応 | 目的は見た目再現ではなく、意味のある Markdown 化 |
 
 ## Use Cases
 
