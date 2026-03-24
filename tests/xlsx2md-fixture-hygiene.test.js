@@ -42,4 +42,45 @@ describe("xlsx2md fixture hygiene", () => {
 
     expect(offenders).toEqual([]);
   });
+
+  it("keeps author, timestamp, and app metadata out of fixture workbooks", () => {
+    const fixtureRoot = path.resolve(__dirname, "./fixtures");
+    const fixtureFiles = collectFixtureXlsxFiles(fixtureRoot);
+
+    const offenders = fixtureFiles.filter((fixturePath) => {
+      let coreXml = "";
+      let appXml = "";
+      try {
+        coreXml = execFileSync("unzip", ["-p", fixturePath, "docProps/core.xml"], { encoding: "utf8" });
+      } catch {
+        coreXml = "";
+      }
+      try {
+        appXml = execFileSync("unzip", ["-p", fixturePath, "docProps/app.xml"], { encoding: "utf8" });
+      } catch {
+        appXml = "";
+      }
+      return /<dc:creator>|<cp:lastModifiedBy>|<dcterms:created\b|<dcterms:modified\b/u.test(coreXml)
+        || /<Application>|<AppVersion>/u.test(appXml);
+    });
+
+    expect(offenders).toEqual([]);
+  });
+
+  it("keeps common sensitive workbook parts out of fixture workbooks", () => {
+    const fixtureRoot = path.resolve(__dirname, "./fixtures");
+    const fixtureFiles = collectFixtureXlsxFiles(fixtureRoot);
+
+    const offenders = fixtureFiles.filter((fixturePath) => {
+      let zipListing = "";
+      try {
+        zipListing = execFileSync("unzip", ["-l", fixturePath], { encoding: "utf8" });
+      } catch {
+        return false;
+      }
+      return /xl\/comments[0-9]*\.xml|xl\/threadedComments\/|xl\/persons\/person\.xml|docProps\/custom\.xml|xl\/externalLinks\/|xl\/connections\.xml|xl\/embeddings\/|xl\/vbaProject\.bin|xl\/printerSettings\//u.test(zipListing);
+    });
+
+    expect(offenders).toEqual([]);
+  });
 });

@@ -76,6 +76,42 @@ describe("xlsx2md zip io", () => {
     expect(view.getUint16(centralOffset + 14, true)).toBe(api.fixedZipEntryTimestamp.dosDate);
   });
 
+  it("does not mark ASCII-only file names with the UTF-8 flag", () => {
+    const api = bootZipIo();
+    const encoder = new TextEncoder();
+    const zipBytes = api.createStoredZip([
+      { name: "output/test.md", data: encoder.encode("# Test\n") }
+    ]);
+    const view = new DataView(zipBytes.buffer, zipBytes.byteOffset, zipBytes.byteLength);
+
+    expect(view.getUint16(6, true)).toBe(0);
+
+    const localNameLength = view.getUint16(26, true);
+    const centralOffset = 30 + localNameLength + encoder.encode("# Test\n").length;
+    expect(view.getUint16(centralOffset + 8, true)).toBe(0);
+  });
+
+  it("marks UTF-8 file names so non-ASCII entries unzip correctly", async () => {
+    const api = bootZipIo();
+    const encoder = new TextEncoder();
+    const zipBytes = api.createStoredZip([
+      { name: "output/日本語.md", data: encoder.encode("# 日本語\n") }
+    ]);
+    const view = new DataView(zipBytes.buffer, zipBytes.byteOffset, zipBytes.byteLength);
+
+    expect(view.getUint16(6, true)).toBe(0x0800);
+
+    const localNameLength = view.getUint16(26, true);
+    const centralOffset = 30 + localNameLength + encoder.encode("# 日本語\n").length;
+    expect(view.getUint16(centralOffset + 8, true)).toBe(0x0800);
+
+    const extracted = await api.unzipEntries(
+      zipBytes.buffer.slice(zipBytes.byteOffset, zipBytes.byteOffset + zipBytes.byteLength)
+    );
+    expect(Array.from(extracted.keys())).toEqual(["output/日本語.md"]);
+    expect(new TextDecoder().decode(extracted.get("output/日本語.md"))).toBe("# 日本語\n");
+  });
+
   it("throws for invalid zip input", async () => {
     const api = bootZipIo();
 
