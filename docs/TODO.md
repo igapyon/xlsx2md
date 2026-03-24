@@ -47,6 +47,12 @@
   - rich fixture 回帰:
     - `tests/fixtures/rich/rich-text-github-sample01.xlsx`
     - `tests/fixtures/rich/rich-markdown-escape-sample01.xlsx`
+- Markdown 保存時の UTF-8 BOM 方針を整理する
+  - 対象経路: GUI の `Save Markdown`、CLI の `--out`、ZIP 内 Markdown
+  - Windows 既定アプリでの文字化け回避と、BOM を嫌う利用者・ツールの両方を考慮する
+  - 既定値を BOM ありにするか、オプション化するかを決める
+  - 3 経路で挙動をそろえるか、ZIP のみ別扱いにするかを決める
+  - 仕様を決めたら README / spec / impl-spec / 回帰テストをまとめて更新する
 - Qiita 記事の新規作成を検討する
   - 直近のハイパーリンク対応、GitHub 向け Markdown 出力方針、fixture hygiene (`x15ac:absPath`) の知見を記事化したい
   - 実装断片だけでなく、なぜその出力方針にしたかも整理して残したい

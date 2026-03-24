@@ -4,6 +4,7 @@
     const textEncoder = new TextEncoder();
     const crcTable = buildCrc32Table();
     const fixedZipEntryTimestamp = toDosDateTime(2025, 1, 1, 0, 0, 0);
+    const utf8FileNameFlag = 0x0800;
     function buildCrc32Table() {
         const table = new Uint32Array(256);
         for (let i = 0; i < 256; i += 1) {
@@ -24,6 +25,9 @@
     }
     function decodeXmlText(bytes) {
         return textDecoder.decode(bytes);
+    }
+    function hasNonAsciiCharacters(value) {
+        return /[^\x00-\x7f]/.test(value);
     }
     function toDosDateTime(year, month, day, hour, minute, second) {
         const clampedYear = Math.max(1980, Math.min(2107, year));
@@ -119,11 +123,12 @@
             const nameBytes = textEncoder.encode(entry.name);
             const dataBytes = entry.data;
             const entryCrc32 = crc32(dataBytes);
+            const generalPurposeBitFlag = hasNonAsciiCharacters(entry.name) ? utf8FileNameFlag : 0;
             const localHeader = new Uint8Array(30 + nameBytes.length);
             const localView = new DataView(localHeader.buffer);
             localView.setUint32(0, 0x04034b50, true);
             localView.setUint16(4, 20, true);
-            localView.setUint16(6, 0, true);
+            localView.setUint16(6, generalPurposeBitFlag, true);
             localView.setUint16(8, 0, true);
             localView.setUint16(10, fixedZipEntryTimestamp.dosTime, true);
             localView.setUint16(12, fixedZipEntryTimestamp.dosDate, true);
@@ -139,7 +144,7 @@
             centralView.setUint32(0, 0x02014b50, true);
             centralView.setUint16(4, 20, true);
             centralView.setUint16(6, 20, true);
-            centralView.setUint16(8, 0, true);
+            centralView.setUint16(8, generalPurposeBitFlag, true);
             centralView.setUint16(10, 0, true);
             centralView.setUint16(12, fixedZipEntryTimestamp.dosTime, true);
             centralView.setUint16(14, fixedZipEntryTimestamp.dosDate, true);
