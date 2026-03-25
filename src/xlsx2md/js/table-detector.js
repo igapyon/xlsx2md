@@ -116,7 +116,7 @@
         const borderSeedCells = collectBorderSeedCells(sheet);
         const candidates = [];
         const candidateKeys = new Set();
-        function maybePushCandidate(component) {
+        function maybePushCandidate(component, sourceKind = "border") {
             const rows = component.map((entry) => entry.row);
             const cols = component.map((entry) => entry.col);
             const startRow = Math.min(...rows);
@@ -165,7 +165,12 @@
                 score += scoreWeights.mergeHeavyPenalty;
                 reasons.push(`Many merged cells (${scoreWeights.mergeHeavyPenalty})`);
             }
-            if (mergedArea >= 2 && rowCount <= 6 && colCount >= 10 && density < 0.25) {
+            if (sourceKind === "border") {
+                if (mergedArea >= 2 && density < 0.25 && headerishCount < 2) {
+                    return;
+                }
+            }
+            else if (mergedArea >= 2 && rowCount <= 6 && colCount >= 10 && density < 0.25) {
                 return;
             }
             const nonEmptyCells = component.filter((entry) => entry.outputValue.trim());
@@ -198,7 +203,7 @@
             }
         }
         for (const component of collectConnectedComponents(borderSeedCells, tableDetectionMode === "border" ? "border" : "grid")) {
-            maybePushCandidate(component);
+            maybePushCandidate(component, "border");
         }
         if (tableDetectionMode !== "border") {
             for (const component of collectConnectedComponents(allSeedCells)) {
@@ -218,7 +223,7 @@
                 if (shadowedByBorderCandidate || shadowedByMultipleBorderCandidates) {
                     continue;
                 }
-                maybePushCandidate(component);
+                maybePushCandidate(component, "fallback");
             }
         }
         return pruneRedundantCandidates(candidates).sort((left, right) => {
