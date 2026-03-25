@@ -198,7 +198,7 @@
     const candidates: TableCandidate[] = [];
     const candidateKeys = new Set<string>();
 
-    function maybePushCandidate(component: TCell[]): void {
+    function maybePushCandidate(component: TCell[], sourceKind: "border" | "fallback" = "border"): void {
       const rows = component.map((entry) => entry.row);
       const cols = component.map((entry) => entry.col);
       const startRow = Math.min(...rows);
@@ -251,7 +251,11 @@
         reasons.push(`Many merged cells (${scoreWeights.mergeHeavyPenalty})`);
       }
 
-      if (mergedArea >= 2 && rowCount <= 6 && colCount >= 10 && density < 0.25) {
+      if (sourceKind === "border") {
+        if (mergedArea >= 2 && density < 0.25 && headerishCount < 2) {
+          return;
+        }
+      } else if (mergedArea >= 2 && rowCount <= 6 && colCount >= 10 && density < 0.25) {
         return;
       }
 
@@ -287,7 +291,7 @@
     }
 
     for (const component of collectConnectedComponents(borderSeedCells, tableDetectionMode === "border" ? "border" : "grid")) {
-      maybePushCandidate(component);
+      maybePushCandidate(component, "border");
     }
 
     if (tableDetectionMode !== "border") {
@@ -310,7 +314,7 @@
         if (shadowedByBorderCandidate || shadowedByMultipleBorderCandidates) {
           continue;
         }
-        maybePushCandidate(component);
+        maybePushCandidate(component, "fallback");
       }
     }
 

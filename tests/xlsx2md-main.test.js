@@ -2490,6 +2490,57 @@ describe("xlsx2md core", () => {
     expect(markdownFile.markdown).toContain("たまに結合漏れのセルがあって、さらに複数文字が登場");
   });
 
+  it("parses the grid-layout-sample-01 fixture workbook as two graph-paper tables", async () => {
+    const api = bootCore();
+    const fixtureName = "grid-layout-sample-01.xlsx";
+    const fixturePath = path.resolve(fixtureDir, "table", fixtureName);
+    const fixtureBytes = readFileSync(fixturePath);
+    const arrayBuffer = fixtureBytes.buffer.slice(
+      fixtureBytes.byteOffset,
+      fixtureBytes.byteOffset + fixtureBytes.byteLength
+    );
+
+    const workbook = await api.parseWorkbook(arrayBuffer, fixtureName);
+    const files = api.convertWorkbookToMarkdownFiles(workbook, {
+      treatFirstRowAsHeader: true,
+      trimText: true,
+      removeEmptyRows: true,
+      removeEmptyColumns: true
+    });
+    const sheet = workbook.sheets[0];
+    const markdownFile = files[0];
+
+    expect(workbook.sheets).toHaveLength(1);
+    expect(sheet.name).toBe("grid-layout");
+    expect(sheet.maxRow).toBe(16);
+    expect(sheet.maxCol).toBe(22);
+    expect(sheet.cells).toHaveLength(281);
+    expect(sheet.merges).toHaveLength(70);
+    expect(sheet.cells.find((cell) => cell.address === "C8")?.outputValue).toBe("項番");
+    expect(sheet.cells.find((cell) => cell.address === "R9")?.outputValue).toBe("担当コードの値");
+    expect(sheet.cells.find((cell) => cell.address === "C15")?.formulaText).toBe("=C14+1");
+    expect(sheet.cells.find((cell) => cell.address === "C16")?.formulaText).toBe("=C15+1");
+    expect(sheet.cells.find((cell) => cell.address === "R16")?.outputValue).toBe("システムへの更新日");
+
+    expect(markdownFile.fileName).toBe("grid-layout-sample-01_001_grid-layout.md");
+    expect(markdownFile.summary.tables).toBe(2);
+    expect(markdownFile.summary.merges).toBe(70);
+    expect(markdownFile.summary.images).toBe(0);
+    expect(markdownFile.summary.formulaDiagnostics).toHaveLength(10);
+    expect(markdownFile.summary.tableScores.map((detail) => detail.range)).toEqual([
+      "B2-U6",
+      "C8-V16"
+    ]);
+    expect(markdownFile.markdown).toContain("Workbook: grid-layout-sample-01.xlsx");
+    expect(markdownFile.markdown).toContain("方眼紙的様式の動作確認");
+    expect(markdownFile.markdown).toContain("### Table 001 (B2-U6)");
+    expect(markdownFile.markdown).toContain("### Table 002 (C8-V16)");
+    expect(markdownFile.markdown).toContain("| 1 | 担当コード | tantocode | 101 | 担当コードの値 |");
+    expect(markdownFile.markdown).toContain("| 2 | 担当者名 | tantoname | Taro | 担当の名前 |");
+    expect(markdownFile.markdown).toContain("| 6 | 備考 | remarks | なし | 補足事項 |");
+    expect(markdownFile.markdown).toContain("| 8 | 更新日 | updatedate |  | システムへの更新日 |");
+  });
+
   it("parses the table-border-priority-sample01 fixture workbook differently between balanced and border modes", async () => {
     const api = bootCore();
     const fixtureName = "table-border-priority-sample01.xlsx";
