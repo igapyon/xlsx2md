@@ -280,4 +280,32 @@ describe("xlsx2md rich fixtures", () => {
     expect(markdownFile.markdown).toContain("| code \\`sample\\` | code \\`sample\\` |");
     expect(markdownFile.markdown).toContain("| path\\\\to\\\\file | path\\\\to\\\\file |");
   });
+
+  it("renders rich-usecase-sample01.xlsx in github mode with hyperlinks, inline styling, and <br>", async () => {
+    const { workbook, markdownFile } = await loadFixtureMarkdown("rich-usecase-sample01.xlsx", "github");
+
+    expect(workbook.sheets).toHaveLength(1);
+    expect(markdownFile.summary.formattingMode).toBe("github");
+    expect(markdownFile.summary.tables).toBe(1);
+    expect(markdownFile.markdown).toContain("| [Apple](https://www.apple.com/) | ***Apple*** の製品が<ins>購入できます</ins>。 |");
+    expect(markdownFile.markdown).toContain("| [Google](https://www.google.com/) | とても<ins>有名</ins>な**検索サイト**です。 |");
+    expect(markdownFile.markdown).toContain("| [Amazon](https://www.amazon.co.jp/) | **<ins>お買い物</ins>**でお世話になっています。 |");
+    expect(markdownFile.markdown).toContain("| [Yodobashi](https://www.yodobashi.com/) | 実店舗とともに<br>**ネットショップ**でもお世話になっています。 |");
+    expect(markdownFile.markdown).toContain("~~池袋の激戦区で、生き残るのはどの店舗か。~~<br>→トルツメ: この部分は文面から外すことを提案。");
+  });
+
+  it("renders rich-usecase-sample01.xlsx in plain mode with links preserved and styling removed", async () => {
+    const { markdownFile } = await loadFixtureMarkdown("rich-usecase-sample01.xlsx", "plain");
+
+    expect(markdownFile.summary.formattingMode).toBe("plain");
+    expect(markdownFile.summary.tables).toBe(1);
+    expect(markdownFile.markdown).toContain("| [Apple](https://www.apple.com/) | Apple の製品が購入できます。 |");
+    expect(markdownFile.markdown).toContain("| [Google](https://www.google.com/) | とても有名な検索サイトです。 |");
+    expect(markdownFile.markdown).toContain("| [Amazon](https://www.amazon.co.jp/) | お買い物でお世話になっています。 |");
+    expect(markdownFile.markdown).toContain("| [Yodobashi](https://www.yodobashi.com/) | 実店舗とともに ネットショップでもお世話になっています。 |");
+    expect(markdownFile.markdown).toContain("池袋の激戦区で、生き残るのはどの店舗か。 →トルツメ: この部分は文面から外すことを提案。");
+    expect(markdownFile.markdown).not.toContain("<br>");
+    expect(markdownFile.markdown).not.toContain("<ins>");
+    expect(markdownFile.markdown).not.toContain("~~池袋の激戦区で、生き残るのはどの店舗か。~~");
+  });
 });

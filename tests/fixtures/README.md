@@ -52,6 +52,7 @@
 | `link/hyperlink-basic-sample01.xlsx` | ハイパーリンク | `xlsx2md-spec.md` 5, 19 | 外部リンク / ブック内リンクの保持、リンクセルの下線出力 |
 | `rich/rich-text-github-sample01.xlsx` | rich text / 文字装飾 | `xlsx2md-spec.md` 5, 6 | GitHub 互換の `bold / italic / strike / underline` 出力 |
 | `rich/rich-markdown-escape-sample01.xlsx` | Markdown 記号 / escape | `xlsx2md-spec.md` 5, 6 | Markdown 記号を含む文字列と rich text の混在 |
+| `rich/rich-usecase-sample01.xlsx` | rich text + hyperlink 実用例 | `xlsx2md-spec.md` 5, 6, 19 | 表セル内 rich text、外部リンク、改行、取消線つき補足文の安定出力 |
 | `merge/merge-pattern-sample01.xlsx` | 結合セル | `xlsx2md-spec.md` 13 | `[MERGED←] / [MERGED↑]` の崩れ |
 | `merge/merge-multiline-sample01.xlsx` | 結合セル内改行 | `xlsx2md-spec.md` 13 | multiline merged text の parse と Markdown 正規化 |
 | `table/table-basic-sample01.xlsx` | 隣接表(縦) | `xlsx2md-spec.md` 7, 8 | 縦に密接した独立表の誤結合 |
@@ -122,6 +123,13 @@
     - narrative では backtick や image 風文字列を literal のまま出す
     - table では `|` だけを優先的に escape し、他の文字列は過剰変換しない
     - `path\\to\\file` や `&lt;tag&gt;` のような断片が mode 差をまたいでも安定する
+- `rich-usecase-sample01.xlsx`
+  - rich text + hyperlink の実用寄りケース
+  - 外部リンク付きの表で、説明列や補足列に部分装飾、セル内改行、取消線つき補足文を含めて確認する
+  - `github` では `bold / italic / strike / underline / <br>` と Markdown リンクが共存することを確認する
+  - `plain` では装飾を落としつつ、リンクラベルと文面が素直なテキストとして残ることを確認する
+  - 対応章: `xlsx2md-spec.md` 5, 6, 19
+  - 主に確認する症状: 表セル内 rich text の崩れ、リンクセルの出力、`github/plain` 差分、取消線つき補足文の扱い
 
 ### `link/`
 
