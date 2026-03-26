@@ -113,6 +113,8 @@
 - 初出: 2026-03-20
 - 更新: 2026-03-20
 
+![1ADC0755-7A21-4014-B75E-93D724973EB4.png](https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/105739/7d31f34c-ad52-4d44-8afe-87a8f3b1e3ab.png)
+
 ## VS Code + GPT-5.4 で何を作ったのか
 
 今回作ったのは、`xlsx2md` という Single-file Web App です。Excel (`.xlsx`) をブラウザ内でローカルに読み込み、地の文、表、画像などを Markdown として抽出します。
@@ -120,6 +122,10 @@
 `xlsx2md` そのものの紹介については、先に公開した次の記事を参照してください。
 
 - https://qiita.com/igapyon/items/cfbbc0d6112059b26522
+
+![スクリーンショット 2026-03-20 12.38.42.png](https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/105739/2e6a342c-265f-4cac-99df-af944c53ccb8.png)
+
+![スクリーンショット 2026-03-20 12.37.20.png](https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/105739/493702cf-a428-422f-a71e-d890f9354dca.png)
 
 このツールは、単に Excel を別形式へ変換するためのものではありません。Excel ブックを、生成AI に渡しやすいテキストへ変換することを主目的にしています。ブック全体をまとめて処理でき、サーバへアップロードせずに動作し、変換結果は Markdown または ZIP として保存できます。
 
@@ -150,6 +156,8 @@
 完全に AI 任せだったわけでもありません。GPT-5.4 から「どのようなテストデータが欲しいか」という質問をしてもらい、その回答に従って Excel のテストデータを人間が作成しました。作られたアプリの最終的な動作確認も人間が担当しました。Git 操作や GitHub 操作については GPT-5.4 側がやりたがったものの、それは断って人間が担当しました。
 
 つまり、人間がやっていたのは要求定義、設計判断、方向修正、入力データ準備、動作確認、公開運用です。GPT-5.4 は、その条件の中で実装担当としてかなり広く担当していました。この役割分担で OSS として公開できるところまで持っていけたのは、かなり印象的でした。
+
+![74A7F37B-56FB-4AB0-B883-DC39F3F08DA2.png](https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/105739/157cd810-f1e4-4028-80e9-2dc5d18bd910.png)
 
 ## 専用プロンプトなしでどう進んだのか
 
@@ -203,6 +211,8 @@
 - https://github.com/igapyon/xlsx2md
 
 ## Appendix
+
+![3553DC3B-6143-4EAD-BC7B-C729D42542F7.png](https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/105739/ccae4a13-719c-4896-86ef-f7fe828683fe.png)
 
 ### 最初に与えた要件と制約
 
