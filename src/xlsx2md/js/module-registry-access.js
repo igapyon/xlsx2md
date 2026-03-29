@@ -1,3 +1,7 @@
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (() => {
     globalThis.getXlsx2mdModuleRegistry = function getXlsx2mdModuleRegistry() {
         const moduleRegistry = globalThis.__xlsx2mdModuleRegistry;
