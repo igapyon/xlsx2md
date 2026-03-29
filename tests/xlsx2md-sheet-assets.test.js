@@ -11,7 +11,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const sheetAssetsCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/sheet-assets.js"),
+  path.resolve(__dirname, "../src/js/sheet-assets.js"),
   "utf8"
 );
 

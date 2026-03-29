@@ -3,11 +3,11 @@ import path from "node:path";
 
 export function loadModuleRegistry(testDir) {
   const moduleRegistryCode = readFileSync(
-    path.resolve(testDir, "../src/xlsx2md/js/module-registry.js"),
+    path.resolve(testDir, "../src/js/module-registry.js"),
     "utf8"
   );
   const moduleRegistryAccessCode = readFileSync(
-    path.resolve(testDir, "../src/xlsx2md/js/module-registry-access.js"),
+    path.resolve(testDir, "../src/js/module-registry-access.js"),
     "utf8"
   );
   new Function(moduleRegistryCode)();
@@ -17,7 +17,7 @@ export function loadModuleRegistry(testDir) {
 
 export function loadRuntimeEnv(testDir) {
   const runtimeEnvCode = readFileSync(
-    path.resolve(testDir, "../src/xlsx2md/js/runtime-env.js"),
+    path.resolve(testDir, "../src/js/runtime-env.js"),
     "utf8"
   );
   new Function(runtimeEnvCode)();

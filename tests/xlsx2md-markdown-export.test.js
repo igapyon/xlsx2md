@@ -11,19 +11,19 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const zipIoCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/zip-io.js"),
+  path.resolve(__dirname, "../src/js/zip-io.js"),
   "utf8"
 );
 const markdownNormalizeCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/markdown-normalize.js"),
+  path.resolve(__dirname, "../src/js/markdown-normalize.js"),
   "utf8"
 );
 const markdownExportCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/markdown-export.js"),
+  path.resolve(__dirname, "../src/js/markdown-export.js"),
   "utf8"
 );
 const markdownTableEscapeCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/markdown-table-escape.js"),
+  path.resolve(__dirname, "../src/js/markdown-table-escape.js"),
   "utf8"
 );
 

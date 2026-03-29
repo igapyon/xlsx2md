@@ -11,7 +11,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const formulaAstCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/formula-ast.js"),
+  path.resolve(__dirname, "../src/js/formula-ast.js"),
   "utf8"
 );
 

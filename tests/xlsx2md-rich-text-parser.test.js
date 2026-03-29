@@ -12,11 +12,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const markdownEscapeCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/markdown-escape.js"),
+  path.resolve(__dirname, "../src/js/markdown-escape.js"),
   "utf8"
 );
 const richTextParserCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/rich-text-parser.js"),
+  path.resolve(__dirname, "../src/js/rich-text-parser.js"),
   "utf8"
 );
 

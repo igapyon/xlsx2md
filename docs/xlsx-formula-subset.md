@@ -335,8 +335,8 @@ Primary
 
 現状:
 
-- `src/xlsx2md/ts/formula/tokenizer.ts`
-- `src/xlsx2md/ts/formula/parser.ts`
+- `src/ts/formula/tokenizer.ts`
+- `src/ts/formula/parser.ts`
 - parser で対応済み:
   - 絶対参照
     - `$A$1`
@@ -364,8 +364,8 @@ Primary
 
 現状:
 
-- `src/xlsx2md/ts/formula/evaluator.ts`
-- `src/xlsx2md/ts/core.ts` から限定的に AST フック済み
+- `src/ts/formula/evaluator.ts`
+- `src/ts/core.ts` から限定的に AST フック済み
 - evaluator で対応済みの主な関数:
   - 条件・論理
     - `IF`

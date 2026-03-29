@@ -11,7 +11,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const officeDrawingCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/office-drawing.js"),
+  path.resolve(__dirname, "../src/js/office-drawing.js"),
   "utf8"
 );
 

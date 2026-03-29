@@ -11,11 +11,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const xmlUtilsCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/xml-utils.js"),
+  path.resolve(__dirname, "../src/js/xml-utils.js"),
   "utf8"
 );
 const relsParserCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/rels-parser.js"),
+  path.resolve(__dirname, "../src/js/rels-parser.js"),
   "utf8"
 );
 

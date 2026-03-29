@@ -11,7 +11,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const mainCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/main.js"),
+  path.resolve(__dirname, "../src/js/main.js"),
   "utf8"
 );
 

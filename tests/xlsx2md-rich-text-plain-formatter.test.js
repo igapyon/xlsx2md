@@ -11,7 +11,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const richTextPlainFormatterCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/rich-text-plain-formatter.js"),
+  path.resolve(__dirname, "../src/js/rich-text-plain-formatter.js"),
   "utf8"
 );
 

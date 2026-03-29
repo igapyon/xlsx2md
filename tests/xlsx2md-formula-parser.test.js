@@ -10,23 +10,23 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const tokenizerCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/formula/tokenizer.js"),
+  path.resolve(__dirname, "../src/js/formula/tokenizer.js"),
   "utf8"
 );
 const moduleRegistryCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/module-registry.js"),
+  path.resolve(__dirname, "../src/js/module-registry.js"),
   "utf8"
 );
 const moduleRegistryAccessCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/module-registry-access.js"),
+  path.resolve(__dirname, "../src/js/module-registry-access.js"),
   "utf8"
 );
 const parserCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/formula/parser.js"),
+  path.resolve(__dirname, "../src/js/formula/parser.js"),
   "utf8"
 );
 const evaluatorCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/formula/evaluator.js"),
+  path.resolve(__dirname, "../src/js/formula/evaluator.js"),
   "utf8"
 );
 

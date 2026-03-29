@@ -11,7 +11,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const richTextGithubFormatterCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/rich-text-github-formatter.js"),
+  path.resolve(__dirname, "../src/js/rich-text-github-formatter.js"),
   "utf8"
 );
 

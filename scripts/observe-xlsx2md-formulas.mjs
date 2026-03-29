@@ -7,10 +7,10 @@ import { JSDOM } from "jsdom";
 
 const ROOT = process.cwd();
 const LOCAL_DATA_DIR = path.resolve(ROOT, "local-data");
-const tokenizerCode = readFileSync(path.resolve(ROOT, "src/xlsx2md/js/formula/tokenizer.js"), "utf8");
-const parserCode = readFileSync(path.resolve(ROOT, "src/xlsx2md/js/formula/parser.js"), "utf8");
-const evaluatorCode = readFileSync(path.resolve(ROOT, "src/xlsx2md/js/formula/evaluator.js"), "utf8");
-const coreCode = readFileSync(path.resolve(ROOT, "src/xlsx2md/js/core.js"), "utf8");
+const tokenizerCode = readFileSync(path.resolve(ROOT, "src/js/formula/tokenizer.js"), "utf8");
+const parserCode = readFileSync(path.resolve(ROOT, "src/js/formula/parser.js"), "utf8");
+const evaluatorCode = readFileSync(path.resolve(ROOT, "src/js/formula/evaluator.js"), "utf8");
+const coreCode = readFileSync(path.resolve(ROOT, "src/js/core.js"), "utf8");
 
 const dom = new JSDOM("<!doctype html><html><body></body></html>");
 globalThis.window = dom.window;

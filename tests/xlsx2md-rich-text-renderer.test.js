@@ -12,23 +12,23 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const markdownEscapeCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/markdown-escape.js"),
+  path.resolve(__dirname, "../src/js/markdown-escape.js"),
   "utf8"
 );
 const richTextParserCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/rich-text-parser.js"),
+  path.resolve(__dirname, "../src/js/rich-text-parser.js"),
   "utf8"
 );
 const richTextPlainFormatterCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/rich-text-plain-formatter.js"),
+  path.resolve(__dirname, "../src/js/rich-text-plain-formatter.js"),
   "utf8"
 );
 const richTextGithubFormatterCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/rich-text-github-formatter.js"),
+  path.resolve(__dirname, "../src/js/rich-text-github-formatter.js"),
   "utf8"
 );
 const richTextRendererCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/rich-text-renderer.js"),
+  path.resolve(__dirname, "../src/js/rich-text-renderer.js"),
   "utf8"
 );
 
