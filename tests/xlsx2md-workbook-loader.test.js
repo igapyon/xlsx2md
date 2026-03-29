@@ -11,7 +11,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const workbookLoaderCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/workbook-loader.js"),
+  path.resolve(__dirname, "../src/js/workbook-loader.js"),
   "utf8"
 );
 

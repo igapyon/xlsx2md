@@ -6,7 +6,7 @@
 
 主な目的は次の通りである。
 
-- `src/xlsx2md/ts/*.ts` の現行実装に基づく挙動を整理する
+- `src/ts/*.ts` の現行実装に基づく挙動を整理する
 - `README.md`、`xlsx2md-spec.md`、`xlsx-formula-subset.md` に分散している実装前提の情報を、実装準拠の観点で補助する
 - 将来の仕様検討や実装差分確認の際に、どこが「現行挙動」で、どこが「将来構想」かを切り分けやすくする
 
@@ -51,7 +51,7 @@
 
 本書の記述基準は次の通りである。
 
-- 現行コードの正本は `src/xlsx2md/ts/` 配下の TypeScript 実装とする
+- 現行コードの正本は `src/ts/` 配下の TypeScript 実装とする
 - `js/` 配下および `xlsx2md.html` はビルド生成物として扱う
 - 実装と既存文書に差分がある場合、本書では現行実装を基準に記述する
 - 未対応事項や将来検討事項は、実装済み仕様と分けて記述する
@@ -413,7 +413,7 @@ Markdown 生成時のセル出力は、`outputMode` により切り替わる。
 
 ### 7.4 AST evaluator
 
-AST evaluator は、`src/xlsx2md/ts/formula/` 配下の tokenizer / parser / evaluator を用いた解決系である。
+AST evaluator は、`src/ts/formula/` 配下の tokenizer / parser / evaluator を用いた解決系である。
 
 現行実装では、数式文字列を AST 化し、必要に応じて次のような参照解決コンテキストを与えて評価する。
 
@@ -1263,7 +1263,7 @@ ZIP の保存名には Workbook 名と、必要に応じて outputMode サフィ
 
 ### 解析本体
 
-- `src/xlsx2md/ts/core.ts`
+- `src/ts/core.ts`
   - ZIP 展開
   - workbook / worksheet 解析
   - sharedStrings / styles / definedNames
@@ -1276,16 +1276,16 @@ ZIP の保存名には Workbook 名と、必要に応じて outputMode サフィ
 
 ### 数式サブシステム
 
-- `src/xlsx2md/ts/formula/tokenizer.ts`
+- `src/ts/formula/tokenizer.ts`
   - 数式トークナイズ
-- `src/xlsx2md/ts/formula/parser.ts`
+- `src/ts/formula/parser.ts`
   - AST 構築
-- `src/xlsx2md/ts/formula/evaluator.ts`
+- `src/ts/formula/evaluator.ts`
   - AST 評価
 
 ### UI
 
-- `src/xlsx2md/ts/main.ts`
+- `src/ts/main.ts`
   - 画面操作
   - オプション取得
   - 解析サマリー表示
@@ -1293,7 +1293,7 @@ ZIP の保存名には Workbook 名と、必要に応じて outputMode サフィ
   - 数式診断表示
   - ダウンロード / ZIP 保存
 
-- `src/xlsx2md/css/app.css`
+- `src/css/app.css`
   - `xlsx2md` 画面固有の見た目
 
 ### テスト
@@ -1307,7 +1307,7 @@ ZIP の保存名には Workbook 名と、必要に応じて outputMode サフィ
 
 ### 生成物
 
-- `src/xlsx2md/js/*.js`
+- `src/js/*.js`
   - TypeScript からの生成物
 - `xlsx2md.html`
   - single-file Web App の生成物
@@ -1318,7 +1318,7 @@ ZIP の保存名には Workbook 名と、必要に応じて outputMode サフィ
 
 本章は、`impl-spec` だけで再実装可能性を上げるための補助資料である。
 
-- 正本は `src/xlsx2md/ts/core.ts` とする
+- 正本は `src/ts/core.ts` とする
 - ここでは、再実装時に骨格となる代表的な型定義と関数断片を掲載する
 - 全量転載ではなく、章ごとの理解と再実装の足場になる範囲へ絞る
 

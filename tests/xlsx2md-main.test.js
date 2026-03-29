@@ -17,135 +17,135 @@ if (typeof globalThis.Blob === "undefined" || typeof globalThis.Blob.prototype?.
 globalThis.DecompressionStream ??= NodeDecompressionStream;
 
 const officeDrawingCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/office-drawing.js"),
+  path.resolve(__dirname, "../src/js/office-drawing.js"),
   "utf8"
 );
 const moduleRegistryCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/module-registry.js"),
+  path.resolve(__dirname, "../src/js/module-registry.js"),
   "utf8"
 );
 const moduleRegistryAccessCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/module-registry-access.js"),
+  path.resolve(__dirname, "../src/js/module-registry-access.js"),
   "utf8"
 );
 const runtimeEnvCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/runtime-env.js"),
+  path.resolve(__dirname, "../src/js/runtime-env.js"),
   "utf8"
 );
 const zipIoCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/zip-io.js"),
+  path.resolve(__dirname, "../src/js/zip-io.js"),
   "utf8"
 );
 const borderGridCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/border-grid.js"),
+  path.resolve(__dirname, "../src/js/border-grid.js"),
   "utf8"
 );
 const markdownNormalizeCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/markdown-normalize.js"),
+  path.resolve(__dirname, "../src/js/markdown-normalize.js"),
   "utf8"
 );
 const markdownEscapeCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/markdown-escape.js"),
+  path.resolve(__dirname, "../src/js/markdown-escape.js"),
   "utf8"
 );
 const markdownTableEscapeCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/markdown-table-escape.js"),
+  path.resolve(__dirname, "../src/js/markdown-table-escape.js"),
   "utf8"
 );
 const richTextParserCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/rich-text-parser.js"),
+  path.resolve(__dirname, "../src/js/rich-text-parser.js"),
   "utf8"
 );
 const richTextPlainFormatterCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/rich-text-plain-formatter.js"),
+  path.resolve(__dirname, "../src/js/rich-text-plain-formatter.js"),
   "utf8"
 );
 const richTextGithubFormatterCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/rich-text-github-formatter.js"),
+  path.resolve(__dirname, "../src/js/rich-text-github-formatter.js"),
   "utf8"
 );
 const richTextRendererCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/rich-text-renderer.js"),
+  path.resolve(__dirname, "../src/js/rich-text-renderer.js"),
   "utf8"
 );
 const narrativeStructureCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/narrative-structure.js"),
+  path.resolve(__dirname, "../src/js/narrative-structure.js"),
   "utf8"
 );
 const tableDetectorCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/table-detector.js"),
+  path.resolve(__dirname, "../src/js/table-detector.js"),
   "utf8"
 );
 const markdownExportCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/markdown-export.js"),
+  path.resolve(__dirname, "../src/js/markdown-export.js"),
   "utf8"
 );
 const sheetMarkdownCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/sheet-markdown.js"),
+  path.resolve(__dirname, "../src/js/sheet-markdown.js"),
   "utf8"
 );
 const stylesParserCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/styles-parser.js"),
+  path.resolve(__dirname, "../src/js/styles-parser.js"),
   "utf8"
 );
 const sharedStringsCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/shared-strings.js"),
+  path.resolve(__dirname, "../src/js/shared-strings.js"),
   "utf8"
 );
 const addressUtilsCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/address-utils.js"),
+  path.resolve(__dirname, "../src/js/address-utils.js"),
   "utf8"
 );
 const relsParserCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/rels-parser.js"),
+  path.resolve(__dirname, "../src/js/rels-parser.js"),
   "utf8"
 );
 const worksheetTablesCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/worksheet-tables.js"),
+  path.resolve(__dirname, "../src/js/worksheet-tables.js"),
   "utf8"
 );
 const cellFormatCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/cell-format.js"),
+  path.resolve(__dirname, "../src/js/cell-format.js"),
   "utf8"
 );
 const xmlUtilsCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/xml-utils.js"),
+  path.resolve(__dirname, "../src/js/xml-utils.js"),
   "utf8"
 );
 const sheetAssetsCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/sheet-assets.js"),
+  path.resolve(__dirname, "../src/js/sheet-assets.js"),
   "utf8"
 );
 const worksheetParserCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/worksheet-parser.js"),
+  path.resolve(__dirname, "../src/js/worksheet-parser.js"),
   "utf8"
 );
 const workbookLoaderCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/workbook-loader.js"),
+  path.resolve(__dirname, "../src/js/workbook-loader.js"),
   "utf8"
 );
 const formulaReferenceUtilsCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/formula-reference-utils.js"),
+  path.resolve(__dirname, "../src/js/formula-reference-utils.js"),
   "utf8"
 );
 const formulaEngineCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/formula-engine.js"),
+  path.resolve(__dirname, "../src/js/formula-engine.js"),
   "utf8"
 );
 const formulaLegacyCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/formula-legacy.js"),
+  path.resolve(__dirname, "../src/js/formula-legacy.js"),
   "utf8"
 );
 const formulaAstCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/formula-ast.js"),
+  path.resolve(__dirname, "../src/js/formula-ast.js"),
   "utf8"
 );
 const formulaResolverCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/formula-resolver.js"),
+  path.resolve(__dirname, "../src/js/formula-resolver.js"),
   "utf8"
 );
 const coreCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/core.js"),
+  path.resolve(__dirname, "../src/js/core.js"),
   "utf8"
 );
 

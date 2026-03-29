@@ -37,28 +37,28 @@
 
 主な責務は次の通りである。
 
-- `src/xlsx2md/ts/shared-strings.ts`
+- `src/ts/shared-strings.ts`
   - `sharedStrings.xml` の `si / r / rPr / t` を読む
   - run 単位の `bold / italic / strike / underline` を抽出する
-- `src/xlsx2md/ts/styles-parser.ts`
+- `src/ts/styles-parser.ts`
   - `styles.xml` の `font / cellXfs` を読む
   - セル全体 style の `bold / italic / strike / underline` を抽出する
-- `src/xlsx2md/ts/worksheet-parser.ts`
+- `src/ts/worksheet-parser.ts`
   - shared string / inline string / cell style を統合し、セルごとの `richTextRuns` と `textStyle` を持たせる
-- `src/xlsx2md/ts/markdown-escape.ts`
+- `src/ts/markdown-escape.ts`
   - 生文字としての Markdown 記号、`<`, `>`, `&` を escape する
-- `src/xlsx2md/ts/rich-text-parser.ts`
+- `src/ts/rich-text-parser.ts`
   - `outputValue / textStyle / richTextRuns` をもとに `text / lineBreak / styledText` token 列へ変換する
-- `src/xlsx2md/ts/rich-text-plain-formatter.ts`
+- `src/ts/rich-text-plain-formatter.ts`
   - `plain` モード固有の text 化を担当する
-- `src/xlsx2md/ts/rich-text-github-formatter.ts`
+- `src/ts/rich-text-github-formatter.ts`
   - `github` モード固有の wrapper 適用と `<br>` 化を担当する
-- `src/xlsx2md/ts/rich-text-renderer.ts`
+- `src/ts/rich-text-renderer.ts`
   - token 列を `plain` / `github` の文字列へ描画する
   - `plain` は素朴な text 化、`github` は formatter 呼び出しを担当する
-- `src/xlsx2md/ts/markdown-table-escape.ts`
+- `src/ts/markdown-table-escape.ts`
   - Markdown table 専用のセル escape を担当する
-- `src/xlsx2md/ts/sheet-markdown.ts`
+- `src/ts/sheet-markdown.ts`
   - シート構造の都合と Markdown section/table 組み立てを担当する
 
 したがって、現状は「小さな parser / renderer パイプラインを持つ lightweight 実装」であり、本格的な Markdown AST renderer にはまだ至っていない。
