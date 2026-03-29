@@ -1,3 +1,8 @@
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 (() => {
   type Xlsx2mdModuleRegistry = {
     getModule: <T>(name: string) => T | undefined;

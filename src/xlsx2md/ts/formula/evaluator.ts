@@ -1,3 +1,8 @@
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 (function initXlsx2mdFormulaEvaluator(global: typeof globalThis) {
   const moduleRegistry = getXlsx2mdModuleRegistry();
   const api = moduleRegistry.getModule<Record<string, unknown>>("formulaRuntime");

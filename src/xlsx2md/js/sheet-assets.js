@@ -1,3 +1,7 @@
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     const runtimeEnv = moduleRegistry === null || moduleRegistry === void 0 ? void 0 : moduleRegistry.getModule("runtimeEnv");
