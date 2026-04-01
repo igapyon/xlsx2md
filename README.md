@@ -1,5 +1,7 @@
 # xlsx2md
 
+![xlsx2md OGP](docs/screenshots/xlsx2md-ogp.png)
+
 ## What is this?
 
 `xlsx2md` is a single-file web app that reads Excel (`.xlsx`) files locally and extracts prose, tables, and images as Markdown.
