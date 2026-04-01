@@ -1,0 +1,51 @@
+<svg width="1200" height="1200" viewBox="0 0 1200 1200" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Markdown symbol</title>
+  <desc id="desc">A document-like markdown symbol inspired by mikuproject WBS Markdown output.</desc>
+  <defs>
+    <linearGradient id="panel" x1="214" y1="194" x2="987" y2="1010" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7D6EA8"/>
+      <stop offset="1" stop-color="#4F4478"/>
+    </linearGradient>
+    <linearGradient id="sheet" x1="320" y1="316" x2="862" y2="892" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#ECE8F6"/>
+    </linearGradient>
+    <filter id="shadow" x="164" y="156" width="872" height="900" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+      <feOffset dy="20"/>
+      <feGaussianBlur stdDeviation="26"/>
+      <feComposite in2="hardAlpha" operator="out"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.309804 0 0 0 0 0.266667 0 0 0 0 0.470588 0 0 0 0.2 0"/>
+      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_1_1"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_1_1" result="shape"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#shadow)">
+    <rect x="216" y="208" width="768" height="784" rx="154" fill="url(#panel)"/>
+    <path d="M332 304C332 281.909 349.909 264 372 264H722.118C732.726 264 742.9 268.214 750.402 275.716L863.284 388.598C870.786 396.1 875 406.274 875 416.882V896C875 918.091 857.091 936 835 936H372C349.909 936 332 918.091 332 896V304Z" fill="url(#sheet)"/>
+    <path d="M744 264V374C744 396.091 761.909 414 784 414H875" fill="#D8D1EA"/>
+
+    <rect x="404" y="384" width="168" height="40" rx="20" fill="#5A4A86"/>
+    <rect x="404" y="468" width="404" height="28" rx="14" fill="#A698CB"/>
+    <rect x="404" y="522" width="318" height="28" rx="14" fill="#C0B6DA"/>
+
+    <g fill="#5A4A86">
+      <rect x="406" y="612" width="18" height="18" rx="9"/>
+      <rect x="406" y="684" width="18" height="18" rx="9"/>
+      <rect x="406" y="756" width="18" height="18" rx="9"/>
+    </g>
+
+    <g fill="#B8AED5">
+      <rect x="448" y="602" width="330" height="28" rx="14"/>
+      <rect x="448" y="674" width="270" height="28" rx="14"/>
+      <rect x="448" y="746" width="312" height="28" rx="14"/>
+    </g>
+
+    <g stroke="#6B5A98" stroke-width="22" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M462 840L520 782L462 724"/>
+      <path d="M600 840H748"/>
+    </g>
+  </g>
+</svg>
