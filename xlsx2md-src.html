@@ -18,9 +18,9 @@ limitations under the License.
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>xlsx2md</title>
+  <title>Mikuku's xlsx2md</title>
   <link rel="stylesheet" href="lht-cmn/css/components.css" />
-  <link rel="stylesheet" href="src/xlsx2md/css/app.css" />
+  <link rel="stylesheet" href="src/css/app.css" />
   <script src="lht-cmn/vendor/material-web-outlined-text-field.bundle.js"></script>
   <script src="lht-cmn/js/components.js" defer></script>
 </head>
@@ -33,13 +33,13 @@ limitations under the License.
   <main class="md-shell">
     <section class="md-card md-surface-card">
       <lht-page-hero
-        title="xlsx2md"
+        title="Mikuku's xlsx2md"
         subtitle="Analyze an Excel workbook (.xlsx) and convert it to Markdown."
         icon="📘"
-        help-label="About xlsx2md"
+        help-label="About Mikuku's xlsx2md"
         help-wide
         action-href="https://github.com/igapyon/xlsx2md"
-        action-aria-label="Open xlsx2md repository"
+        action-aria-label="Open Mikuku's xlsx2md repository"
         action-icon-id="md-icon-github"
         menu-home-href="./index.html"
         menu-home-label="Back to Home">
@@ -76,7 +76,7 @@ limitations under the License.
                 ]
               </script>
             </lht-select-help>
-            <lht-select-help field-id="tableDetectionModeSelect" label="Table Detection" help-text="Choose how aggressively xlsx2md detects tables. `border` detects tables from bordered regions and reduces borderless fallback detection.">
+            <lht-select-help field-id="tableDetectionModeSelect" label="Table Detection" help-text="Choose how aggressively Mikuku's xlsx2md detects tables. `border` detects tables from bordered regions and reduces borderless fallback detection.">
               <script type="application/json" slot="options">
                 [
                   { "value": "balanced", "label": "balanced: bordered + fallback detection", "selected": true },
@@ -90,6 +90,26 @@ limitations under the License.
                   { "value": "display", "label": "display: prefer displayed values", "selected": true },
                   { "value": "raw", "label": "raw: prefer internal values" },
                   { "value": "both", "label": "both: include both" }
+                ]
+              </script>
+            </lht-select-help>
+            <lht-select-help field-id="encodingSelect" label="Encoding" help-text="Choose the output encoding used when saving Markdown or ZIP entries. Shift_JIS availability depends on the runtime.">
+              <script type="application/json" slot="options">
+                [
+                  { "value": "utf-8", "label": "UTF-8", "selected": true },
+                  { "value": "shift_jis", "label": "Shift_JIS" },
+                  { "value": "utf-16le", "label": "UTF-16 LE" },
+                  { "value": "utf-16be", "label": "UTF-16 BE" },
+                  { "value": "utf-32le", "label": "UTF-32 LE" },
+                  { "value": "utf-32be", "label": "UTF-32 BE" }
+                ]
+              </script>
+            </lht-select-help>
+            <lht-select-help field-id="bomSelect" label="BOM" help-text="Choose whether a Unicode BOM should be written at the start of saved Markdown bytes. Shift_JIS does not support BOM.">
+              <script type="application/json" slot="options">
+                [
+                  { "value": "off", "label": "off", "selected": true },
+                  { "value": "on", "label": "on" }
                 ]
               </script>
             </lht-select-help>
@@ -112,6 +132,8 @@ limitations under the License.
           <div id="outputModeNotice" class="md-caption">`display` outputs values close to what Excel shows.</div>
           <div id="formattingModeNotice" class="md-caption">`github` preserves supported Excel emphasis as GitHub-compatible Markdown: bold, italic, strike, underline, and in-cell line breaks as `&lt;br&gt;`.</div>
           <div id="tableDetectionModeNotice" class="md-caption">`balanced` uses both bordered candidates and value-density fallback detection.</div>
+          <div id="encodingNotice" class="md-caption">`utf-8` is the default Markdown encoding.</div>
+          <div id="bomNotice" class="md-caption">BOM is disabled for saved Markdown bytes.</div>
         </div>
       </details>
 
@@ -179,42 +201,43 @@ limitations under the License.
     </section>
   </main>
 
-  <script src="src/xlsx2md/js/module-registry.js"></script>
-  <script src="src/xlsx2md/js/module-registry-access.js"></script>
-  <script src="src/xlsx2md/js/runtime-env.js"></script>
-  <script src="src/xlsx2md/js/office-drawing.js"></script>
-  <script src="src/xlsx2md/js/zip-io.js"></script>
-  <script src="src/xlsx2md/js/border-grid.js"></script>
-  <script src="src/xlsx2md/js/markdown-normalize.js"></script>
-  <script src="src/xlsx2md/js/markdown-escape.js"></script>
-  <script src="src/xlsx2md/js/markdown-table-escape.js"></script>
-  <script src="src/xlsx2md/js/rich-text-parser.js"></script>
-  <script src="src/xlsx2md/js/rich-text-plain-formatter.js"></script>
-  <script src="src/xlsx2md/js/rich-text-github-formatter.js"></script>
-  <script src="src/xlsx2md/js/rich-text-renderer.js"></script>
-  <script src="src/xlsx2md/js/narrative-structure.js"></script>
-  <script src="src/xlsx2md/js/table-detector.js"></script>
-  <script src="src/xlsx2md/js/markdown-export.js"></script>
-  <script src="src/xlsx2md/js/sheet-markdown.js"></script>
-  <script src="src/xlsx2md/js/styles-parser.js"></script>
-  <script src="src/xlsx2md/js/shared-strings.js"></script>
-  <script src="src/xlsx2md/js/address-utils.js"></script>
-  <script src="src/xlsx2md/js/rels-parser.js"></script>
-  <script src="src/xlsx2md/js/worksheet-tables.js"></script>
-  <script src="src/xlsx2md/js/cell-format.js"></script>
-  <script src="src/xlsx2md/js/xml-utils.js"></script>
-  <script src="src/xlsx2md/js/sheet-assets.js"></script>
-  <script src="src/xlsx2md/js/worksheet-parser.js"></script>
-  <script src="src/xlsx2md/js/workbook-loader.js"></script>
-  <script src="src/xlsx2md/js/formula-reference-utils.js"></script>
-  <script src="src/xlsx2md/js/formula-engine.js"></script>
-  <script src="src/xlsx2md/js/formula-legacy.js"></script>
-  <script src="src/xlsx2md/js/formula-ast.js"></script>
-  <script src="src/xlsx2md/js/formula-resolver.js"></script>
-  <script src="src/xlsx2md/js/formula/tokenizer.js"></script>
-  <script src="src/xlsx2md/js/formula/parser.js"></script>
-  <script src="src/xlsx2md/js/formula/evaluator.js"></script>
-  <script src="src/xlsx2md/js/core.js"></script>
-  <script src="src/xlsx2md/js/main.js"></script>
+  <script src="src/js/module-registry.js"></script>
+  <script src="src/js/module-registry-access.js"></script>
+  <script src="src/js/runtime-env.js"></script>
+  <script src="src/js/office-drawing.js"></script>
+  <script src="src/js/zip-io.js"></script>
+  <script src="src/js/border-grid.js"></script>
+  <script src="src/js/markdown-normalize.js"></script>
+  <script src="src/js/markdown-escape.js"></script>
+  <script src="src/js/markdown-table-escape.js"></script>
+  <script src="src/js/text-encoding.js"></script>
+  <script src="src/js/rich-text-parser.js"></script>
+  <script src="src/js/rich-text-plain-formatter.js"></script>
+  <script src="src/js/rich-text-github-formatter.js"></script>
+  <script src="src/js/rich-text-renderer.js"></script>
+  <script src="src/js/narrative-structure.js"></script>
+  <script src="src/js/table-detector.js"></script>
+  <script src="src/js/markdown-export.js"></script>
+  <script src="src/js/sheet-markdown.js"></script>
+  <script src="src/js/styles-parser.js"></script>
+  <script src="src/js/shared-strings.js"></script>
+  <script src="src/js/address-utils.js"></script>
+  <script src="src/js/rels-parser.js"></script>
+  <script src="src/js/worksheet-tables.js"></script>
+  <script src="src/js/cell-format.js"></script>
+  <script src="src/js/xml-utils.js"></script>
+  <script src="src/js/sheet-assets.js"></script>
+  <script src="src/js/worksheet-parser.js"></script>
+  <script src="src/js/workbook-loader.js"></script>
+  <script src="src/js/formula-reference-utils.js"></script>
+  <script src="src/js/formula-engine.js"></script>
+  <script src="src/js/formula-legacy.js"></script>
+  <script src="src/js/formula-ast.js"></script>
+  <script src="src/js/formula-resolver.js"></script>
+  <script src="src/js/formula/tokenizer.js"></script>
+  <script src="src/js/formula/parser.js"></script>
+  <script src="src/js/formula/evaluator.js"></script>
+  <script src="src/js/core.js"></script>
+  <script src="src/js/main.js"></script>
 </body>
 </html>

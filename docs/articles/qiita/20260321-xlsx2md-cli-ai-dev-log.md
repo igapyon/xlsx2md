@@ -56,6 +56,8 @@
 - 初出: 2026-03-21
 - 更新: 2026-03-21
 
+![D243A22C-387C-4905-A127-68D7FA4D6EA8.jpg](https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/105739/7982b103-0f52-4b51-998f-801861084654.jpeg)
+
 ## 題材は GUI アプリへの CLI 追加だった
 
 出発点の `xlsx2md` は、ブラウザでローカルに `.xlsx` を読み込み、Markdown や ZIP を保存する Single-file Web App でした。

@@ -11,19 +11,23 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const zipIoCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/zip-io.js"),
+  path.resolve(__dirname, "../src/js/zip-io.js"),
   "utf8"
 );
 const markdownNormalizeCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/markdown-normalize.js"),
+  path.resolve(__dirname, "../src/js/markdown-normalize.js"),
   "utf8"
 );
 const markdownExportCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/markdown-export.js"),
+  path.resolve(__dirname, "../src/js/markdown-export.js"),
+  "utf8"
+);
+const textEncodingCode = readFileSync(
+  path.resolve(__dirname, "../src/js/text-encoding.js"),
   "utf8"
 );
 const markdownTableEscapeCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/markdown-table-escape.js"),
+  path.resolve(__dirname, "../src/js/markdown-table-escape.js"),
   "utf8"
 );
 
@@ -33,6 +37,7 @@ function bootMarkdownExport() {
   new Function(zipIoCode)();
   new Function(markdownNormalizeCode)();
   new Function(markdownTableEscapeCode)();
+  new Function(textEncodingCode)();
   new Function(markdownExportCode)();
   return globalThis.__xlsx2mdModuleRegistry.getModule("markdownExport");
 }
@@ -190,6 +195,36 @@ describe("xlsx2md markdown export", () => {
     expect(new TextDecoder().decode(extracted.get("output/sample.md"))).toContain("<!-- sample_001_Sheet1 -->");
     expect(extracted.get("output/images/pic.png")).toEqual(new Uint8Array([1, 2, 3]));
     expect(extracted.get("output/shapes/shape_001.svg")).toEqual(new Uint8Array([4, 5]));
+  });
+
+  it("creates encoded payload bytes for UTF-16BE with BOM", () => {
+    const api = bootMarkdownExport();
+    const payload = api.createCombinedMarkdownExportPayload(
+      { name: "sample.xlsx", sheets: [{ images: [], shapes: [] }] },
+      [{
+        fileName: "sample_001_Sheet1.md",
+        sheetName: "Sheet1",
+        markdown: "# A",
+        summary: {
+          outputMode: "display",
+          formattingMode: "plain",
+          tableDetectionMode: "balanced",
+          sections: 1,
+          tables: 0,
+          narrativeBlocks: 1,
+          merges: 0,
+          images: 0,
+          charts: 0,
+          cells: 1,
+          tableScores: [],
+          formulaDiagnostics: []
+        }
+      }],
+      { encoding: "utf-16be", bom: "on" }
+    );
+
+    expect(payload.mimeType).toBe("text/markdown;charset=utf-16be");
+    expect(Array.from(payload.data.slice(0, 4))).toEqual([0xfe, 0xff, 0x00, 0x3c]);
   });
 
   it("uses formatting mode suffixes in combined export file names", () => {

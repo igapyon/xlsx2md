@@ -11,7 +11,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const addressUtilsCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/address-utils.js"),
+  path.resolve(__dirname, "../src/js/address-utils.js"),
   "utf8"
 );
 

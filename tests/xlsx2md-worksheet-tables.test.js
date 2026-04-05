@@ -11,7 +11,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const worksheetTablesCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/worksheet-tables.js"),
+  path.resolve(__dirname, "../src/js/worksheet-tables.js"),
   "utf8"
 );
 

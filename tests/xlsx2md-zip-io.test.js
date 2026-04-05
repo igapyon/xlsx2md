@@ -18,7 +18,7 @@ if (typeof globalThis.Blob === "undefined" || typeof globalThis.Blob.prototype?.
 globalThis.DecompressionStream ??= NodeDecompressionStream;
 
 const zipIoCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/zip-io.js"),
+  path.resolve(__dirname, "../src/js/zip-io.js"),
   "utf8"
 );
 

@@ -17,135 +17,139 @@ if (typeof globalThis.Blob === "undefined" || typeof globalThis.Blob.prototype?.
 globalThis.DecompressionStream ??= NodeDecompressionStream;
 
 const moduleRegistryCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/module-registry.js"),
+  path.resolve(__dirname, "../src/js/module-registry.js"),
   "utf8"
 );
 const moduleRegistryAccessCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/module-registry-access.js"),
+  path.resolve(__dirname, "../src/js/module-registry-access.js"),
   "utf8"
 );
 const runtimeEnvCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/runtime-env.js"),
+  path.resolve(__dirname, "../src/js/runtime-env.js"),
   "utf8"
 );
 const officeDrawingCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/office-drawing.js"),
+  path.resolve(__dirname, "../src/js/office-drawing.js"),
   "utf8"
 );
 const zipIoCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/zip-io.js"),
+  path.resolve(__dirname, "../src/js/zip-io.js"),
   "utf8"
 );
 const borderGridCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/border-grid.js"),
+  path.resolve(__dirname, "../src/js/border-grid.js"),
   "utf8"
 );
 const markdownNormalizeCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/markdown-normalize.js"),
+  path.resolve(__dirname, "../src/js/markdown-normalize.js"),
   "utf8"
 );
 const markdownEscapeCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/markdown-escape.js"),
+  path.resolve(__dirname, "../src/js/markdown-escape.js"),
   "utf8"
 );
 const markdownTableEscapeCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/markdown-table-escape.js"),
+  path.resolve(__dirname, "../src/js/markdown-table-escape.js"),
   "utf8"
 );
 const richTextParserCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/rich-text-parser.js"),
+  path.resolve(__dirname, "../src/js/rich-text-parser.js"),
   "utf8"
 );
 const richTextPlainFormatterCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/rich-text-plain-formatter.js"),
+  path.resolve(__dirname, "../src/js/rich-text-plain-formatter.js"),
   "utf8"
 );
 const richTextGithubFormatterCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/rich-text-github-formatter.js"),
+  path.resolve(__dirname, "../src/js/rich-text-github-formatter.js"),
   "utf8"
 );
 const richTextRendererCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/rich-text-renderer.js"),
+  path.resolve(__dirname, "../src/js/rich-text-renderer.js"),
   "utf8"
 );
 const narrativeStructureCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/narrative-structure.js"),
+  path.resolve(__dirname, "../src/js/narrative-structure.js"),
   "utf8"
 );
 const tableDetectorCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/table-detector.js"),
+  path.resolve(__dirname, "../src/js/table-detector.js"),
   "utf8"
 );
 const markdownExportCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/markdown-export.js"),
+  path.resolve(__dirname, "../src/js/markdown-export.js"),
+  "utf8"
+);
+const textEncodingCode = readFileSync(
+  path.resolve(__dirname, "../src/js/text-encoding.js"),
   "utf8"
 );
 const sheetMarkdownCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/sheet-markdown.js"),
+  path.resolve(__dirname, "../src/js/sheet-markdown.js"),
   "utf8"
 );
 const stylesParserCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/styles-parser.js"),
+  path.resolve(__dirname, "../src/js/styles-parser.js"),
   "utf8"
 );
 const sharedStringsCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/shared-strings.js"),
+  path.resolve(__dirname, "../src/js/shared-strings.js"),
   "utf8"
 );
 const addressUtilsCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/address-utils.js"),
+  path.resolve(__dirname, "../src/js/address-utils.js"),
   "utf8"
 );
 const relsParserCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/rels-parser.js"),
+  path.resolve(__dirname, "../src/js/rels-parser.js"),
   "utf8"
 );
 const worksheetTablesCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/worksheet-tables.js"),
+  path.resolve(__dirname, "../src/js/worksheet-tables.js"),
   "utf8"
 );
 const cellFormatCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/cell-format.js"),
+  path.resolve(__dirname, "../src/js/cell-format.js"),
   "utf8"
 );
 const xmlUtilsCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/xml-utils.js"),
+  path.resolve(__dirname, "../src/js/xml-utils.js"),
   "utf8"
 );
 const sheetAssetsCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/sheet-assets.js"),
+  path.resolve(__dirname, "../src/js/sheet-assets.js"),
   "utf8"
 );
 const worksheetParserCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/worksheet-parser.js"),
+  path.resolve(__dirname, "../src/js/worksheet-parser.js"),
   "utf8"
 );
 const workbookLoaderCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/workbook-loader.js"),
+  path.resolve(__dirname, "../src/js/workbook-loader.js"),
   "utf8"
 );
 const formulaReferenceUtilsCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/formula-reference-utils.js"),
+  path.resolve(__dirname, "../src/js/formula-reference-utils.js"),
   "utf8"
 );
 const formulaEngineCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/formula-engine.js"),
+  path.resolve(__dirname, "../src/js/formula-engine.js"),
   "utf8"
 );
 const formulaLegacyCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/formula-legacy.js"),
+  path.resolve(__dirname, "../src/js/formula-legacy.js"),
   "utf8"
 );
 const formulaAstCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/formula-ast.js"),
+  path.resolve(__dirname, "../src/js/formula-ast.js"),
   "utf8"
 );
 const formulaResolverCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/formula-resolver.js"),
+  path.resolve(__dirname, "../src/js/formula-resolver.js"),
   "utf8"
 );
 const coreCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/core.js"),
+  path.resolve(__dirname, "../src/js/core.js"),
   "utf8"
 );
 
@@ -160,6 +164,7 @@ function bootCore() {
   new Function(markdownNormalizeCode)();
   new Function(markdownEscapeCode)();
   new Function(markdownTableEscapeCode)();
+  new Function(textEncodingCode)();
   new Function(richTextParserCode)();
   new Function(richTextPlainFormatterCode)();
   new Function(richTextGithubFormatterCode)();
@@ -279,5 +284,33 @@ describe("xlsx2md rich fixtures", () => {
     expect(markdownFile.markdown).toContain("| \\!\\[alt\\]\\(image.png\\) | \\!\\[alt\\]\\(image.png\\) |");
     expect(markdownFile.markdown).toContain("| code \\`sample\\` | code \\`sample\\` |");
     expect(markdownFile.markdown).toContain("| path\\\\to\\\\file | path\\\\to\\\\file |");
+  });
+
+  it("renders rich-usecase-sample01.xlsx in github mode with hyperlinks, inline styling, and <br>", async () => {
+    const { workbook, markdownFile } = await loadFixtureMarkdown("rich-usecase-sample01.xlsx", "github");
+
+    expect(workbook.sheets).toHaveLength(1);
+    expect(markdownFile.summary.formattingMode).toBe("github");
+    expect(markdownFile.summary.tables).toBe(1);
+    expect(markdownFile.markdown).toContain("| [Apple](https://www.apple.com/) | ***Apple*** の製品が<ins>購入できます</ins>。 |");
+    expect(markdownFile.markdown).toContain("| [Google](https://www.google.com/) | とても<ins>有名</ins>な**検索サイト**です。 |");
+    expect(markdownFile.markdown).toContain("| [Amazon](https://www.amazon.co.jp/) | **<ins>お買い物</ins>**でお世話になっています。 |");
+    expect(markdownFile.markdown).toContain("| [Yodobashi](https://www.yodobashi.com/) | 実店舗とともに<br>**ネットショップ**でもお世話になっています。 |");
+    expect(markdownFile.markdown).toContain("~~池袋の激戦区で、生き残るのはどの店舗か。~~<br>→トルツメ: この部分は文面から外すことを提案。");
+  });
+
+  it("renders rich-usecase-sample01.xlsx in plain mode with links preserved and styling removed", async () => {
+    const { markdownFile } = await loadFixtureMarkdown("rich-usecase-sample01.xlsx", "plain");
+
+    expect(markdownFile.summary.formattingMode).toBe("plain");
+    expect(markdownFile.summary.tables).toBe(1);
+    expect(markdownFile.markdown).toContain("| [Apple](https://www.apple.com/) | Apple の製品が購入できます。 |");
+    expect(markdownFile.markdown).toContain("| [Google](https://www.google.com/) | とても有名な検索サイトです。 |");
+    expect(markdownFile.markdown).toContain("| [Amazon](https://www.amazon.co.jp/) | お買い物でお世話になっています。 |");
+    expect(markdownFile.markdown).toContain("| [Yodobashi](https://www.yodobashi.com/) | 実店舗とともに ネットショップでもお世話になっています。 |");
+    expect(markdownFile.markdown).toContain("池袋の激戦区で、生き残るのはどの店舗か。 →トルツメ: この部分は文面から外すことを提案。");
+    expect(markdownFile.markdown).not.toContain("<br>");
+    expect(markdownFile.markdown).not.toContain("<ins>");
+    expect(markdownFile.markdown).not.toContain("~~池袋の激戦区で、生き残るのはどの店舗か。~~");
   });
 });

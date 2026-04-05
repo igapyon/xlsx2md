@@ -6,7 +6,7 @@
 
 主な目的は次の通りである。
 
-- `src/xlsx2md/ts/*.ts` の現行実装に基づく挙動を整理する
+- `src/ts/*.ts` の現行実装に基づく挙動を整理する
 - `README.md`、`xlsx2md-spec.md`、`xlsx-formula-subset.md` に分散している実装前提の情報を、実装準拠の観点で補助する
 - 将来の仕様検討や実装差分確認の際に、どこが「現行挙動」で、どこが「将来構想」かを切り分けやすくする
 
@@ -51,7 +51,7 @@
 
 本書の記述基準は次の通りである。
 
-- 現行コードの正本は `src/xlsx2md/ts/` 配下の TypeScript 実装とする
+- 現行コードの正本は `src/ts/` 配下の TypeScript 実装とする
 - `js/` 配下および `xlsx2md.html` はビルド生成物として扱う
 - 実装と既存文書に差分がある場合、本書では現行実装を基準に記述する
 - 未対応事項や将来検討事項は、実装済み仕様と分けて記述する
@@ -413,7 +413,7 @@ Markdown 生成時のセル出力は、`outputMode` により切り替わる。
 
 ### 7.4 AST evaluator
 
-AST evaluator は、`src/xlsx2md/ts/formula/` 配下の tokenizer / parser / evaluator を用いた解決系である。
+AST evaluator は、`src/ts/formula/` 配下の tokenizer / parser / evaluator を用いた解決系である。
 
 現行実装では、数式文字列を AST 化し、必要に応じて次のような参照解決コンテキストを与えて評価する。
 
@@ -1263,7 +1263,7 @@ ZIP の保存名には Workbook 名と、必要に応じて outputMode サフィ
 
 ### 解析本体
 
-- `src/xlsx2md/ts/core.ts`
+- `src/ts/core.ts`
   - ZIP 展開
   - workbook / worksheet 解析
   - sharedStrings / styles / definedNames
@@ -1276,16 +1276,16 @@ ZIP の保存名には Workbook 名と、必要に応じて outputMode サフィ
 
 ### 数式サブシステム
 
-- `src/xlsx2md/ts/formula/tokenizer.ts`
+- `src/ts/formula/tokenizer.ts`
   - 数式トークナイズ
-- `src/xlsx2md/ts/formula/parser.ts`
+- `src/ts/formula/parser.ts`
   - AST 構築
-- `src/xlsx2md/ts/formula/evaluator.ts`
+- `src/ts/formula/evaluator.ts`
   - AST 評価
 
 ### UI
 
-- `src/xlsx2md/ts/main.ts`
+- `src/ts/main.ts`
   - 画面操作
   - オプション取得
   - 解析サマリー表示
@@ -1293,7 +1293,7 @@ ZIP の保存名には Workbook 名と、必要に応じて outputMode サフィ
   - 数式診断表示
   - ダウンロード / ZIP 保存
 
-- `src/xlsx2md/css/app.css`
+- `src/css/app.css`
   - `xlsx2md` 画面固有の見た目
 
 ### テスト
@@ -1307,7 +1307,7 @@ ZIP の保存名には Workbook 名と、必要に応じて outputMode サフィ
 
 ### 生成物
 
-- `src/xlsx2md/js/*.js`
+- `src/js/*.js`
   - TypeScript からの生成物
 - `xlsx2md.html`
   - single-file Web App の生成物
@@ -1318,7 +1318,7 @@ ZIP の保存名には Workbook 名と、必要に応じて outputMode サフィ
 
 本章は、`impl-spec` だけで再実装可能性を上げるための補助資料である。
 
-- 正本は `src/xlsx2md/ts/core.ts` とする
+- 正本は `src/ts/core.ts` とする
 - ここでは、再実装時に骨格となる代表的な型定義と関数断片を掲載する
 - 全量転載ではなく、章ごとの理解と再実装の足場になる範囲へ絞る
 
@@ -1682,6 +1682,7 @@ function detectTableCandidates(sheet: ParsedSheet): TableCandidate[] {
 - 入力: `workbook`, `sheet`, `options` または `markdownFiles`
 - 出力: `MarkdownFile`、連結 Markdown、ZIP entry 一覧
 - 前後関係: 解析本体の最終段であり、UI のプレビューと保存の両方がこの結果を使う
+- 現行実装の注意: ここで返す Markdown 本文は JavaScript 文字列であり、エンコーディングや BOM はまだ扱わない
 
 ```ts
 function convertSheetToMarkdown(workbook: ParsedWorkbook, sheet: ParsedSheet, options: MarkdownOptions = {}): MarkdownFile {
@@ -1766,6 +1767,12 @@ function createExportEntries(workbook: ParsedWorkbook, markdownFiles: MarkdownFi
   return entries;
 }
 ```
+
+`createCombinedMarkdownExportFile(...)` は現行実装では `{ fileName, content }` を返すだけで、`content` は未エンコードの文字列である。保存時の文字コード選択はここでは行っていない。
+
+`createExportEntries(...)` は現行実装では専用の text-encoding 層を経由して Markdown をバイト列化する。`utf-8`、`utf-16le`、`utf-16be`、`utf-32le`、`utf-32be` はブラウザ / Node で扱える。`shift_jis` は Node 側では `iconv-lite` を使ってエンコードできるが、ブラウザ単体 runtime では利用できない前提である。
+
+そのため UI 層では runtime 可用性に応じて `shift_jis` を無効化し、Node CLI では `shift_jis` を有効な保存経路として扱う。
 
 ### 22.7 今後の付録追加候補
 
@@ -3151,6 +3158,10 @@ function downloadCurrentMarkdown(): void {
 }
 ```
 
+現行実装では MIME type に `charset=utf-8` を与え、Blob 本文も UTF-8 前提で保存している。したがってブラウザ UI からの Markdown 単体保存は UTF-8 固定であり、BOM 付与や他エンコーディングへの切り替えはまだ実装されていない。
+
+将来 `encoding` / `bom` を導入する場合は、`downloadCurrentMarkdown()` が `string` を直接 Blob 化するのではなく、保存直前にエンコード済み `Uint8Array` を受け取り、それを Blob 化する構造へ変更する必要がある。
+
 ZIP 保存は `createWorkbookExportArchive(...)` を直接呼び、保存名だけ UI 側で `_xlsx2md_export` を付加する。
 
 ```ts
@@ -3174,6 +3185,10 @@ function downloadExportZip(): void {
   showToast("ZIP を保存しました");
 }
 ```
+
+ZIP 保存も現行実装では `createWorkbookExportArchive(...)` が返す `Uint8Array` をそのまま保存するだけであり、ZIP 内 Markdown の文字コードは `markdown-export.ts` 側の UTF-8 固定実装に依存している。
+
+将来 `encoding` / `bom` を導入する場合は、Markdown 単体保存と ZIP 保存で別々の変換を持つのではなく、同一のエンコード層を共有させるのが自然である。
 
 ### 22.25 shape SVG helper と `drawingHelper` 境界
 

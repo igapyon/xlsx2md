@@ -18,7 +18,7 @@ limitations under the License.
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>xlsx2md</title>
+  <title>Mikuku's xlsx2md</title>
   
   
   
@@ -1507,13 +1507,13 @@ lht-preview-output {
   <main class="md-shell">
     <section class="md-card md-surface-card">
       <lht-page-hero
-        title="xlsx2md"
+        title="Mikuku's xlsx2md"
         subtitle="Analyze an Excel workbook (.xlsx) and convert it to Markdown."
         icon="📘"
-        help-label="About xlsx2md"
+        help-label="About Mikuku's xlsx2md"
         help-wide
         action-href="https://github.com/igapyon/xlsx2md"
-        action-aria-label="Open xlsx2md repository"
+        action-aria-label="Open Mikuku's xlsx2md repository"
         action-icon-id="md-icon-github"
         menu-home-href="./index.html"
         menu-home-label="Back to Home">
@@ -1550,7 +1550,7 @@ lht-preview-output {
                 ]
               </script>
             </lht-select-help>
-            <lht-select-help field-id="tableDetectionModeSelect" label="Table Detection" help-text="Choose how aggressively xlsx2md detects tables. `border` detects tables from bordered regions and reduces borderless fallback detection.">
+            <lht-select-help field-id="tableDetectionModeSelect" label="Table Detection" help-text="Choose how aggressively Mikuku's xlsx2md detects tables. `border` detects tables from bordered regions and reduces borderless fallback detection.">
               <script type="application/json" slot="options">
                 [
                   { "value": "balanced", "label": "balanced: bordered + fallback detection", "selected": true },
@@ -1564,6 +1564,26 @@ lht-preview-output {
                   { "value": "display", "label": "display: prefer displayed values", "selected": true },
                   { "value": "raw", "label": "raw: prefer internal values" },
                   { "value": "both", "label": "both: include both" }
+                ]
+              </script>
+            </lht-select-help>
+            <lht-select-help field-id="encodingSelect" label="Encoding" help-text="Choose the output encoding used when saving Markdown or ZIP entries. Shift_JIS availability depends on the runtime.">
+              <script type="application/json" slot="options">
+                [
+                  { "value": "utf-8", "label": "UTF-8", "selected": true },
+                  { "value": "shift_jis", "label": "Shift_JIS" },
+                  { "value": "utf-16le", "label": "UTF-16 LE" },
+                  { "value": "utf-16be", "label": "UTF-16 BE" },
+                  { "value": "utf-32le", "label": "UTF-32 LE" },
+                  { "value": "utf-32be", "label": "UTF-32 BE" }
+                ]
+              </script>
+            </lht-select-help>
+            <lht-select-help field-id="bomSelect" label="BOM" help-text="Choose whether a Unicode BOM should be written at the start of saved Markdown bytes. Shift_JIS does not support BOM.">
+              <script type="application/json" slot="options">
+                [
+                  { "value": "off", "label": "off", "selected": true },
+                  { "value": "on", "label": "on" }
                 ]
               </script>
             </lht-select-help>
@@ -1586,6 +1606,8 @@ lht-preview-output {
           <div id="outputModeNotice" class="md-caption">`display` outputs values close to what Excel shows.</div>
           <div id="formattingModeNotice" class="md-caption">`github` preserves supported Excel emphasis as GitHub-compatible Markdown: bold, italic, strike, underline, and in-cell line breaks as `&lt;br&gt;`.</div>
           <div id="tableDetectionModeNotice" class="md-caption">`balanced` uses both bordered candidates and value-density fallback detection.</div>
+          <div id="encodingNotice" class="md-caption">`utf-8` is the default Markdown encoding.</div>
+          <div id="bomNotice" class="md-caption">BOM is disabled for saved Markdown bytes.</div>
         </div>
       </details>
 
@@ -1653,6 +1675,7 @@ lht-preview-output {
     </section>
   </main>
 
+  
   
   
   
@@ -3820,6 +3843,10 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (() => {
     var _a;
     var _b;
@@ -3847,6 +3874,10 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (() => {
     globalThis.getXlsx2mdModuleRegistry = function getXlsx2mdModuleRegistry() {
         const moduleRegistry = globalThis.__xlsx2mdModuleRegistry;
@@ -3863,6 +3894,9 @@ if (!customElements.get("lht-page-menu")) {
     };
     globalThis.requireXlsx2mdZipIo = function requireXlsx2mdZipIo() {
         return globalThis.getXlsx2mdModuleRegistry().requireModule("zipIo", "xlsx2md zip io module is not loaded");
+    };
+    globalThis.requireXlsx2mdTextEncoding = function requireXlsx2mdTextEncoding() {
+        return globalThis.getXlsx2mdModuleRegistry().requireModule("textEncoding", "xlsx2md text encoding module is not loaded");
     };
     globalThis.requireXlsx2mdMarkdownEscape = function requireXlsx2mdMarkdownEscape() {
         return globalThis.getXlsx2mdModuleRegistry().requireModule("markdownEscape", "xlsx2md markdown escape module is not loaded");
@@ -3946,6 +3980,10 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     const ELEMENT_NODE = 1;
@@ -3969,6 +4007,10 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     const textEncoder = new TextEncoder();
@@ -4131,6 +4173,10 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     const textDecoder = new TextDecoder("utf-8");
@@ -4331,6 +4377,10 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     function getCellAt(cellMap, row, col) {
@@ -4411,6 +4461,10 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     const MARKDOWN_UNSAFE_UNICODE_REGEX = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F\u00AD\u200B-\u200F\u2028\u2029\u202A-\u202E\u2060-\u206F\uFEFF\uFDD0-\uFDEF\uFFFE\uFFFF]/g;
@@ -4444,6 +4498,10 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     function escapeMarkdownLineStart(text) {
@@ -4541,6 +4599,10 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     const markdownNormalizeHelper = requireXlsx2mdMarkdownNormalize();
@@ -4555,6 +4617,161 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
+(() => {
+    const moduleRegistry = getXlsx2mdModuleRegistry();
+    const utf8Encoder = new TextEncoder();
+    const nodeRequire = (() => {
+        const candidate = globalThis.__xlsx2mdNodeRequire;
+        return typeof candidate === "function" ? candidate : null;
+    })();
+    function normalizeEncoding(value) {
+        const normalized = String(value || "utf-8").toLowerCase();
+        if (normalized === "utf-8" ||
+            normalized === "shift_jis" ||
+            normalized === "utf-16le" ||
+            normalized === "utf-16be" ||
+            normalized === "utf-32le" ||
+            normalized === "utf-32be") {
+            return normalized;
+        }
+        throw new Error(`Unsupported encoding: ${String(value)}`);
+    }
+    function normalizeBom(value) {
+        const normalized = String(value || "off").toLowerCase();
+        if (normalized === "off" || normalized === "on") {
+            return normalized;
+        }
+        throw new Error(`Unsupported BOM mode: ${String(value)}`);
+    }
+    function concatBytes(parts) {
+        const totalLength = parts.reduce((sum, part) => sum + part.length, 0);
+        const result = new Uint8Array(totalLength);
+        let offset = 0;
+        for (const part of parts) {
+            result.set(part, offset);
+            offset += part.length;
+        }
+        return result;
+    }
+    function getBomBytes(encoding) {
+        if (encoding === "utf-8")
+            return new Uint8Array([0xef, 0xbb, 0xbf]);
+        if (encoding === "utf-16le")
+            return new Uint8Array([0xff, 0xfe]);
+        if (encoding === "utf-16be")
+            return new Uint8Array([0xfe, 0xff]);
+        if (encoding === "utf-32le")
+            return new Uint8Array([0xff, 0xfe, 0x00, 0x00]);
+        if (encoding === "utf-32be")
+            return new Uint8Array([0x00, 0x00, 0xfe, 0xff]);
+        throw new Error(`Encoding does not support BOM: ${encoding}`);
+    }
+    function encodeUtf16(text, littleEndian) {
+        const result = new Uint8Array(text.length * 2);
+        for (let index = 0; index < text.length; index += 1) {
+            const codeUnit = text.charCodeAt(index);
+            const offset = index * 2;
+            if (littleEndian) {
+                result[offset] = codeUnit & 0xff;
+                result[offset + 1] = codeUnit >>> 8;
+            }
+            else {
+                result[offset] = codeUnit >>> 8;
+                result[offset + 1] = codeUnit & 0xff;
+            }
+        }
+        return result;
+    }
+    function encodeUtf32(text, littleEndian) {
+        const codePoints = [];
+        for (let index = 0; index < text.length; index += 1) {
+            const first = text.charCodeAt(index);
+            if (first >= 0xd800 && first <= 0xdbff && index + 1 < text.length) {
+                const second = text.charCodeAt(index + 1);
+                if (second >= 0xdc00 && second <= 0xdfff) {
+                    codePoints.push(((first - 0xd800) << 10) + (second - 0xdc00) + 0x10000);
+                    index += 1;
+                    continue;
+                }
+            }
+            codePoints.push(first);
+        }
+        const result = new Uint8Array(codePoints.length * 4);
+        codePoints.forEach((codePoint, index) => {
+            const offset = index * 4;
+            if (littleEndian) {
+                result[offset] = codePoint & 0xff;
+                result[offset + 1] = (codePoint >>> 8) & 0xff;
+                result[offset + 2] = (codePoint >>> 16) & 0xff;
+                result[offset + 3] = (codePoint >>> 24) & 0xff;
+            }
+            else {
+                result[offset] = (codePoint >>> 24) & 0xff;
+                result[offset + 1] = (codePoint >>> 16) & 0xff;
+                result[offset + 2] = (codePoint >>> 8) & 0xff;
+                result[offset + 3] = codePoint & 0xff;
+            }
+        });
+        return result;
+    }
+    function encodeText(text, options = {}) {
+        const encoding = normalizeEncoding(options.encoding);
+        const bom = normalizeBom(options.bom);
+        if (encoding === "shift_jis") {
+            if (bom === "on") {
+                throw new Error("BOM cannot be enabled for shift_jis.");
+            }
+            if (!nodeRequire) {
+                throw new Error("Shift_JIS encoding is not available in this runtime.");
+            }
+            const iconvLite = nodeRequire("iconv-lite");
+            return Uint8Array.from(iconvLite.encode(text, "shift_jis"));
+        }
+        const body = encoding === "utf-8"
+            ? utf8Encoder.encode(text)
+            : encoding === "utf-16le"
+                ? encodeUtf16(text, true)
+                : encoding === "utf-16be"
+                    ? encodeUtf16(text, false)
+                    : encoding === "utf-32le"
+                        ? encodeUtf32(text, true)
+                        : encodeUtf32(text, false);
+        if (bom === "off") {
+            return body;
+        }
+        return concatBytes([getBomBytes(encoding), body]);
+    }
+    function isEncodingAvailable(value) {
+        const encoding = normalizeEncoding(value);
+        if (encoding === "shift_jis") {
+            return !!nodeRequire;
+        }
+        return true;
+    }
+    function createTextMimeType(options = {}) {
+        return `text/markdown;charset=${normalizeEncoding(options.encoding)}`;
+    }
+    const textEncodingApi = {
+        normalizeEncoding,
+        normalizeBom,
+        getBomBytes,
+        isEncodingAvailable,
+        encodeText,
+        createTextMimeType
+    };
+    moduleRegistry.registerModule("textEncoding", textEncodingApi);
+})();
+  </script>
+
+  <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     function createRichTextParserApi(deps = {}) {
@@ -4660,6 +4877,10 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     function createRichTextPlainFormatterApi() {
@@ -4701,6 +4922,10 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     function createRichTextGithubFormatterApi() {
@@ -4757,6 +4982,10 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     function createRichTextRendererApi(deps = {}) {
@@ -4812,6 +5041,10 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     const markdownNormalizeHelper = requireXlsx2mdMarkdownNormalize();
@@ -4859,6 +5092,10 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     const DEFAULT_TABLE_SCORE_WEIGHTS = {
@@ -5206,10 +5443,15 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     const textEncoder = new TextEncoder();
     const zipIoHelper = requireXlsx2mdZipIo();
+    const textEncodingHelper = requireXlsx2mdTextEncoding();
     const markdownNormalizeHelper = requireXlsx2mdMarkdownNormalize();
     const markdownTableEscapeHelper = requireXlsx2mdMarkdownTableEscape();
     function normalizeMarkdownLineBreaks(text) {
@@ -5286,13 +5528,24 @@ if (!customElements.get("lht-page-menu")) {
             .join("\n\n");
         return { fileName, content };
     }
-    function createExportEntries(workbook, markdownFiles) {
+    function encodeMarkdownText(text, options = {}) {
+        return textEncodingHelper.encodeText(text, options);
+    }
+    function createCombinedMarkdownExportPayload(workbook, markdownFiles, options = {}) {
+        const combined = createCombinedMarkdownExportFile(workbook, markdownFiles);
+        return {
+            ...combined,
+            data: encodeMarkdownText(`${combined.content}\n`, options),
+            mimeType: textEncodingHelper.createTextMimeType(options)
+        };
+    }
+    function createExportEntries(workbook, markdownFiles, options = {}) {
         const entries = [];
         if (markdownFiles.length > 0) {
-            const combined = createCombinedMarkdownExportFile(workbook, markdownFiles);
+            const combined = createCombinedMarkdownExportPayload(workbook, markdownFiles, options);
             entries.push({
                 name: `output/${combined.fileName}`,
-                data: textEncoder.encode(`${combined.content}\n`)
+                data: combined.data
             });
         }
         for (const sheet of workbook.sheets) {
@@ -5313,10 +5566,12 @@ if (!customElements.get("lht-page-menu")) {
         }
         return entries;
     }
-    function createWorkbookExportArchive(workbook, markdownFiles) {
-        return zipIoHelper.createStoredZip(createExportEntries(workbook, markdownFiles));
+    function createWorkbookExportArchive(workbook, markdownFiles, options = {}) {
+        return zipIoHelper.createStoredZip(createExportEntries(workbook, markdownFiles, options));
     }
     const markdownExportApi = {
+        encodeMarkdownText,
+        createCombinedMarkdownExportPayload,
         escapeMarkdownCell,
         renderMarkdownTable,
         sanitizeFileNameSegment,
@@ -5333,6 +5588,10 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     function createSheetMarkdownApi(deps) {
@@ -5770,6 +6029,10 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     const EMPTY_BORDERS = {
@@ -5915,6 +6178,10 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     const textDecoder = new TextDecoder("utf-8");
@@ -6014,6 +6281,10 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     function colToLetters(col) {
@@ -6085,6 +6356,10 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     function createRelsParserApi(deps) {
@@ -6162,6 +6437,10 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     const textDecoder = new TextDecoder("utf-8");
@@ -6277,6 +6556,10 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     function isDateFormatCode(formatCode) {
@@ -6667,6 +6950,10 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     const textDecoder = new TextDecoder("utf-8");
@@ -6710,6 +6997,10 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     const runtimeEnv = moduleRegistry === null || moduleRegistry === void 0 ? void 0 : moduleRegistry.getModule("runtimeEnv");
@@ -7167,6 +7458,10 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     function expandRangeAddresses(ref, deps) {
@@ -7571,6 +7866,10 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     function parseDefinedNames(workbookDoc, sheetNames, getTextContent) {
@@ -7631,6 +7930,10 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     function createFormulaReferenceUtilsApi(deps) {
@@ -7701,6 +8004,10 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     function createFormulaEngineApi(deps) {
@@ -7749,6 +8056,10 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     function createFormulaLegacyApi(deps) {
@@ -9081,6 +9392,10 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     function createFormulaAstApi(deps) {
@@ -9229,6 +9544,10 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     function buildFormulaResolver(workbook, deps) {
@@ -9506,6 +9825,10 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (function initXlsx2mdFormulaTokenizer(global) {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     const api = moduleRegistry.getModule("formulaRuntime") || {};
@@ -9772,6 +10095,10 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (function initXlsx2mdFormulaParser(global) {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     const api = moduleRegistry.getModule("formulaRuntime");
@@ -10083,6 +10410,10 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (function initXlsx2mdFormulaEvaluator(global) {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     const api = moduleRegistry.getModule("formulaRuntime");
@@ -11302,6 +11633,10 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (() => {
     const EMPTY_BORDERS = {
         top: false,
@@ -11525,8 +11860,10 @@ if (!customElements.get("lht-page-menu")) {
         extractNarrativeBlocks,
         convertSheetToMarkdown,
         convertWorkbookToMarkdownFiles,
+        encodeMarkdownText: markdownExportHelper.encodeMarkdownText,
         createSummaryText: markdownExportHelper.createSummaryText,
         createCombinedMarkdownExportFile: markdownExportHelper.createCombinedMarkdownExportFile,
+        createCombinedMarkdownExportPayload: markdownExportHelper.createCombinedMarkdownExportPayload,
         createExportEntries: markdownExportHelper.createExportEntries,
         createWorkbookExportArchive: markdownExportHelper.createWorkbookExportArchive,
         formatRange,
@@ -11539,8 +11876,13 @@ if (!customElements.get("lht-page-menu")) {
   </script>
 
   <script>
+/*
+ * Copyright 2026 Toshiki Iga
+ * SPDX-License-Identifier: Apache-2.0
+ */
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
+    const textEncoding = requireXlsx2mdTextEncoding();
     const xlsx2md = moduleRegistry.getModule("xlsx2md");
     if (!xlsx2md) {
         throw new Error("xlsx2md core module is not loaded");
@@ -11558,20 +11900,21 @@ if (!customElements.get("lht-page-menu")) {
         const element = getElement(id);
         return !!element.checked;
     }
+    function getSelectValue(id, fallback) {
+        var _a;
+        const element = getElement(id);
+        if (typeof element.getValue === "function") {
+            return element.getValue() || fallback;
+        }
+        return ((_a = document.getElementById(id)) === null || _a === void 0 ? void 0 : _a.value) || fallback;
+    }
+    function isEncodingAvailable(encoding) {
+        return textEncoding.isEncodingAvailable(encoding);
+    }
     function getOptions() {
-        var _a, _b, _c;
-        const outputModeSelect = getElement("outputModeSelect");
-        const outputMode = typeof outputModeSelect.getValue === "function"
-            ? outputModeSelect.getValue()
-            : ((_a = document.getElementById("outputModeSelect")) === null || _a === void 0 ? void 0 : _a.value) || "display";
-        const formattingModeSelect = getElement("formattingModeSelect");
-        const formattingMode = typeof formattingModeSelect.getValue === "function"
-            ? formattingModeSelect.getValue()
-            : ((_b = document.getElementById("formattingModeSelect")) === null || _b === void 0 ? void 0 : _b.value) || "plain";
-        const tableDetectionModeSelect = getElement("tableDetectionModeSelect");
-        const tableDetectionMode = typeof tableDetectionModeSelect.getValue === "function"
-            ? tableDetectionModeSelect.getValue()
-            : ((_c = document.getElementById("tableDetectionModeSelect")) === null || _c === void 0 ? void 0 : _c.value) || "balanced";
+        const outputMode = getSelectValue("outputModeSelect", "display");
+        const formattingMode = getSelectValue("formattingModeSelect", "plain");
+        const tableDetectionMode = getSelectValue("tableDetectionModeSelect", "balanced");
         return {
             treatFirstRowAsHeader: getSwitchValue("headerRowEnabled"),
             trimText: getSwitchValue("trimTextEnabled"),
@@ -11581,6 +11924,18 @@ if (!customElements.get("lht-page-menu")) {
             outputMode: outputMode === "raw" || outputMode === "both" ? outputMode : "display",
             formattingMode: formattingMode === "github" ? "github" : "plain",
             tableDetectionMode: tableDetectionMode === "border-priority" || tableDetectionMode === "border" ? "border" : "balanced"
+        };
+    }
+    function getEncodingOptions() {
+        const encoding = getSelectValue("encodingSelect", "utf-8");
+        const bom = getSelectValue("bomSelect", "off");
+        return {
+            encoding: (encoding === "shift_jis" ||
+                encoding === "utf-16le" ||
+                encoding === "utf-16be" ||
+                encoding === "utf-32le" ||
+                encoding === "utf-32be") ? encoding : "utf-8",
+            bom: bom === "on" ? "on" : "off"
         };
     }
     function getSelectedOutputMode() {
@@ -11800,6 +12155,55 @@ if (!customElements.get("lht-page-menu")) {
         }
         notice.textContent = "`balanced` uses both bordered candidates and value-density fallback detection.";
     }
+    function updateEncodingNotice(encoding) {
+        const notice = getElement("encodingNotice");
+        if (encoding === "shift_jis") {
+            notice.textContent = isEncodingAvailable("shift_jis")
+                ? "`shift_jis` save is available in this runtime, including the Node CLI path."
+                : "`shift_jis` save is not available in this browser runtime. Use the Node CLI for Shift_JIS output.";
+            return;
+        }
+        if (encoding === "utf-16le" || encoding === "utf-16be" || encoding === "utf-32le" || encoding === "utf-32be") {
+            notice.textContent = `\`${encoding}\` writes Unicode text in the selected endian form instead of UTF-8.`;
+            return;
+        }
+        notice.textContent = "`utf-8` is the default Markdown encoding.";
+    }
+    function updateBomNotice(options) {
+        const notice = getElement("bomNotice");
+        if (options.encoding === "shift_jis") {
+            notice.textContent = "`shift_jis` does not support BOM output.";
+            return;
+        }
+        if (options.bom === "on") {
+            notice.textContent = "BOM will be written at the start of the saved Markdown bytes.";
+            return;
+        }
+        notice.textContent = "BOM is disabled for saved Markdown bytes.";
+    }
+    function syncEncodingControls() {
+        const encodingSelect = getElement("encodingSelect");
+        const shiftJisOption = Array.from(encodingSelect.options).find((option) => option.value === "shift_jis") || null;
+        const shiftJisAvailable = isEncodingAvailable("shift_jis");
+        if (shiftJisOption) {
+            shiftJisOption.disabled = !shiftJisAvailable;
+            shiftJisOption.text = shiftJisAvailable ? "Shift_JIS" : "Shift_JIS (CLI only)";
+        }
+        if (!shiftJisAvailable && encodingSelect.value === "shift_jis") {
+            encodingSelect.value = "utf-8";
+        }
+        const options = getEncodingOptions();
+        const bomSelect = getElement("bomSelect");
+        if (options.encoding === "shift_jis") {
+            bomSelect.value = "off";
+            bomSelect.disabled = true;
+        }
+        else {
+            bomSelect.disabled = false;
+        }
+        updateEncodingNotice(options.encoding);
+        updateBomNotice(getEncodingOptions());
+    }
     function updatePreviewModeBanner(mode) {
         const banner = getElement("previewModeBanner");
         if (mode === "raw") {
@@ -11894,45 +12298,55 @@ if (!customElements.get("lht-page-menu")) {
             return null;
         if (!currentWorkbook)
             return null;
-        return xlsx2md.createCombinedMarkdownExportFile(currentWorkbook, currentFiles);
+        return xlsx2md.createCombinedMarkdownExportPayload(currentWorkbook, currentFiles, getEncodingOptions());
     }
     function downloadCurrentMarkdown() {
-        const payload = getSelectedFileForDownload();
-        if (!payload) {
-            showError("No Markdown is available to save.");
-            return;
+        try {
+            const payload = getSelectedFileForDownload();
+            if (!payload) {
+                showError("No Markdown is available to save.");
+                return;
+            }
+            const blob = new Blob([payload.data], { type: payload.mimeType });
+            const objectUrl = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = objectUrl;
+            link.download = payload.fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
+            showToast("Saved Markdown.");
         }
-        const blob = new Blob([`${payload.content}\n`], { type: "text/markdown;charset=utf-8" });
-        const objectUrl = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = objectUrl;
-        link.download = payload.fileName;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
-        showToast("Saved Markdown.");
+        catch (error) {
+            showError(error instanceof Error ? error.message : "Failed to save Markdown.");
+        }
     }
     function downloadExportZip() {
         var _a, _b;
-        if (!currentWorkbook || currentFiles.length === 0) {
-            showError("Generate Markdown first.");
-            return;
+        try {
+            if (!currentWorkbook || currentFiles.length === 0) {
+                showError("Generate Markdown first.");
+                return;
+            }
+            const zipBytes = xlsx2md.createWorkbookExportArchive(currentWorkbook, currentFiles, getEncodingOptions());
+            const outputMode = ((_a = currentFiles[0]) === null || _a === void 0 ? void 0 : _a.summary.outputMode) || "display";
+            const formattingMode = ((_b = currentFiles[0]) === null || _b === void 0 ? void 0 : _b.summary.formattingMode) || "plain";
+            const suffix = `${outputMode === "display" ? "" : `_${outputMode}`}${formattingMode === "plain" ? "" : `_${formattingMode}`}`;
+            const blob = new Blob([zipBytes], { type: "application/zip" });
+            const objectUrl = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = objectUrl;
+            link.download = `${currentWorkbook.name.replace(/\.xlsx$/i, "")}_xlsx2md_export${suffix}.zip`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
+            showToast("Saved ZIP archive.");
         }
-        const zipBytes = xlsx2md.createWorkbookExportArchive(currentWorkbook, currentFiles);
-        const outputMode = ((_a = currentFiles[0]) === null || _a === void 0 ? void 0 : _a.summary.outputMode) || "display";
-        const formattingMode = ((_b = currentFiles[0]) === null || _b === void 0 ? void 0 : _b.summary.formattingMode) || "plain";
-        const suffix = `${outputMode === "display" ? "" : `_${outputMode}`}${formattingMode === "plain" ? "" : `_${formattingMode}`}`;
-        const blob = new Blob([zipBytes], { type: "application/zip" });
-        const objectUrl = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = objectUrl;
-        link.download = `${currentWorkbook.name.replace(/\.xlsx$/i, "")}_xlsx2md_export${suffix}.zip`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
-        showToast("Saved ZIP archive.");
+        catch (error) {
+            showError(error instanceof Error ? error.message : "Failed to save ZIP archive.");
+        }
     }
     function convertCurrentWorkbook(showSuccessToast = true) {
         clearError();
@@ -12009,6 +12423,12 @@ if (!customElements.get("lht-page-menu")) {
         getElement("tableDetectionModeSelect").addEventListener("change", () => {
             updateTableDetectionModeNotice(getOptions().tableDetectionMode);
         });
+        getElement("encodingSelect").addEventListener("change", () => {
+            syncEncodingControls();
+        });
+        getElement("bomSelect").addEventListener("change", () => {
+            updateBomNotice(getEncodingOptions());
+        });
     }
     function initialize() {
         clearError();
@@ -12019,6 +12439,7 @@ if (!customElements.get("lht-page-menu")) {
         updateOutputModeNotice(getSelectedOutputMode());
         updateFormattingModeNotice(getOptions().formattingMode);
         updateTableDetectionModeNotice(getOptions().tableDetectionMode);
+        syncEncodingControls();
         updatePreviewModeBanner(getSelectedOutputMode());
         getElement("downloadBtn").disabled = true;
         getElement("exportZipBtn").disabled = true;

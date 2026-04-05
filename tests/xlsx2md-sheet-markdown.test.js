@@ -11,35 +11,35 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const markdownNormalizeCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/markdown-normalize.js"),
+  path.resolve(__dirname, "../src/js/markdown-normalize.js"),
   "utf8"
 );
 const markdownEscapeCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/markdown-escape.js"),
+  path.resolve(__dirname, "../src/js/markdown-escape.js"),
   "utf8"
 );
 const markdownTableEscapeCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/markdown-table-escape.js"),
+  path.resolve(__dirname, "../src/js/markdown-table-escape.js"),
   "utf8"
 );
 const richTextParserCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/rich-text-parser.js"),
+  path.resolve(__dirname, "../src/js/rich-text-parser.js"),
   "utf8"
 );
 const richTextPlainFormatterCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/rich-text-plain-formatter.js"),
+  path.resolve(__dirname, "../src/js/rich-text-plain-formatter.js"),
   "utf8"
 );
 const richTextGithubFormatterCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/rich-text-github-formatter.js"),
+  path.resolve(__dirname, "../src/js/rich-text-github-formatter.js"),
   "utf8"
 );
 const richTextRendererCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/rich-text-renderer.js"),
+  path.resolve(__dirname, "../src/js/rich-text-renderer.js"),
   "utf8"
 );
 const sheetMarkdownCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/sheet-markdown.js"),
+  path.resolve(__dirname, "../src/js/sheet-markdown.js"),
   "utf8"
 );
 

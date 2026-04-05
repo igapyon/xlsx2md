@@ -1,13 +1,15 @@
 import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import path from "node:path";
 
 export function loadModuleRegistry(testDir) {
+  globalThis.__xlsx2mdNodeRequire ??= createRequire(import.meta.url);
   const moduleRegistryCode = readFileSync(
-    path.resolve(testDir, "../src/xlsx2md/js/module-registry.js"),
+    path.resolve(testDir, "../src/js/module-registry.js"),
     "utf8"
   );
   const moduleRegistryAccessCode = readFileSync(
-    path.resolve(testDir, "../src/xlsx2md/js/module-registry-access.js"),
+    path.resolve(testDir, "../src/js/module-registry-access.js"),
     "utf8"
   );
   new Function(moduleRegistryCode)();
@@ -17,7 +19,7 @@ export function loadModuleRegistry(testDir) {
 
 export function loadRuntimeEnv(testDir) {
   const runtimeEnvCode = readFileSync(
-    path.resolve(testDir, "../src/xlsx2md/js/runtime-env.js"),
+    path.resolve(testDir, "../src/js/runtime-env.js"),
     "utf8"
   );
   new Function(runtimeEnvCode)();

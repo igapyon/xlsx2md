@@ -11,7 +11,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const formulaLegacyCode = readFileSync(
-  path.resolve(__dirname, "../src/xlsx2md/js/formula-legacy.js"),
+  path.resolve(__dirname, "../src/js/formula-legacy.js"),
   "utf8"
 );
 
