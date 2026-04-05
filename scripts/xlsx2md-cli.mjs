@@ -10,6 +10,8 @@ function printHelp() {
 Options:
   --out <file>                  Write combined Markdown to this file
   --zip <file>                  Write ZIP export to this file
+  --encoding <value>            utf-8 | shift_jis | utf-16le | utf-16be | utf-32le | utf-32be (default: utf-8)
+  --bom <value>                 off | on (default: off; shift_jis does not allow on)
   --output-mode <mode>          display | raw | both (default: display)
   --formatting-mode <mode>      plain | github (default: plain)
   --table-detection-mode <mode> balanced | border (default: balanced)
@@ -38,6 +40,8 @@ function parseArgs(argv) {
     outputMode: "display",
     formattingMode: "plain",
     tableDetectionMode: "balanced",
+    encoding: "utf-8",
+    bom: "off",
     summary: false,
     outPath: null,
     zipPath: null
@@ -79,7 +83,7 @@ function parseArgs(argv) {
       options.summary = true;
       continue;
     }
-    if (arg === "--out" || arg === "--zip" || arg === "--output-mode" || arg === "--formatting-mode" || arg === "--shape-details" || arg === "--table-detection-mode") {
+    if (arg === "--out" || arg === "--zip" || arg === "--output-mode" || arg === "--formatting-mode" || arg === "--shape-details" || arg === "--table-detection-mode" || arg === "--encoding" || arg === "--bom") {
       const value = argv[index + 1];
       if (!value) {
         throw new Error(`Missing value for ${arg}`);
@@ -111,6 +115,18 @@ function parseArgs(argv) {
         }
         options.includeShapeDetails = value === "include";
       }
+      if (arg === "--encoding") {
+        if (!["utf-8", "shift_jis", "utf-16le", "utf-16be", "utf-32le", "utf-32be"].includes(value)) {
+          throw new Error(`Invalid encoding: ${value}`);
+        }
+        options.encoding = value;
+      }
+      if (arg === "--bom") {
+        if (value !== "off" && value !== "on") {
+          throw new Error(`Invalid BOM mode: ${value}`);
+        }
+        options.bom = value;
+      }
       continue;
     }
 
@@ -129,11 +145,6 @@ function parseArgs(argv) {
 
 function toArrayBuffer(buffer) {
   return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
-}
-
-async function writeTextFile(outputPath, content) {
-  await fs.mkdir(path.dirname(outputPath), { recursive: true });
-  await fs.writeFile(outputPath, content, "utf8");
 }
 
 async function writeBinaryFile(outputPath, content) {
@@ -165,6 +176,10 @@ async function main() {
   const inputPath = path.resolve(options.inputPath);
 
   try {
+    if (options.encoding === "shift_jis" && options.bom === "on") {
+      throw new Error(formatWorkbookError(inputPath, "option validation failed", "BOM cannot be enabled for shift_jis."));
+    }
+
     let inputBytes;
     try {
       inputBytes = await fs.readFile(inputPath);
@@ -199,11 +214,17 @@ async function main() {
       printWorkbookSummary(api, path.basename(inputPath), files);
     }
 
-    const combined = api.createCombinedMarkdownExportFile(workbook, files);
+    const combined = api.createCombinedMarkdownExportPayload(workbook, files, {
+      encoding: options.encoding,
+      bom: options.bom
+    });
 
     if (options.zipPath) {
       try {
-        const zipBytes = api.createWorkbookExportArchive(workbook, files);
+        const zipBytes = api.createWorkbookExportArchive(workbook, files, {
+          encoding: options.encoding,
+          bom: options.bom
+        });
         await writeBinaryFile(path.resolve(options.zipPath), zipBytes);
       } catch (error) {
         throw new Error(formatWorkbookError(inputPath, "zip write failed", error));
@@ -215,7 +236,7 @@ async function main() {
         ? path.resolve(options.outPath)
         : path.resolve(combined.fileName);
       try {
-        await writeTextFile(markdownOutputPath, `${combined.content}\n`);
+        await writeBinaryFile(markdownOutputPath, combined.data);
       } catch (error) {
         throw new Error(formatWorkbookError(inputPath, "markdown write failed", error));
       }

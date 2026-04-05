@@ -14,6 +14,10 @@ const mainCode = readFileSync(
   path.resolve(__dirname, "../src/js/main.js"),
   "utf8"
 );
+const textEncodingCode = readFileSync(
+  path.resolve(__dirname, "../src/js/text-encoding.js"),
+  "utf8"
+);
 
 function createDomFixture() {
   document.body.innerHTML = `
@@ -31,6 +35,15 @@ function createDomFixture() {
       <option value="raw">raw</option>
       <option value="both">both</option>
     </select>
+    <select id="encodingSelect">
+      <option value="utf-8" selected>utf-8</option>
+      <option value="shift_jis">shift_jis</option>
+      <option value="utf-16le">utf-16le</option>
+    </select>
+    <select id="bomSelect">
+      <option value="off" selected>off</option>
+      <option value="on">on</option>
+    </select>
     <select id="formattingModeSelect">
       <option value="plain">plain</option>
       <option value="github" selected>github</option>
@@ -42,6 +55,8 @@ function createDomFixture() {
     <div id="outputModeNotice"></div>
     <div id="formattingModeNotice"></div>
     <div id="tableDetectionModeNotice"></div>
+    <div id="encodingNotice"></div>
+    <div id="bomNotice"></div>
     <div id="previewModeBanner" hidden></div>
     <div id="analysisSummary"></div>
     <div id="scoreSummary"></div>
@@ -59,6 +74,14 @@ function createDomFixture() {
   };
   const formattingModeSelect = document.getElementById("formattingModeSelect");
   formattingModeSelect.getValue = function getValue() {
+    return this.value;
+  };
+  const encodingSelect = document.getElementById("encodingSelect");
+  encodingSelect.getValue = function getValue() {
+    return this.value;
+  };
+  const bomSelect = document.getElementById("bomSelect");
+  bomSelect.getValue = function getValue() {
     return this.value;
   };
   const tableDetectionModeSelect = document.getElementById("tableDetectionModeSelect");
@@ -117,14 +140,19 @@ function createWorkbookFile() {
   };
 }
 
-function bootMain(overrides = {}) {
+function bootMain(overrides = {}, options = {}) {
   createDomFixture();
   const registry = loadModuleRegistry(__dirname);
+  if (options.disableNodeRequire) {
+    delete globalThis.__xlsx2mdNodeRequire;
+  }
+  new Function(textEncodingCode)();
   const api = {
     parseWorkbook: vi.fn(async () => ({ name: "book.xlsx", sheets: [{ name: "Sheet1", index: 1 }] })),
     convertWorkbookToMarkdownFiles: vi.fn(() => [createWorkbookFile()]),
     createSummaryText: vi.fn(() => "summary"),
     createCombinedMarkdownExportFile: vi.fn(() => ({ fileName: "book.md", content: "# combined" })),
+    createCombinedMarkdownExportPayload: vi.fn(() => ({ fileName: "book.md", content: "# combined", data: new Uint8Array([35]), mimeType: "text/markdown;charset=utf-8" })),
     createWorkbookExportArchive: vi.fn(() => new Uint8Array([1, 2, 3])),
     ...overrides
   };
@@ -148,6 +176,8 @@ describe("xlsx2md main ui", () => {
     expect(document.getElementById("outputModeNotice").textContent).toContain("`display`");
     expect(document.getElementById("formattingModeNotice").textContent).toContain("`github`");
     expect(document.getElementById("tableDetectionModeNotice").textContent).toContain("`balanced`");
+    expect(document.getElementById("encodingNotice").textContent).toContain("`utf-8`");
+    expect(document.getElementById("bomNotice").textContent).toContain("disabled");
     expect(document.getElementById("analysisSummary").textContent).toContain("No conversion yet.");
   });
 
@@ -196,5 +226,16 @@ describe("xlsx2md main ui", () => {
     expect(document.getElementById("downloadBtn").disabled).toBe(false);
     expect(document.getElementById("exportZipBtn").disabled).toBe(false);
     expect(document.getElementById("markdownPreview").dataset.rendered).toContain("# Sheet1");
+  });
+
+  it("disables shift_jis in browser-only runtime", () => {
+    bootMain({}, { disableNodeRequire: true });
+
+    const encodingSelect = document.getElementById("encodingSelect");
+    const shiftJisOption = Array.from(encodingSelect.options).find((option) => option.value === "shift_jis");
+
+    expect(shiftJisOption.disabled).toBe(true);
+    expect(shiftJisOption.text).toContain("CLI only");
+    expect(document.getElementById("encodingNotice").textContent).toContain("`utf-8`");
   });
 });

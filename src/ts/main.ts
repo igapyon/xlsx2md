@@ -14,6 +14,12 @@
     formattingMode: "plain" | "github";
     tableDetectionMode: "balanced" | "border";
   };
+  type MarkdownEncoding = "utf-8" | "shift_jis" | "utf-16le" | "utf-16be" | "utf-32le" | "utf-32be";
+  type MarkdownBomMode = "off" | "on";
+  type MarkdownEncodingOptions = {
+    encoding: MarkdownEncoding;
+    bom: MarkdownBomMode;
+  };
 
   type WorkbookFile = {
     fileName: string;
@@ -49,12 +55,23 @@
   };
 
   const moduleRegistry = getXlsx2mdModuleRegistry();
+  const textEncoding = requireXlsx2mdTextEncoding();
   const xlsx2md = moduleRegistry.getModule<{
     parseWorkbook: (arrayBuffer: ArrayBuffer, workbookName?: string) => Promise<ParsedWorkbook & { sheets: Array<Record<string, unknown>> }>;
     convertWorkbookToMarkdownFiles: (workbook: ParsedWorkbook & { sheets: Array<Record<string, unknown>> }, options?: MarkdownOptions) => WorkbookFile[];
+    encodeMarkdownText: (text: string, options?: MarkdownEncodingOptions) => Uint8Array;
     createSummaryText: (file: WorkbookFile) => string;
     createCombinedMarkdownExportFile: (workbook: ParsedWorkbook & { sheets: Array<Record<string, unknown>> }, files: WorkbookFile[]) => { fileName: string; content: string };
-    createWorkbookExportArchive: (workbook: ParsedWorkbook & { sheets: Array<Record<string, unknown>> }, files: WorkbookFile[]) => Uint8Array;
+    createCombinedMarkdownExportPayload: (
+      workbook: ParsedWorkbook & { sheets: Array<Record<string, unknown>> },
+      files: WorkbookFile[],
+      options?: MarkdownEncodingOptions
+    ) => { fileName: string; content: string; data: Uint8Array; mimeType: string };
+    createWorkbookExportArchive: (
+      workbook: ParsedWorkbook & { sheets: Array<Record<string, unknown>> },
+      files: WorkbookFile[],
+      options?: MarkdownEncodingOptions
+    ) => Uint8Array;
   }>("xlsx2md");
 
   if (!xlsx2md) {
@@ -77,19 +94,22 @@
     return !!element.checked;
   }
 
+  function getSelectValue(id: string, fallback: string): string {
+    const element = getElement<HTMLElement>(id) as HTMLElement & { getValue?: () => string; disabled?: boolean };
+    if (typeof element.getValue === "function") {
+      return element.getValue() || fallback;
+    }
+    return (document.getElementById(id) as HTMLSelectElement | null)?.value || fallback;
+  }
+
+  function isEncodingAvailable(encoding: MarkdownEncoding): boolean {
+    return textEncoding.isEncodingAvailable(encoding);
+  }
+
   function getOptions(): MarkdownOptions {
-    const outputModeSelect = getElement<HTMLElement>("outputModeSelect") as HTMLElement & { getValue?: () => string };
-    const outputMode = typeof outputModeSelect.getValue === "function"
-      ? outputModeSelect.getValue()
-      : (document.getElementById("outputModeSelect") as HTMLSelectElement | null)?.value || "display";
-    const formattingModeSelect = getElement<HTMLElement>("formattingModeSelect") as HTMLElement & { getValue?: () => string };
-    const formattingMode = typeof formattingModeSelect.getValue === "function"
-      ? formattingModeSelect.getValue()
-      : (document.getElementById("formattingModeSelect") as HTMLSelectElement | null)?.value || "plain";
-    const tableDetectionModeSelect = getElement<HTMLElement>("tableDetectionModeSelect") as HTMLElement & { getValue?: () => string };
-    const tableDetectionMode = typeof tableDetectionModeSelect.getValue === "function"
-      ? tableDetectionModeSelect.getValue()
-      : (document.getElementById("tableDetectionModeSelect") as HTMLSelectElement | null)?.value || "balanced";
+    const outputMode = getSelectValue("outputModeSelect", "display");
+    const formattingMode = getSelectValue("formattingModeSelect", "plain");
+    const tableDetectionMode = getSelectValue("tableDetectionModeSelect", "balanced");
     return {
       treatFirstRowAsHeader: getSwitchValue("headerRowEnabled"),
       trimText: getSwitchValue("trimTextEnabled"),
@@ -99,6 +119,21 @@
       outputMode: outputMode === "raw" || outputMode === "both" ? outputMode : "display",
       formattingMode: formattingMode === "github" ? "github" : "plain",
       tableDetectionMode: tableDetectionMode === "border-priority" || tableDetectionMode === "border" ? "border" : "balanced"
+    };
+  }
+
+  function getEncodingOptions(): MarkdownEncodingOptions {
+    const encoding = getSelectValue("encodingSelect", "utf-8");
+    const bom = getSelectValue("bomSelect", "off");
+    return {
+      encoding: (
+        encoding === "shift_jis" ||
+        encoding === "utf-16le" ||
+        encoding === "utf-16be" ||
+        encoding === "utf-32le" ||
+        encoding === "utf-32be"
+      ) ? encoding : "utf-8",
+      bom: bom === "on" ? "on" : "off"
     };
   }
 
@@ -348,6 +383,57 @@
     notice.textContent = "`balanced` uses both bordered candidates and value-density fallback detection.";
   }
 
+  function updateEncodingNotice(encoding: MarkdownEncoding): void {
+    const notice = getElement<HTMLElement>("encodingNotice");
+    if (encoding === "shift_jis") {
+      notice.textContent = isEncodingAvailable("shift_jis")
+        ? "`shift_jis` save is available in this runtime, including the Node CLI path."
+        : "`shift_jis` save is not available in this browser runtime. Use the Node CLI for Shift_JIS output.";
+      return;
+    }
+    if (encoding === "utf-16le" || encoding === "utf-16be" || encoding === "utf-32le" || encoding === "utf-32be") {
+      notice.textContent = `\`${encoding}\` writes Unicode text in the selected endian form instead of UTF-8.`;
+      return;
+    }
+    notice.textContent = "`utf-8` is the default Markdown encoding.";
+  }
+
+  function updateBomNotice(options: MarkdownEncodingOptions): void {
+    const notice = getElement<HTMLElement>("bomNotice");
+    if (options.encoding === "shift_jis") {
+      notice.textContent = "`shift_jis` does not support BOM output.";
+      return;
+    }
+    if (options.bom === "on") {
+      notice.textContent = "BOM will be written at the start of the saved Markdown bytes.";
+      return;
+    }
+    notice.textContent = "BOM is disabled for saved Markdown bytes.";
+  }
+
+  function syncEncodingControls(): void {
+    const encodingSelect = getElement<HTMLSelectElement>("encodingSelect");
+    const shiftJisOption = Array.from(encodingSelect.options).find((option) => option.value === "shift_jis") || null;
+    const shiftJisAvailable = isEncodingAvailable("shift_jis");
+    if (shiftJisOption) {
+      shiftJisOption.disabled = !shiftJisAvailable;
+      shiftJisOption.text = shiftJisAvailable ? "Shift_JIS" : "Shift_JIS (CLI only)";
+    }
+    if (!shiftJisAvailable && encodingSelect.value === "shift_jis") {
+      encodingSelect.value = "utf-8";
+    }
+    const options = getEncodingOptions();
+    const bomSelect = getElement<HTMLSelectElement>("bomSelect");
+    if (options.encoding === "shift_jis") {
+      bomSelect.value = "off";
+      bomSelect.disabled = true;
+    } else {
+      bomSelect.disabled = false;
+    }
+    updateEncodingNotice(options.encoding);
+    updateBomNotice(getEncodingOptions());
+  }
+
   function updatePreviewModeBanner(mode: "display" | "raw" | "both"): void {
     const banner = getElement<HTMLElement>("previewModeBanner");
     if (mode === "raw") {
@@ -439,49 +525,57 @@
     getElement<HTMLButtonElement>("exportZipBtn").disabled = false;
   }
 
-  function getSelectedFileForDownload(): { fileName: string; content: string } | null {
+  function getSelectedFileForDownload(): { fileName: string; content: string; data: Uint8Array; mimeType: string } | null {
     if (!currentFiles.length) return null;
     if (!currentWorkbook) return null;
-    return xlsx2md.createCombinedMarkdownExportFile(currentWorkbook, currentFiles);
+    return xlsx2md.createCombinedMarkdownExportPayload(currentWorkbook, currentFiles, getEncodingOptions());
   }
 
   function downloadCurrentMarkdown(): void {
-    const payload = getSelectedFileForDownload();
-    if (!payload) {
-      showError("No Markdown is available to save.");
-      return;
+    try {
+      const payload = getSelectedFileForDownload();
+      if (!payload) {
+        showError("No Markdown is available to save.");
+        return;
+      }
+      const blob = new Blob([payload.data], { type: payload.mimeType });
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = payload.fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
+      showToast("Saved Markdown.");
+    } catch (error) {
+      showError(error instanceof Error ? error.message : "Failed to save Markdown.");
     }
-    const blob = new Blob([`${payload.content}\n`], { type: "text/markdown;charset=utf-8" });
-    const objectUrl = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = objectUrl;
-    link.download = payload.fileName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
-    showToast("Saved Markdown.");
   }
 
   function downloadExportZip(): void {
-    if (!currentWorkbook || currentFiles.length === 0) {
-      showError("Generate Markdown first.");
-      return;
+    try {
+      if (!currentWorkbook || currentFiles.length === 0) {
+        showError("Generate Markdown first.");
+        return;
+      }
+      const zipBytes = xlsx2md.createWorkbookExportArchive(currentWorkbook, currentFiles, getEncodingOptions());
+      const outputMode = currentFiles[0]?.summary.outputMode || "display";
+      const formattingMode = currentFiles[0]?.summary.formattingMode || "plain";
+      const suffix = `${outputMode === "display" ? "" : `_${outputMode}`}${formattingMode === "plain" ? "" : `_${formattingMode}`}`;
+      const blob = new Blob([zipBytes], { type: "application/zip" });
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = `${currentWorkbook.name.replace(/\.xlsx$/i, "")}_xlsx2md_export${suffix}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
+      showToast("Saved ZIP archive.");
+    } catch (error) {
+      showError(error instanceof Error ? error.message : "Failed to save ZIP archive.");
     }
-    const zipBytes = xlsx2md.createWorkbookExportArchive(currentWorkbook, currentFiles);
-    const outputMode = currentFiles[0]?.summary.outputMode || "display";
-    const formattingMode = currentFiles[0]?.summary.formattingMode || "plain";
-    const suffix = `${outputMode === "display" ? "" : `_${outputMode}`}${formattingMode === "plain" ? "" : `_${formattingMode}`}`;
-    const blob = new Blob([zipBytes], { type: "application/zip" });
-    const objectUrl = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = objectUrl;
-    link.download = `${currentWorkbook.name.replace(/\.xlsx$/i, "")}_xlsx2md_export${suffix}.zip`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
-    showToast("Saved ZIP archive.");
   }
 
   function convertCurrentWorkbook(showSuccessToast = true): void {
@@ -557,6 +651,12 @@
     getElement<HTMLElement>("tableDetectionModeSelect").addEventListener("change", () => {
       updateTableDetectionModeNotice(getOptions().tableDetectionMode);
     });
+    getElement<HTMLElement>("encodingSelect").addEventListener("change", () => {
+      syncEncodingControls();
+    });
+    getElement<HTMLElement>("bomSelect").addEventListener("change", () => {
+      updateBomNotice(getEncodingOptions());
+    });
   }
 
   function initialize(): void {
@@ -568,6 +668,7 @@
     updateOutputModeNotice(getSelectedOutputMode());
     updateFormattingModeNotice(getOptions().formattingMode);
     updateTableDetectionModeNotice(getOptions().tableDetectionMode);
+    syncEncodingControls();
     updatePreviewModeBanner(getSelectedOutputMode());
     getElement<HTMLButtonElement>("downloadBtn").disabled = true;
     getElement<HTMLButtonElement>("exportZipBtn").disabled = true;

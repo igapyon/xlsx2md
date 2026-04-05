@@ -4,6 +4,7 @@
  */
 (() => {
     const moduleRegistry = getXlsx2mdModuleRegistry();
+    const textEncoding = requireXlsx2mdTextEncoding();
     const xlsx2md = moduleRegistry.getModule("xlsx2md");
     if (!xlsx2md) {
         throw new Error("xlsx2md core module is not loaded");
@@ -21,20 +22,21 @@
         const element = getElement(id);
         return !!element.checked;
     }
+    function getSelectValue(id, fallback) {
+        var _a;
+        const element = getElement(id);
+        if (typeof element.getValue === "function") {
+            return element.getValue() || fallback;
+        }
+        return ((_a = document.getElementById(id)) === null || _a === void 0 ? void 0 : _a.value) || fallback;
+    }
+    function isEncodingAvailable(encoding) {
+        return textEncoding.isEncodingAvailable(encoding);
+    }
     function getOptions() {
-        var _a, _b, _c;
-        const outputModeSelect = getElement("outputModeSelect");
-        const outputMode = typeof outputModeSelect.getValue === "function"
-            ? outputModeSelect.getValue()
-            : ((_a = document.getElementById("outputModeSelect")) === null || _a === void 0 ? void 0 : _a.value) || "display";
-        const formattingModeSelect = getElement("formattingModeSelect");
-        const formattingMode = typeof formattingModeSelect.getValue === "function"
-            ? formattingModeSelect.getValue()
-            : ((_b = document.getElementById("formattingModeSelect")) === null || _b === void 0 ? void 0 : _b.value) || "plain";
-        const tableDetectionModeSelect = getElement("tableDetectionModeSelect");
-        const tableDetectionMode = typeof tableDetectionModeSelect.getValue === "function"
-            ? tableDetectionModeSelect.getValue()
-            : ((_c = document.getElementById("tableDetectionModeSelect")) === null || _c === void 0 ? void 0 : _c.value) || "balanced";
+        const outputMode = getSelectValue("outputModeSelect", "display");
+        const formattingMode = getSelectValue("formattingModeSelect", "plain");
+        const tableDetectionMode = getSelectValue("tableDetectionModeSelect", "balanced");
         return {
             treatFirstRowAsHeader: getSwitchValue("headerRowEnabled"),
             trimText: getSwitchValue("trimTextEnabled"),
@@ -44,6 +46,18 @@
             outputMode: outputMode === "raw" || outputMode === "both" ? outputMode : "display",
             formattingMode: formattingMode === "github" ? "github" : "plain",
             tableDetectionMode: tableDetectionMode === "border-priority" || tableDetectionMode === "border" ? "border" : "balanced"
+        };
+    }
+    function getEncodingOptions() {
+        const encoding = getSelectValue("encodingSelect", "utf-8");
+        const bom = getSelectValue("bomSelect", "off");
+        return {
+            encoding: (encoding === "shift_jis" ||
+                encoding === "utf-16le" ||
+                encoding === "utf-16be" ||
+                encoding === "utf-32le" ||
+                encoding === "utf-32be") ? encoding : "utf-8",
+            bom: bom === "on" ? "on" : "off"
         };
     }
     function getSelectedOutputMode() {
@@ -263,6 +277,55 @@
         }
         notice.textContent = "`balanced` uses both bordered candidates and value-density fallback detection.";
     }
+    function updateEncodingNotice(encoding) {
+        const notice = getElement("encodingNotice");
+        if (encoding === "shift_jis") {
+            notice.textContent = isEncodingAvailable("shift_jis")
+                ? "`shift_jis` save is available in this runtime, including the Node CLI path."
+                : "`shift_jis` save is not available in this browser runtime. Use the Node CLI for Shift_JIS output.";
+            return;
+        }
+        if (encoding === "utf-16le" || encoding === "utf-16be" || encoding === "utf-32le" || encoding === "utf-32be") {
+            notice.textContent = `\`${encoding}\` writes Unicode text in the selected endian form instead of UTF-8.`;
+            return;
+        }
+        notice.textContent = "`utf-8` is the default Markdown encoding.";
+    }
+    function updateBomNotice(options) {
+        const notice = getElement("bomNotice");
+        if (options.encoding === "shift_jis") {
+            notice.textContent = "`shift_jis` does not support BOM output.";
+            return;
+        }
+        if (options.bom === "on") {
+            notice.textContent = "BOM will be written at the start of the saved Markdown bytes.";
+            return;
+        }
+        notice.textContent = "BOM is disabled for saved Markdown bytes.";
+    }
+    function syncEncodingControls() {
+        const encodingSelect = getElement("encodingSelect");
+        const shiftJisOption = Array.from(encodingSelect.options).find((option) => option.value === "shift_jis") || null;
+        const shiftJisAvailable = isEncodingAvailable("shift_jis");
+        if (shiftJisOption) {
+            shiftJisOption.disabled = !shiftJisAvailable;
+            shiftJisOption.text = shiftJisAvailable ? "Shift_JIS" : "Shift_JIS (CLI only)";
+        }
+        if (!shiftJisAvailable && encodingSelect.value === "shift_jis") {
+            encodingSelect.value = "utf-8";
+        }
+        const options = getEncodingOptions();
+        const bomSelect = getElement("bomSelect");
+        if (options.encoding === "shift_jis") {
+            bomSelect.value = "off";
+            bomSelect.disabled = true;
+        }
+        else {
+            bomSelect.disabled = false;
+        }
+        updateEncodingNotice(options.encoding);
+        updateBomNotice(getEncodingOptions());
+    }
     function updatePreviewModeBanner(mode) {
         const banner = getElement("previewModeBanner");
         if (mode === "raw") {
@@ -357,45 +420,55 @@
             return null;
         if (!currentWorkbook)
             return null;
-        return xlsx2md.createCombinedMarkdownExportFile(currentWorkbook, currentFiles);
+        return xlsx2md.createCombinedMarkdownExportPayload(currentWorkbook, currentFiles, getEncodingOptions());
     }
     function downloadCurrentMarkdown() {
-        const payload = getSelectedFileForDownload();
-        if (!payload) {
-            showError("No Markdown is available to save.");
-            return;
+        try {
+            const payload = getSelectedFileForDownload();
+            if (!payload) {
+                showError("No Markdown is available to save.");
+                return;
+            }
+            const blob = new Blob([payload.data], { type: payload.mimeType });
+            const objectUrl = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = objectUrl;
+            link.download = payload.fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
+            showToast("Saved Markdown.");
         }
-        const blob = new Blob([`${payload.content}\n`], { type: "text/markdown;charset=utf-8" });
-        const objectUrl = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = objectUrl;
-        link.download = payload.fileName;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
-        showToast("Saved Markdown.");
+        catch (error) {
+            showError(error instanceof Error ? error.message : "Failed to save Markdown.");
+        }
     }
     function downloadExportZip() {
         var _a, _b;
-        if (!currentWorkbook || currentFiles.length === 0) {
-            showError("Generate Markdown first.");
-            return;
+        try {
+            if (!currentWorkbook || currentFiles.length === 0) {
+                showError("Generate Markdown first.");
+                return;
+            }
+            const zipBytes = xlsx2md.createWorkbookExportArchive(currentWorkbook, currentFiles, getEncodingOptions());
+            const outputMode = ((_a = currentFiles[0]) === null || _a === void 0 ? void 0 : _a.summary.outputMode) || "display";
+            const formattingMode = ((_b = currentFiles[0]) === null || _b === void 0 ? void 0 : _b.summary.formattingMode) || "plain";
+            const suffix = `${outputMode === "display" ? "" : `_${outputMode}`}${formattingMode === "plain" ? "" : `_${formattingMode}`}`;
+            const blob = new Blob([zipBytes], { type: "application/zip" });
+            const objectUrl = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = objectUrl;
+            link.download = `${currentWorkbook.name.replace(/\.xlsx$/i, "")}_xlsx2md_export${suffix}.zip`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
+            showToast("Saved ZIP archive.");
         }
-        const zipBytes = xlsx2md.createWorkbookExportArchive(currentWorkbook, currentFiles);
-        const outputMode = ((_a = currentFiles[0]) === null || _a === void 0 ? void 0 : _a.summary.outputMode) || "display";
-        const formattingMode = ((_b = currentFiles[0]) === null || _b === void 0 ? void 0 : _b.summary.formattingMode) || "plain";
-        const suffix = `${outputMode === "display" ? "" : `_${outputMode}`}${formattingMode === "plain" ? "" : `_${formattingMode}`}`;
-        const blob = new Blob([zipBytes], { type: "application/zip" });
-        const objectUrl = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = objectUrl;
-        link.download = `${currentWorkbook.name.replace(/\.xlsx$/i, "")}_xlsx2md_export${suffix}.zip`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
-        showToast("Saved ZIP archive.");
+        catch (error) {
+            showError(error instanceof Error ? error.message : "Failed to save ZIP archive.");
+        }
     }
     function convertCurrentWorkbook(showSuccessToast = true) {
         clearError();
@@ -472,6 +545,12 @@
         getElement("tableDetectionModeSelect").addEventListener("change", () => {
             updateTableDetectionModeNotice(getOptions().tableDetectionMode);
         });
+        getElement("encodingSelect").addEventListener("change", () => {
+            syncEncodingControls();
+        });
+        getElement("bomSelect").addEventListener("change", () => {
+            updateBomNotice(getEncodingOptions());
+        });
     }
     function initialize() {
         clearError();
@@ -482,6 +561,7 @@
         updateOutputModeNotice(getSelectedOutputMode());
         updateFormattingModeNotice(getOptions().formattingMode);
         updateTableDetectionModeNotice(getOptions().tableDetectionMode);
+        syncEncodingControls();
         updatePreviewModeBanner(getSelectedOutputMode());
         getElement("downloadBtn").disabled = true;
         getElement("exportZipBtn").disabled = true;

@@ -8,6 +8,7 @@ export const XLSX2MD_CORE_TS_ORDER = [
   "src/ts/markdown-normalize.ts",
   "src/ts/markdown-escape.ts",
   "src/ts/markdown-table-escape.ts",
+  "src/ts/text-encoding.ts",
   "src/ts/rich-text-parser.ts",
   "src/ts/rich-text-plain-formatter.ts",
   "src/ts/rich-text-github-formatter.ts",

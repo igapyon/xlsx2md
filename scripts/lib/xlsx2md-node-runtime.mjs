@@ -1,5 +1,6 @@
 import { Blob as NodeBlob } from "node:buffer";
 import fs from "node:fs";
+import { createRequire } from "node:module";
 import path from "node:path";
 import { DecompressionStream as NodeDecompressionStream } from "node:stream/web";
 import { fileURLToPath } from "node:url";
@@ -11,6 +12,7 @@ import { XLSX2MD_CORE_JS_ORDER } from "./xlsx2md-module-order.mjs";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const DEFAULT_ROOT_DIR = path.resolve(__dirname, "../..");
+const nodeRequire = createRequire(import.meta.url);
 
 let cachedApi = null;
 let cachedRootDir = null;
@@ -32,6 +34,7 @@ export function installNodeDomGlobals() {
     globalThis.Blob = NodeBlob;
   }
   globalThis.DecompressionStream ??= NodeDecompressionStream;
+  globalThis.__xlsx2mdNodeRequire ??= nodeRequire;
 }
 
 export function loadXlsx2mdNodeApi(options = {}) {

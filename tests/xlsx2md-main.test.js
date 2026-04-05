@@ -80,6 +80,10 @@ const markdownExportCode = readFileSync(
   path.resolve(__dirname, "../src/js/markdown-export.js"),
   "utf8"
 );
+const textEncodingCode = readFileSync(
+  path.resolve(__dirname, "../src/js/text-encoding.js"),
+  "utf8"
+);
 const sheetMarkdownCode = readFileSync(
   path.resolve(__dirname, "../src/js/sheet-markdown.js"),
   "utf8"
@@ -160,6 +164,7 @@ function bootCore() {
   new Function(markdownNormalizeCode)();
   new Function(markdownEscapeCode)();
   new Function(markdownTableEscapeCode)();
+  new Function(textEncodingCode)();
   new Function(richTextParserCode)();
   new Function(richTextPlainFormatterCode)();
   new Function(richTextGithubFormatterCode)();

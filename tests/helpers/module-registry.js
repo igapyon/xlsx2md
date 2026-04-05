@@ -1,7 +1,9 @@
 import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import path from "node:path";
 
 export function loadModuleRegistry(testDir) {
+  globalThis.__xlsx2mdNodeRequire ??= createRequire(import.meta.url);
   const moduleRegistryCode = readFileSync(
     path.resolve(testDir, "../src/js/module-registry.js"),
     "utf8"

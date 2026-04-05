@@ -1682,6 +1682,7 @@ function detectTableCandidates(sheet: ParsedSheet): TableCandidate[] {
 - 入力: `workbook`, `sheet`, `options` または `markdownFiles`
 - 出力: `MarkdownFile`、連結 Markdown、ZIP entry 一覧
 - 前後関係: 解析本体の最終段であり、UI のプレビューと保存の両方がこの結果を使う
+- 現行実装の注意: ここで返す Markdown 本文は JavaScript 文字列であり、エンコーディングや BOM はまだ扱わない
 
 ```ts
 function convertSheetToMarkdown(workbook: ParsedWorkbook, sheet: ParsedSheet, options: MarkdownOptions = {}): MarkdownFile {
@@ -1766,6 +1767,12 @@ function createExportEntries(workbook: ParsedWorkbook, markdownFiles: MarkdownFi
   return entries;
 }
 ```
+
+`createCombinedMarkdownExportFile(...)` は現行実装では `{ fileName, content }` を返すだけで、`content` は未エンコードの文字列である。保存時の文字コード選択はここでは行っていない。
+
+`createExportEntries(...)` は現行実装では専用の text-encoding 層を経由して Markdown をバイト列化する。`utf-8`、`utf-16le`、`utf-16be`、`utf-32le`、`utf-32be` はブラウザ / Node で扱える。`shift_jis` は Node 側では `iconv-lite` を使ってエンコードできるが、ブラウザ単体 runtime では利用できない前提である。
+
+そのため UI 層では runtime 可用性に応じて `shift_jis` を無効化し、Node CLI では `shift_jis` を有効な保存経路として扱う。
 
 ### 22.7 今後の付録追加候補
 
@@ -3151,6 +3158,10 @@ function downloadCurrentMarkdown(): void {
 }
 ```
 
+現行実装では MIME type に `charset=utf-8` を与え、Blob 本文も UTF-8 前提で保存している。したがってブラウザ UI からの Markdown 単体保存は UTF-8 固定であり、BOM 付与や他エンコーディングへの切り替えはまだ実装されていない。
+
+将来 `encoding` / `bom` を導入する場合は、`downloadCurrentMarkdown()` が `string` を直接 Blob 化するのではなく、保存直前にエンコード済み `Uint8Array` を受け取り、それを Blob 化する構造へ変更する必要がある。
+
 ZIP 保存は `createWorkbookExportArchive(...)` を直接呼び、保存名だけ UI 側で `_xlsx2md_export` を付加する。
 
 ```ts
@@ -3174,6 +3185,10 @@ function downloadExportZip(): void {
   showToast("ZIP を保存しました");
 }
 ```
+
+ZIP 保存も現行実装では `createWorkbookExportArchive(...)` が返す `Uint8Array` をそのまま保存するだけであり、ZIP 内 Markdown の文字コードは `markdown-export.ts` 側の UTF-8 固定実装に依存している。
+
+将来 `encoding` / `bom` を導入する場合は、Markdown 単体保存と ZIP 保存で別々の変換を持つのではなく、同一のエンコード層を共有させるのが自然である。
 
 ### 22.25 shape SVG helper と `drawingHelper` 境界
 

@@ -130,6 +130,104 @@ output/
 - 全シート連結保存や ZIP 保存でも、`display` 以外のモードでは同様にモード名サフィックスを付与してよい
 - 連結 Markdown 保存名は `workbook.md` を基本とし、モード付きでは `workbook_raw.md` や `workbook_both.md` としてよい
 
+### 4.5 Markdown 出力エンコーディング
+
+- Markdown 出力時の文字エンコーディングは、明示指定できてよい
+- 既定値は `utf-8` とする
+- 初期対応の候補値は次のとおりとする
+  - `utf-8`
+  - `shift_jis`
+  - `utf-16le`
+  - `utf-16be`
+  - `utf-32le`
+  - `utf-32be`
+- `encoding` には空白を含まない機械可読な値を採用する
+- UI では人間向けに `UTF-16 LE` のような表示名を用いてよいが、内部値および CLI 値は `utf-16le` のように空白なしで統一する
+- `utf-16` や `utf-32` のようなエンディアン未確定値は採用しない
+- 未対応値が指定された場合は、自動補完せずエラーとしてよい
+
+### 4.6 BOM 付与
+
+- Markdown 出力時に BOM 付与有無を明示指定できてよい
+- `bom` の候補値は `off` または `on` とする
+- 既定値は `off` とする
+- `bom=on` の場合、選択した Unicode エンコーディングに対応する BOM をファイル先頭へ付与してよい
+  - `utf-8`: UTF-8 BOM
+  - `utf-16le`: UTF-16LE BOM
+  - `utf-16be`: UTF-16BE BOM
+  - `utf-32le`: UTF-32LE BOM
+  - `utf-32be`: UTF-32BE BOM
+- `shift_jis` は BOM を持たない前提とし、`encoding=shift_jis` かつ `bom=on` が指定された場合はエラーとしてよい
+- 本仕様における BOM は Byte Order Mark を意味し、`utf-16le` / `utf-16be` / `utf-32le` / `utf-32be` のエンディアン自体は `encoding` 値で明示する
+
+### 4.7 適用範囲
+
+- `encoding` および `bom` の指定は、少なくとも次の出力経路に共通適用できることが望ましい
+  - ブラウザ UI の Markdown 保存
+  - ブラウザ UI の ZIP 保存に含まれる Markdown
+  - Node.js CLI の Markdown 保存
+  - Node.js CLI の ZIP 保存に含まれる Markdown
+- 画面プレビューや内部文字列処理は JavaScript 文字列として保持してよく、ファイル書き出し時にのみエンコーディング変換を適用してよい
+
+### 4.8 ブラウザ UI での指定方法
+
+- 変換設定に `Encoding` と `BOM` を追加してよい
+- `Encoding` は select 形式とし、少なくとも次の表示名と内部値の対応を持ってよい
+  - `UTF-8` -> `utf-8`
+  - `Shift_JIS` -> `shift_jis`
+  - `UTF-16 LE` -> `utf-16le`
+  - `UTF-16 BE` -> `utf-16be`
+  - `UTF-32 LE` -> `utf-32le`
+  - `UTF-32 BE` -> `utf-32be`
+- `BOM` も select 形式または switch 形式としてよい
+  - select の場合は `off` / `on`
+  - switch の場合は OFF / ON を内部的に `off` / `on` として扱ってよい
+- 既定状態は `Encoding=utf-8`、`BOM=off` とする
+- `Encoding=shift_jis` の場合、UI は `BOM` を無効化してもよい
+- `Encoding=shift_jis` のまま `BOM=on` 相当状態になった場合は、保存前にエラー表示へ切り替えてよい
+- 画面プレビューの文字列内容自体は `encoding` に依存せず、保存時のバイト列のみを切り替える
+
+### 4.9 CLI での指定方法
+
+- CLI では `--encoding <value>` と `--bom <value>` を追加してよい
+- `--encoding` の候補値は次のとおりとする
+  - `utf-8`
+  - `shift_jis`
+  - `utf-16le`
+  - `utf-16be`
+  - `utf-32le`
+  - `utf-32be`
+- `--bom` の候補値は `off` または `on` とする
+- 既定値は `--encoding utf-8` および `--bom off` とする
+- CLI ヘルプには、`shift_jis` では `--bom on` を指定できないことを明示してよい
+- 無効な値が指定された場合は自動補完せず、終了コード `1` でエラー終了してよい
+
+CLI 使用例:
+
+```bash
+node scripts/xlsx2md-cli.mjs sample.xlsx --out sample.md --encoding utf-8 --bom off
+node scripts/xlsx2md-cli.mjs sample.xlsx --out sample-utf16be.md --encoding utf-16be --bom on
+node scripts/xlsx2md-cli.mjs sample.xlsx --zip sample-sjis.zip --encoding shift_jis
+```
+
+### 4.10 エラー方針
+
+- `encoding` に未対応値が指定された場合はエラーとする
+- `bom` に `off` / `on` 以外が指定された場合はエラーとする
+- `encoding=shift_jis` かつ `bom=on` はエラーとする
+- 文字変換時に対象エンコーディングへ変換できない文字が含まれる場合は、黙って置換せずエラーとしてよい
+- エラー時は、どの設定値またはどの文字列が原因かを可能な範囲でメッセージに含めてよい
+
+### 4.11 実装分離方針
+
+- Markdown 構築処理は引き続き JavaScript 文字列を返してよい
+- 文字列をファイル保存用のバイト列へ変換する責務は、Markdown 構築処理とは別レイヤーへ分離する
+- 少なくとも次のような責務分離を保ってよい
+  - Markdown 構築: Workbook から Markdown 文字列を生成する
+  - エンコード: Markdown 文字列を `encoding` と `bom` に応じた `Uint8Array` へ変換する
+  - 保存: 生成済みバイト列をブラウザ保存または CLI 書き込みへ渡す
+- ZIP 出力でも、Markdown エントリだけは同じエンコード処理を通すことが望ましい
+
 ## 5. Markdown 出力構造
 
 ### 5.1 基本構造
