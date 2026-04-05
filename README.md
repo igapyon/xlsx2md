@@ -1,10 +1,10 @@
-# xlsx2md
+# Mikuku's xlsx2md
 
-![xlsx2md OGP](docs/screenshots/xlsx2md-ogp.png)
+![Mikuku's xlsx2md OGP](docs/screenshots/xlsx2md-ogp.png)
 
 ## What is this?
 
-`xlsx2md` is a single-file web app that reads Excel (`.xlsx`) files locally and extracts prose, tables, and images as Markdown.
+`Mikuku's xlsx2md` is a single-file web app that reads Excel (`.xlsx`) files locally and extracts prose, tables, and images as Markdown.
 
 - Runs entirely in the browser with no server communication
 - Converts the whole workbook automatically without sheet-by-sheet manual work
@@ -28,9 +28,9 @@
 
 ## Feature Support Overview
 
-`xlsx2md` prioritizes extracting workbook content into meaningful Markdown rather than reproducing Excel's visual appearance exactly. The support status for common expectations is as follows.
+`Mikuku's xlsx2md` prioritizes extracting workbook content into meaningful Markdown rather than reproducing Excel's visual appearance exactly. The support status for common expectations is as follows.
 
-| Item | `xlsx2md` status | Notes |
+| Item | `Mikuku's xlsx2md` status | Notes |
 | --- | --- | --- |
 | Read `.xlsx` files | Supported | Runs locally in the browser |
 | Convert a whole workbook in one pass | Supported | Processes all sheets together |
@@ -62,7 +62,8 @@
 1. Open `xlsx2md.html` in a web browser
 2. Select an `.xlsx` file
 3. After loading, Markdown for all sheets is generated automatically
-4. Save the result as Markdown or ZIP
+4. Optionally choose output encoding and BOM settings
+5. Save the result as Markdown or ZIP
 
 ### Node CLI
 
@@ -77,6 +78,8 @@ Options:
 - `--output-mode <mode>`: `display`, `raw`, or `both`
 - `--formatting-mode <mode>`: `plain` or `github`
 - `--table-detection-mode <mode>`: `balanced` or `border`
+- `--encoding <value>`: `utf-8`, `shift_jis`, `utf-16le`, `utf-16be`, `utf-32le`, or `utf-32be`
+- `--bom <value>`: `off` or `on`
 - `--shape-details <mode>`: `include` or `exclude`
 - `--include-shape-details`: Alias for `--shape-details include`
 - `--no-header-row`: Do not treat the first row as a table header
@@ -121,6 +124,18 @@ You can also switch table detection behavior. `balanced` keeps the existing heur
 npm run cli -- ./tests/fixtures/table/table-border-priority-sample01.xlsx --table-detection-mode border
 ```
 
+You can also control output encoding and BOM. `shift_jis` does not allow BOM. Unicode encodings such as `utf-16be` and `utf-32le` can be written with or without BOM.
+
+```bash
+npm run cli -- ./tests/fixtures/xlsx2md-basic-sample01.xlsx --out /tmp/xlsx2md-utf16be.md --encoding utf-16be --bom on
+```
+
+```bash
+npm run cli -- ./tests/fixtures/xlsx2md-basic-sample01.xlsx --out /tmp/xlsx2md-sjis.md --encoding shift_jis
+```
+
+In the browser UI, `utf-8`, `utf-16le`, `utf-16be`, `utf-32le`, and `utf-32be` save directly in the browser runtime. `shift_jis` support depends on runtime support and is primarily intended for the Node.js CLI path. When the browser runtime does not support it, the UI disables the `Shift_JIS` option.
+
 ## Tech Stack
 
 - Runtime: Web Browser
@@ -151,7 +166,7 @@ For more details, see:
 
 ## Example
 
-This is the main `xlsx2md` screen where you load an Excel workbook and review the generated result.
+This is the main `Mikuku's xlsx2md` screen where you load an Excel workbook and review the generated result.
 
 ![xlsx2md screenshot 0](docs/screenshots/xlsx2md_0.png)
 
@@ -159,7 +174,7 @@ The input workbook can contain prose, tables, images, and other spreadsheet cont
 
 ![xlsx2md screenshot 1](docs/screenshots/xlsx2md_1.png)
 
-After loading the workbook, `xlsx2md` extracts the content and generates Markdown text automatically.
+After loading the workbook, `Mikuku's xlsx2md` extracts the content and generates Markdown text automatically.
 
 ![xlsx2md screenshot 2a](docs/screenshots/xlsx2md_2a.png)
 
@@ -169,7 +184,7 @@ The generated Markdown can then be previewed as a readable document.
 
 ## License
 
-### xlsx2md
+### Mikuku's xlsx2md
 
 - Released under the Apache License 2.0
 - See [LICENSE](./LICENSE) for the full license text
@@ -179,7 +194,7 @@ The generated Markdown can then be previewed as a readable document.
 
 ## What is this?
 
-`xlsx2md` は、Excel (`.xlsx`) をローカルで読み込み、地の文・表・画像を Markdown として抽出する Single-file Web App です。
+`Mikuku's xlsx2md` は、Excel (`.xlsx`) をローカルで読み込み、地の文・表・画像を Markdown として抽出する Single-file Web App です。
 
 - ブラウザ内でローカルに動作し、サーバ通信を行いません
 - Excel ブック全体を、シートごとの手作業なしで自動変換します
@@ -203,9 +218,9 @@ The generated Markdown can then be previewed as a readable document.
 
 ## 主な機能の対応状況
 
-`xlsx2md` は、Excel の見た目をそのまま再現することよりも、ブック内の情報を意味のある Markdown として取り出すことを重視しています。代表的な観点での対応状況は次のとおりです。
+`Mikuku's xlsx2md` は、Excel の見た目をそのまま再現することよりも、ブック内の情報を意味のある Markdown として取り出すことを重視しています。代表的な観点での対応状況は次のとおりです。
 
-| 項目 | `xlsx2md` の状況 | 補足 |
+| 項目 | `Mikuku's xlsx2md` の状況 | 補足 |
 | --- | --- | --- |
 | `.xlsx` を読み込める | 対応 | ブラウザ内でローカル実行できる |
 | ブック全体を一括変換できる | 対応 | 全シートをまとめて処理できる |
@@ -237,7 +252,8 @@ The generated Markdown can then be previewed as a readable document.
 1. Webブラウザで `xlsx2md.html` を開く
 2. `.xlsx` ファイルを選択する
 3. 読み込み後、自動で全シートの Markdown が生成される
-4. Markdown または ZIP を保存する
+4. 必要に応じて出力エンコーディングと BOM を選ぶ
+5. Markdown または ZIP を保存する
 
 ### Node CLI
 
@@ -252,6 +268,8 @@ CLI interface may change.
 - `--output-mode <mode>`: `display` / `raw` / `both`
 - `--formatting-mode <mode>`: `plain` / `github`
 - `--table-detection-mode <mode>`: `balanced` / `border`
+- `--encoding <value>`: `utf-8` / `shift_jis` / `utf-16le` / `utf-16be` / `utf-32le` / `utf-32be`
+- `--bom <value>`: `off` / `on`
 - `--shape-details <mode>`: `include` / `exclude`
 - `--include-shape-details`: `--shape-details include` の互換 alias
 - `--no-header-row`: 先頭行を表ヘッダーとして扱わない
@@ -296,6 +314,18 @@ npm run cli -- ./tests/fixtures/rich/rich-text-github-sample01.xlsx --formatting
 npm run cli -- ./tests/fixtures/table/table-border-priority-sample01.xlsx --table-detection-mode border
 ```
 
+出力エンコーディングや BOM も切り替えられます。`shift_jis` では BOM を指定できません。`utf-16be` や `utf-32le` などの Unicode 系エンコーディングは BOM あり・なしを選べます。
+
+```bash
+npm run cli -- ./tests/fixtures/xlsx2md-basic-sample01.xlsx --out /tmp/xlsx2md-utf16be.md --encoding utf-16be --bom on
+```
+
+```bash
+npm run cli -- ./tests/fixtures/xlsx2md-basic-sample01.xlsx --out /tmp/xlsx2md-sjis.md --encoding shift_jis
+```
+
+ブラウザ UI では、`utf-8`、`utf-16le`、`utf-16be`、`utf-32le`、`utf-32be` はそのまま保存できます。`shift_jis` はランタイム依存があるため、主に Node.js CLI での利用を想定しています。ブラウザ runtime で使えない場合、UI では `Shift_JIS` の選択肢を無効化します。
+
 補足:
 
 - `plain` は装飾を落として素朴なテキストへ寄せるモードです
@@ -335,7 +365,7 @@ npm run cli -- ./tests/fixtures/table/table-border-priority-sample01.xlsx --tabl
 
 ## Example
 
-これは `xlsx2md` のメイン画面です。ここで Excel ブックを読み込み、生成された結果を確認します。
+これは `Mikuku's xlsx2md` のメイン画面です。ここで Excel ブックを読み込み、生成された結果を確認します。
 
 ![xlsx2md screenshot 0](docs/screenshots/xlsx2md_0.png)
 
@@ -343,7 +373,7 @@ npm run cli -- ./tests/fixtures/table/table-border-priority-sample01.xlsx --tabl
 
 ![xlsx2md screenshot 1](docs/screenshots/xlsx2md_1.png)
 
-ブックを読み込むと、`xlsx2md` が内容を抽出し、Markdown テキストを自動生成します。
+ブックを読み込むと、`Mikuku's xlsx2md` が内容を抽出し、Markdown テキストを自動生成します。
 
 ![xlsx2md screenshot 2a](docs/screenshots/xlsx2md_2a.png)
 
@@ -353,7 +383,7 @@ npm run cli -- ./tests/fixtures/table/table-border-priority-sample01.xlsx --tabl
 
 ## License
 
-### xlsx2md
+### Mikuku's xlsx2md
 
 - Apache License 2.0 のもとで公開しています
 - ライセンス本文は [LICENSE](./LICENSE) を参照してください

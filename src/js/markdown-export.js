@@ -6,6 +6,7 @@
     const moduleRegistry = getXlsx2mdModuleRegistry();
     const textEncoder = new TextEncoder();
     const zipIoHelper = requireXlsx2mdZipIo();
+    const textEncodingHelper = requireXlsx2mdTextEncoding();
     const markdownNormalizeHelper = requireXlsx2mdMarkdownNormalize();
     const markdownTableEscapeHelper = requireXlsx2mdMarkdownTableEscape();
     function normalizeMarkdownLineBreaks(text) {
@@ -82,13 +83,24 @@
             .join("\n\n");
         return { fileName, content };
     }
-    function createExportEntries(workbook, markdownFiles) {
+    function encodeMarkdownText(text, options = {}) {
+        return textEncodingHelper.encodeText(text, options);
+    }
+    function createCombinedMarkdownExportPayload(workbook, markdownFiles, options = {}) {
+        const combined = createCombinedMarkdownExportFile(workbook, markdownFiles);
+        return {
+            ...combined,
+            data: encodeMarkdownText(`${combined.content}\n`, options),
+            mimeType: textEncodingHelper.createTextMimeType(options)
+        };
+    }
+    function createExportEntries(workbook, markdownFiles, options = {}) {
         const entries = [];
         if (markdownFiles.length > 0) {
-            const combined = createCombinedMarkdownExportFile(workbook, markdownFiles);
+            const combined = createCombinedMarkdownExportPayload(workbook, markdownFiles, options);
             entries.push({
                 name: `output/${combined.fileName}`,
-                data: textEncoder.encode(`${combined.content}\n`)
+                data: combined.data
             });
         }
         for (const sheet of workbook.sheets) {
@@ -109,10 +121,12 @@
         }
         return entries;
     }
-    function createWorkbookExportArchive(workbook, markdownFiles) {
-        return zipIoHelper.createStoredZip(createExportEntries(workbook, markdownFiles));
+    function createWorkbookExportArchive(workbook, markdownFiles, options = {}) {
+        return zipIoHelper.createStoredZip(createExportEntries(workbook, markdownFiles, options));
     }
     const markdownExportApi = {
+        encodeMarkdownText,
+        createCombinedMarkdownExportPayload,
         escapeMarkdownCell,
         renderMarkdownTable,
         sanitizeFileNameSegment,

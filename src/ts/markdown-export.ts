@@ -42,6 +42,12 @@
   };
 
   type ExportEntry = { name: string; data: Uint8Array };
+  type MarkdownEncoding = "utf-8" | "shift_jis" | "utf-16le" | "utf-16be" | "utf-32le" | "utf-32be";
+  type MarkdownBomMode = "off" | "on";
+  type MarkdownEncodingOptions = {
+    encoding?: MarkdownEncoding | string | null;
+    bom?: MarkdownBomMode | string | null;
+  };
 
   type WorkbookLike = {
     name: string;
@@ -59,6 +65,7 @@
 
   const textEncoder = new TextEncoder();
   const zipIoHelper = requireXlsx2mdZipIo();
+  const textEncodingHelper = requireXlsx2mdTextEncoding();
   const markdownNormalizeHelper = requireXlsx2mdMarkdownNormalize();
   const markdownTableEscapeHelper = requireXlsx2mdMarkdownTableEscape();
 
@@ -148,13 +155,30 @@
     return { fileName, content };
   }
 
-  function createExportEntries(workbook: WorkbookLike, markdownFiles: MarkdownFile[]): ExportEntry[] {
+  function encodeMarkdownText(text: string, options: MarkdownEncodingOptions = {}): Uint8Array {
+    return textEncodingHelper.encodeText(text, options);
+  }
+
+  function createCombinedMarkdownExportPayload(
+    workbook: WorkbookLike,
+    markdownFiles: MarkdownFile[],
+    options: MarkdownEncodingOptions = {}
+  ): { fileName: string; content: string; data: Uint8Array; mimeType: string } {
+    const combined = createCombinedMarkdownExportFile(workbook, markdownFiles);
+    return {
+      ...combined,
+      data: encodeMarkdownText(`${combined.content}\n`, options),
+      mimeType: textEncodingHelper.createTextMimeType(options)
+    };
+  }
+
+  function createExportEntries(workbook: WorkbookLike, markdownFiles: MarkdownFile[], options: MarkdownEncodingOptions = {}): ExportEntry[] {
     const entries: ExportEntry[] = [];
     if (markdownFiles.length > 0) {
-      const combined = createCombinedMarkdownExportFile(workbook, markdownFiles);
+      const combined = createCombinedMarkdownExportPayload(workbook, markdownFiles, options);
       entries.push({
         name: `output/${combined.fileName}`,
-        data: textEncoder.encode(`${combined.content}\n`)
+        data: combined.data
       });
     }
     for (const sheet of workbook.sheets) {
@@ -175,11 +199,17 @@
     return entries;
   }
 
-  function createWorkbookExportArchive(workbook: WorkbookLike, markdownFiles: MarkdownFile[]): Uint8Array {
-    return zipIoHelper.createStoredZip(createExportEntries(workbook, markdownFiles));
+  function createWorkbookExportArchive(
+    workbook: WorkbookLike,
+    markdownFiles: MarkdownFile[],
+    options: MarkdownEncodingOptions = {}
+  ): Uint8Array {
+    return zipIoHelper.createStoredZip(createExportEntries(workbook, markdownFiles, options));
   }
 
   const markdownExportApi = {
+    encodeMarkdownText,
+    createCombinedMarkdownExportPayload,
     escapeMarkdownCell,
     renderMarkdownTable,
     sanitizeFileNameSegment,

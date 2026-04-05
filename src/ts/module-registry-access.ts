@@ -28,6 +28,20 @@
   type MarkdownTableEscapeApi = {
     escapeMarkdownTableCell: (text: string) => string;
   };
+  type TextEncodingApi = {
+    normalizeEncoding: (value?: string | null) => "utf-8" | "shift_jis" | "utf-16le" | "utf-16be" | "utf-32le" | "utf-32be";
+    normalizeBom: (value?: string | null) => "off" | "on";
+    getBomBytes: (encoding: "utf-8" | "shift_jis" | "utf-16le" | "utf-16be" | "utf-32le" | "utf-32be") => Uint8Array;
+    isEncodingAvailable: (value?: string | null) => boolean;
+    encodeText: (text: string, options?: {
+      encoding?: "utf-8" | "shift_jis" | "utf-16le" | "utf-16be" | "utf-32le" | "utf-32be" | string | null;
+      bom?: "off" | "on" | string | null;
+    }) => Uint8Array;
+    createTextMimeType: (options?: {
+      encoding?: "utf-8" | "shift_jis" | "utf-16le" | "utf-16be" | "utf-32le" | "utf-32be" | string | null;
+      bom?: "off" | "on" | string | null;
+    }) => string;
+  };
   type Xlsx2mdRichTextParserModule<TCell> = {
     createRichTextParserApi: (deps: {
       normalizeMarkdownText?: (text: string) => string;
@@ -202,6 +216,18 @@
     ) => void;
   };
   type Xlsx2mdMarkdownExportModule<TParsedWorkbook, TMarkdownFile, TExportEntry> = {
+    encodeMarkdownText: (text: string, options?: {
+      encoding?: "utf-8" | "shift_jis" | "utf-16le" | "utf-16be" | "utf-32le" | "utf-32be" | string | null;
+      bom?: "off" | "on" | string | null;
+    }) => Uint8Array;
+    createCombinedMarkdownExportPayload: (
+      workbook: TParsedWorkbook,
+      markdownFiles: TMarkdownFile[],
+      options?: {
+        encoding?: "utf-8" | "shift_jis" | "utf-16le" | "utf-16be" | "utf-32le" | "utf-32be" | string | null;
+        bom?: "off" | "on" | string | null;
+      }
+    ) => { fileName: string; content: string; data: Uint8Array; mimeType: string };
     renderMarkdownTable: (rows: string[][], treatFirstRowAsHeader: boolean) => string;
     createOutputFileName: (
       workbookName: string,
@@ -212,8 +238,22 @@
     ) => string;
     createSummaryText: (markdownFile: TMarkdownFile) => string;
     createCombinedMarkdownExportFile: (workbook: TParsedWorkbook, markdownFiles: TMarkdownFile[]) => { fileName: string; content: string };
-    createExportEntries: (workbook: TParsedWorkbook, markdownFiles: TMarkdownFile[]) => TExportEntry[];
-    createWorkbookExportArchive: (workbook: TParsedWorkbook, markdownFiles: TMarkdownFile[]) => Uint8Array;
+    createExportEntries: (
+      workbook: TParsedWorkbook,
+      markdownFiles: TMarkdownFile[],
+      options?: {
+        encoding?: "utf-8" | "shift_jis" | "utf-16le" | "utf-16be" | "utf-32le" | "utf-32be" | string | null;
+        bom?: "off" | "on" | string | null;
+      }
+    ) => TExportEntry[];
+    createWorkbookExportArchive: (
+      workbook: TParsedWorkbook,
+      markdownFiles: TMarkdownFile[],
+      options?: {
+        encoding?: "utf-8" | "shift_jis" | "utf-16le" | "utf-16be" | "utf-32le" | "utf-32be" | string | null;
+        bom?: "off" | "on" | string | null;
+      }
+    ) => Uint8Array;
     normalizeMarkdownLineBreaks: (text: string) => string;
     textEncoder: TextEncoder;
   };
@@ -449,6 +489,7 @@
     requireXlsx2mdRuntimeEnv?: () => RuntimeEnvApi;
     requireXlsx2mdMarkdownNormalize?: () => MarkdownNormalizeApi;
     requireXlsx2mdZipIo?: () => ZipIoApi;
+    requireXlsx2mdTextEncoding?: () => TextEncodingApi;
     getXlsx2mdDrawingHelperModule?: () => Xlsx2mdDrawingHelperModule | null;
     requireXlsx2mdNarrativeStructureModule?: <TNarrativeBlock>() => Xlsx2mdNarrativeStructureModule<TNarrativeBlock>;
     requireXlsx2mdRichTextPlainFormatterModule?: () => Xlsx2mdRichTextPlainFormatterModule;
@@ -508,6 +549,16 @@
     }).getXlsx2mdModuleRegistry().requireModule<ZipIoApi>(
       "zipIo",
       "xlsx2md zip io module is not loaded"
+    );
+  };
+  (globalThis as typeof globalThis & {
+    requireXlsx2mdTextEncoding?: () => TextEncodingApi;
+  }).requireXlsx2mdTextEncoding = function requireXlsx2mdTextEncoding(): TextEncodingApi {
+    return (globalThis as typeof globalThis & {
+      getXlsx2mdModuleRegistry: () => Xlsx2mdModuleRegistry;
+    }).getXlsx2mdModuleRegistry().requireModule<TextEncodingApi>(
+      "textEncoding",
+      "xlsx2md text encoding module is not loaded"
     );
   };
   (globalThis as typeof globalThis & {

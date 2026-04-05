@@ -19,6 +19,9 @@
     globalThis.requireXlsx2mdZipIo = function requireXlsx2mdZipIo() {
         return globalThis.getXlsx2mdModuleRegistry().requireModule("zipIo", "xlsx2md zip io module is not loaded");
     };
+    globalThis.requireXlsx2mdTextEncoding = function requireXlsx2mdTextEncoding() {
+        return globalThis.getXlsx2mdModuleRegistry().requireModule("textEncoding", "xlsx2md text encoding module is not loaded");
+    };
     globalThis.requireXlsx2mdMarkdownEscape = function requireXlsx2mdMarkdownEscape() {
         return globalThis.getXlsx2mdModuleRegistry().requireModule("markdownEscape", "xlsx2md markdown escape module is not loaded");
     };
