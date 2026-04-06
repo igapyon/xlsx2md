@@ -15,8 +15,13 @@
             }
             return map;
         }
-        function createSheetAnchorId(workbookName, sheetIndex, sheetName, options = {}) {
-            return deps.createOutputFileName(workbookName, sheetIndex, sheetName, options.outputMode || "display", options.formattingMode || "plain").replace(/\.md$/i, "");
+        function createHeadingFragment(text) {
+            return String(text || "")
+                .trim()
+                .toLowerCase()
+                .replace(/<[^>]+>/g, "")
+                .replace(/[^\p{L}\p{N}\s_-]+/gu, "")
+                .replace(/\s+/g, "-");
         }
         function parseInternalHyperlinkLocation(location, currentSheetName) {
             const normalized = String(location || "").trim().replace(/^#/, "");
@@ -51,7 +56,7 @@
             if (!targetSheet || !workbook) {
                 return traceText ? `${label} (${traceText})` : label;
             }
-            const href = `#${createSheetAnchorId(workbook.name, targetSheet.index, targetSheet.name, options)}`;
+            const href = `#${createHeadingFragment(targetSheet.name)}`;
             return traceText && traceText !== targetSheet.name
                 ? `[${label}](${href}) (${traceText})`
                 : `[${label}](${href})`;
@@ -272,7 +277,6 @@
                 });
             }
             const fileName = deps.createOutputFileName(workbook.name, sheet.index, sheet.name, options.outputMode || "display", options.formattingMode || "plain");
-            const sheetAnchorId = createSheetAnchorId(workbook.name, sheet.index, sheet.name, options);
             let tableCounter = 1;
             for (const table of tables) {
                 const rows = deps.matrixFromCandidate(sheet, table, options, buildCellMap, (cell, tableOptions) => formatCellForMarkdown(cell, tableOptions, workbook, sheet));
@@ -282,7 +286,7 @@
                 sections.push({
                     sortRow: table.startRow,
                     sortCol: table.startCol,
-                    markdown: `### Table ${String(tableCounter).padStart(3, "0")} (${deps.formatRange(table.startRow, table.startCol, table.endRow, table.endCol)})\n\n${tableMarkdown}\n`,
+                    markdown: `### Table: ${String(tableCounter).padStart(3, "0")} (${deps.formatRange(table.startRow, table.startCol, table.endRow, table.endCol)})\n\n${tableMarkdown}\n`,
                     kind: "table"
                 });
                 tableCounter += 1;
@@ -312,24 +316,20 @@
             const imageSection = sheet.images.length > 0
                 ? [
                     "",
-                    "## Images",
-                    "",
                     ...sheet.images.map((image, index) => [
-                        `### Image ${String(index + 1).padStart(3, "0")} (${image.anchor})`,
+                        `### Image: ${String(index + 1).padStart(3, "0")} (${image.anchor})`,
                         `- File: ${image.path}`,
                         "",
                         `![${image.filename}](${image.path})`
                     ].join("\n"))
-                ].join("\n")
+                ].join("\n\n")
                 : "";
             const chartSection = charts.length > 0
                 ? [
                     "",
-                    "## Charts",
-                    "",
                     ...charts.map((chart, index) => {
                         const lines = [
-                            `### Chart ${String(index + 1).padStart(3, "0")} (${chart.anchor})`,
+                            `### Chart: ${String(index + 1).padStart(3, "0")} (${chart.anchor})`,
                             `- Title: ${chart.title || "(none)"}`,
                             `- Type: ${chart.chartType}`
                         ];
@@ -347,46 +347,70 @@
                         }
                         return lines.join("\n");
                     })
-                ].join("\n")
+                ].join("\n\n")
                 : "";
             const includeShapeDetails = options.includeShapeDetails !== false;
             const shapeSection = includeShapeDetails && shapes.length > 0
                 ? [
                     "",
-                    "## Shape Blocks",
-                    "",
-                    ...shapeBlocks.map((block, blockIndex) => [
-                        `### Shape Block ${String(blockIndex + 1).padStart(3, "0")} (${deps.formatRange(block.startRow, block.startCol, block.endRow, block.endCol)})`,
-                        `- Shapes: ${block.shapeIndexes.map((shapeIndex) => `Shape ${String(shapeIndex + 1).padStart(3, "0")}`).join(", ")}`,
-                        `- anchorRange: ${deps.colToLetters(block.startCol)}${block.startRow}-${deps.colToLetters(block.endCol)}${block.endRow}`
-                    ].join("\n")),
-                    "",
-                    "## Shapes",
-                    "",
-                    ...shapes.map((shape, index) => {
-                        const lines = [
-                            `### Shape ${String(index + 1).padStart(3, "0")} (${shape.anchor})`,
-                            ...deps.renderHierarchicalRawEntries(shape.rawEntries)
-                        ];
-                        if (shape.svgPath) {
-                            lines.push(`- SVG: ${shape.svgPath}`);
-                            lines.push("");
-                            lines.push(`![${shape.svgFilename || `shape_${String(index + 1).padStart(3, "0")}.svg`}](${shape.svgPath})`);
+                    ...shapeBlocks.map((block, blockIndex) => {
+                        const shapeDetails = block.shapeIndexes
+                            .map((shapeIndex) => {
+                            const shape = shapes[shapeIndex];
+                            if (!shape)
+                                return "";
+                            const lines = [
+                                `#### Shape: ${String(shapeIndex + 1).padStart(3, "0")} (${shape.anchor})`,
+                                ...deps.renderHierarchicalRawEntries(shape.rawEntries)
+                            ];
+                            if (shape.svgPath) {
+                                lines.push(`- SVG: ${shape.svgPath}`);
+                                lines.push("");
+                                lines.push(`![${shape.svgFilename || `shape_${String(shapeIndex + 1).padStart(3, "0")}.svg`}](${shape.svgPath})`);
+                            }
+                            return lines.join("\n");
+                        })
+                            .filter(Boolean)
+                            .join("\n\n");
+                        return [
+                            `### Shape Block: ${String(blockIndex + 1).padStart(3, "0")} (${deps.formatRange(block.startRow, block.startCol, block.endRow, block.endCol)})`,
+                            `- Shapes: ${block.shapeIndexes.map((shapeIndex) => `Shape ${String(shapeIndex + 1).padStart(3, "0")}`).join(", ")}`,
+                            `- anchorRange: ${deps.colToLetters(block.startCol)}${block.startRow}-${deps.colToLetters(block.endCol)}${block.endRow}`,
+                            ...(shapeDetails ? ["", shapeDetails] : [])
+                        ].join("\n");
+                    }),
+                    ...(() => {
+                        const grouped = new Set(shapeBlocks.flatMap((block) => block.shapeIndexes));
+                        const ungrouped = shapes
+                            .map((shape, index) => ({ shape, index }))
+                            .filter(({ index }) => !grouped.has(index));
+                        if (ungrouped.length === 0) {
+                            return [];
                         }
-                        return lines.join("\n");
-                    })
-                ].join("\n")
+                        return [
+                            "",
+                            "### Ungrouped Shapes",
+                            "",
+                            ...ungrouped.map(({ shape, index }) => {
+                                const lines = [
+                                    `#### Shape: ${String(index + 1).padStart(3, "0")} (${shape.anchor})`,
+                                    ...deps.renderHierarchicalRawEntries(shape.rawEntries)
+                                ];
+                                if (shape.svgPath) {
+                                    lines.push(`- SVG: ${shape.svgPath}`);
+                                    lines.push("");
+                                    lines.push(`![${shape.svgFilename || `shape_${String(index + 1).padStart(3, "0")}.svg`}](${shape.svgPath})`);
+                                }
+                                return lines.join("\n");
+                            })
+                        ];
+                    })()
+                ].join("\n\n")
                 : "";
             const markdown = [
-                `<a id="${sheetAnchorId}"></a>`,
+                `# Book: ${workbook.name}`,
                 "",
-                `# ${sheet.name}`,
-                "",
-                "## Source Information",
-                `- Workbook: ${workbook.name}`,
-                `- Sheet: ${sheet.name}`,
-                "",
-                "## Body",
+                `## Sheet: ${sheet.name}`,
                 "",
                 body || "_No extractable body content was found._",
                 chartSection,

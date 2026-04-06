@@ -11,6 +11,9 @@
     }
     let currentWorkbook = null;
     let currentFiles = [];
+    let currentWorkbookBytes = null;
+    let currentWorkbookName = "";
+    let currentParsedIncludeShapeDetails = null;
     function getElement(id) {
         const element = document.getElementById(id);
         if (!element) {
@@ -349,9 +352,6 @@
         }
         getElement("markdownOutput").textContent = markdown;
     }
-    function createMarkdownChunkLabel(fileName) {
-        return String(fileName || "").replace(/\.md$/i, "");
-    }
     function clearError() {
         const errorAlert = getElement("errorAlert");
         if (typeof errorAlert.clear === "function") {
@@ -403,9 +403,11 @@
             updatePreviewModeBanner(getSelectedOutputMode());
             return;
         }
-        const combinedMarkdown = currentFiles
-            .map((file) => `<!-- ${createMarkdownChunkLabel(file.fileName)} -->\n${file.markdown}`)
-            .join("\n\n");
+        if (!currentWorkbook) {
+            showError("Workbook context is missing.");
+            return;
+        }
+        const combinedMarkdown = xlsx2md.createCombinedMarkdownExportFile(currentWorkbook, currentFiles).content;
         const outputMode = ((_a = currentFiles[0]) === null || _a === void 0 ? void 0 : _a.summary.outputMode) || "display";
         updatePreviewModeBanner(outputMode);
         setSummaryHtml(renderAnalysisSummary(currentFiles, (currentWorkbook === null || currentWorkbook === void 0 ? void 0 : currentWorkbook.name) || "workbook.xlsx"));
@@ -470,13 +472,39 @@
             showError(error instanceof Error ? error.message : "Failed to save ZIP archive.");
         }
     }
-    function convertCurrentWorkbook(showSuccessToast = true) {
+    async function ensureWorkbookParsedForCurrentOptions() {
+        if (!currentWorkbookBytes || !currentWorkbookName) {
+            return currentWorkbook !== null;
+        }
+        const includeShapeDetails = getOptions().includeShapeDetails;
+        if (currentWorkbook && currentParsedIncludeShapeDetails === includeShapeDetails) {
+            return true;
+        }
+        setLoading(true, "Analyzing xlsx");
+        try {
+            currentWorkbook = await xlsx2md.parseWorkbook(currentWorkbookBytes, currentWorkbookName, { includeShapeDetails });
+            currentParsedIncludeShapeDetails = includeShapeDetails;
+            return true;
+        }
+        catch (error) {
+            showError(error instanceof Error ? error.message : "Failed to load the xlsx file.");
+            return false;
+        }
+        finally {
+            setLoading(false);
+        }
+    }
+    async function convertCurrentWorkbook(showSuccessToast = true) {
         clearError();
-        if (!currentWorkbook) {
+        if (!currentWorkbook && !currentWorkbookBytes) {
             showError("Load an xlsx file first.");
             return;
         }
         try {
+            const ready = await ensureWorkbookParsedForCurrentOptions();
+            if (!ready || !currentWorkbook) {
+                return;
+            }
             currentFiles = xlsx2md.convertWorkbookToMarkdownFiles(currentWorkbook, getOptions());
             renderCurrentSelection();
             if (showSuccessToast) {
@@ -492,14 +520,22 @@
         setLoading(true, "Loading xlsx");
         try {
             const arrayBuffer = await file.arrayBuffer();
-            currentWorkbook = await xlsx2md.parseWorkbook(arrayBuffer, file.name);
+            currentWorkbookBytes = arrayBuffer;
+            currentWorkbookName = file.name;
+            currentWorkbook = await xlsx2md.parseWorkbook(arrayBuffer, file.name, {
+                includeShapeDetails: getOptions().includeShapeDetails
+            });
+            currentParsedIncludeShapeDetails = getOptions().includeShapeDetails;
             currentFiles = [];
-            convertCurrentWorkbook(false);
+            await convertCurrentWorkbook(false);
             showToast("Loaded xlsx and generated Markdown.");
         }
         catch (error) {
             currentWorkbook = null;
             currentFiles = [];
+            currentWorkbookBytes = null;
+            currentWorkbookName = "";
+            currentParsedIncludeShapeDetails = null;
             setSummaryText("Failed to load the workbook.");
             setScoreSummaryHtml('<div class="md-summary-empty">No conversion yet.</div>');
             setFormulaSummaryHtml('<div class="md-summary-empty">No conversion yet.</div>');
@@ -524,7 +560,7 @@
     }
     function bindActions() {
         getElement("convertBtn").addEventListener("click", () => {
-            convertCurrentWorkbook(true);
+            void convertCurrentWorkbook(true);
         });
         getElement("downloadBtn").addEventListener("click", () => {
             downloadCurrentMarkdown();

@@ -14,6 +14,30 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 describe("xlsx2md cli", () => {
+  it("finishes a small fixture conversion within a reasonable time budget", async () => {
+    const workspace = mkdtempSync(path.join(tmpdir(), "xlsx2md-cli-"));
+    const fixturePath = path.resolve(__dirname, "./fixtures/edge/edge-empty-sample01.xlsx");
+    const outputPath = path.join(workspace, "edge-empty.md");
+
+    try {
+      const startedAt = performance.now();
+      await execFileAsync(process.execPath, [
+        path.resolve(__dirname, "../scripts/xlsx2md-cli.mjs"),
+        fixturePath,
+        "--out",
+        outputPath
+      ], {
+        cwd: path.resolve(__dirname, "..")
+      });
+      const elapsedMs = performance.now() - startedAt;
+
+      expect(readFileSync(outputPath, "utf8")).toContain("# ");
+      expect(elapsedMs).toBeLessThan(5000);
+    } finally {
+      rmSync(workspace, { recursive: true, force: true });
+    }
+  }, 10000);
+
   it("writes combined markdown from a workbook", async () => {
     const workspace = mkdtempSync(path.join(tmpdir(), "xlsx2md-cli-"));
     const fixturePath = path.resolve(__dirname, "./fixtures/xlsx2md-basic-sample01.xlsx");
@@ -31,7 +55,7 @@ describe("xlsx2md cli", () => {
 
       const outputText = readFileSync(outputPath, "utf8");
       expect(outputText).toContain("# ");
-      expect(outputText).toContain("<!-- ");
+      expect(outputText).toContain("## ");
     } finally {
       rmSync(workspace, { recursive: true, force: true });
     }
@@ -195,7 +219,7 @@ describe("xlsx2md cli", () => {
       const outputBytes = readFileSync(outputPath);
       const outputText = new TextDecoder("shift_jis").decode(outputBytes);
       expect(outputText).toContain("# ");
-      expect(outputText).toContain("<!-- ");
+      expect(outputText).toContain("## ");
     } finally {
       rmSync(workspace, { recursive: true, force: true });
     }

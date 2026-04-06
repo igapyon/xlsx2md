@@ -5,7 +5,13 @@ import path from "node:path";
 import { DecompressionStream as NodeDecompressionStream } from "node:stream/web";
 import { fileURLToPath } from "node:url";
 
-import { JSDOM } from "jsdom";
+import {
+  DOMParser as XmldomParser,
+  XMLSerializer as XmldomSerializer,
+  Node as XmldomNode,
+  Document as XmldomDocument,
+  Element as XmldomElement
+} from "@xmldom/xmldom";
 
 import { XLSX2MD_CORE_JS_ORDER } from "./xlsx2md-module-order.mjs";
 
@@ -19,15 +25,11 @@ let cachedRootDir = null;
 
 export function installNodeDomGlobals() {
   if (typeof globalThis.DOMParser !== "function") {
-    const dom = new JSDOM("<!doctype html><html><body></body></html>");
-    globalThis.window ??= dom.window;
-    globalThis.document ??= dom.window.document;
-    globalThis.DOMParser = dom.window.DOMParser;
-    globalThis.Node = dom.window.Node;
-    globalThis.Document = dom.window.Document;
-    globalThis.Element = dom.window.Element;
-    globalThis.ParentNode = dom.window.ParentNode;
-    globalThis.XMLSerializer ??= dom.window.XMLSerializer;
+    globalThis.DOMParser = XmldomParser;
+    globalThis.Node = XmldomNode;
+    globalThis.Document = XmldomDocument;
+    globalThis.Element = XmldomElement;
+    globalThis.XMLSerializer ??= XmldomSerializer;
   }
 
   if (typeof globalThis.Blob === "undefined" || typeof globalThis.Blob.prototype?.stream !== "function") {
