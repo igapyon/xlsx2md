@@ -199,9 +199,10 @@
             }
         };
     }
-    async function parseWorkbook(arrayBuffer, workbookName = "workbook.xlsx") {
+    async function parseWorkbook(arrayBuffer, workbookName = "workbook.xlsx", options = {}) {
         const worksheetParseDeps = createWorksheetParseDeps();
         const formulaResolverDeps = createFormulaResolverDeps();
+        const parseShapes = options.includeShapeDetails !== false;
         return workbookLoaderHelper.parseWorkbook(arrayBuffer, workbookName, {
             unzipEntries: zipIoHelper.unzipEntries,
             parseSharedStrings: sharedStringsHelper.parseSharedStrings,
@@ -210,7 +211,10 @@
             xmlToDocument,
             decodeXmlText,
             getTextContent,
-            parseWorksheet: (files, name, sheetPath, sheetIndex, sharedStrings, cellStyles) => worksheetParserHelper.parseWorksheet(files, name, sheetPath, sheetIndex, sharedStrings, cellStyles, worksheetParseDeps),
+            parseWorksheet: (files, name, sheetPath, sheetIndex, sharedStrings, cellStyles) => worksheetParserHelper.parseWorksheet(files, name, sheetPath, sheetIndex, sharedStrings, cellStyles, {
+                ...worksheetParseDeps,
+                parseShapes
+            }),
             postProcessWorkbook: (workbook) => {
                 formulaResolverHelper.resolveSimpleFormulaReferences(workbook, formulaResolverDeps);
             }

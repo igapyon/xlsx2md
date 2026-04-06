@@ -209,7 +209,7 @@ describe("xlsx2md main ui", () => {
     fileInput.dispatchEvent(new Event("change"));
     await flushAsyncWork();
 
-    expect(api.parseWorkbook).toHaveBeenCalledWith(expect.any(ArrayBuffer), "sample.xlsx");
+    expect(api.parseWorkbook).toHaveBeenCalledWith(expect.any(ArrayBuffer), "sample.xlsx", { includeShapeDetails: false });
     expect(api.convertWorkbookToMarkdownFiles).toHaveBeenCalledWith(
       expect.objectContaining({ name: "book.xlsx" }),
       expect.objectContaining({
@@ -225,7 +225,11 @@ describe("xlsx2md main ui", () => {
     );
     expect(document.getElementById("downloadBtn").disabled).toBe(false);
     expect(document.getElementById("exportZipBtn").disabled).toBe(false);
-    expect(document.getElementById("markdownPreview").dataset.rendered).toContain("# Sheet1");
+    expect(api.createCombinedMarkdownExportFile).toHaveBeenCalledWith(
+      expect.objectContaining({ name: "book.xlsx" }),
+      expect.any(Array)
+    );
+    expect(document.getElementById("markdownPreview").dataset.rendered).toContain("# combined");
   });
 
   it("disables shift_jis in browser-only runtime", () => {
@@ -237,5 +241,28 @@ describe("xlsx2md main ui", () => {
     expect(shiftJisOption.disabled).toBe(true);
     expect(shiftJisOption.text).toContain("CLI only");
     expect(document.getElementById("encodingNotice").textContent).toContain("`utf-8`");
+  });
+
+  it("reparses the workbook when includeShapeDetails changes before reconvert", async () => {
+    const api = bootMain();
+    const fileInput = document.getElementById("xlsxFileInput");
+    const file = {
+      name: "sample.xlsx",
+      arrayBuffer: async () => new ArrayBuffer(8)
+    };
+    Object.defineProperty(fileInput, "files", {
+      configurable: true,
+      get: () => [file]
+    });
+
+    fileInput.dispatchEvent(new Event("change"));
+    await flushAsyncWork();
+    api.parseWorkbook.mockClear();
+
+    document.getElementById("includeShapeDetailsEnabled").checked = false;
+    document.getElementById("convertBtn").click();
+    await flushAsyncWork();
+
+    expect(api.parseWorkbook).toHaveBeenCalledWith(expect.any(ArrayBuffer), "sample.xlsx", { includeShapeDetails: false });
   });
 });

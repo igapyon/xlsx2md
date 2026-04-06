@@ -25,6 +25,12 @@
 
   const textDecoder = new TextDecoder("utf-8");
   const textEncoder = new TextEncoder();
+  const nodeRequire = (() => {
+    const candidate = (globalThis as typeof globalThis & {
+      __xlsx2mdNodeRequire?: ((id: string) => unknown) | undefined;
+    }).__xlsx2mdNodeRequire;
+    return typeof candidate === "function" ? candidate : null;
+  })();
   const crcTable = buildCrc32Table();
   const fixedZipEntryTimestamp = toDosDateTime(2025, 1, 1, 0, 0, 0);
   const utf8FileNameFlag = 0x0800;
@@ -84,9 +90,18 @@
 
   async function inflateRaw(data: Uint8Array): Promise<Uint8Array> {
     if (typeof DecompressionStream === "function") {
-      const stream = new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
-      const buffer = await new Response(stream).arrayBuffer();
-      return new Uint8Array(buffer);
+      try {
+        const stream = new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+        const buffer = await new Response(stream).arrayBuffer();
+        return new Uint8Array(buffer);
+      } catch (_error) {
+        // Fall through to the Node zlib path when the runtime exposes
+        // DecompressionStream but lacks "deflate-raw" support.
+      }
+    }
+    if (nodeRequire) {
+      const zlib = nodeRequire("node:zlib") as { inflateRawSync: (input: Uint8Array) => Uint8Array };
+      return Uint8Array.from(zlib.inflateRawSync(data));
     }
     throw new Error("This environment does not support ZIP deflate decompression.");
   }

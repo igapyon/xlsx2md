@@ -210,6 +210,10 @@
     tableDetectionMode?: "balanced" | "border";
   };
 
+  type ParseWorkbookOptions = {
+    includeShapeDetails?: boolean;
+  };
+
   type MarkdownFile = {
     fileName: string;
     sheetName: string;
@@ -560,9 +564,14 @@
     };
   }
 
-  async function parseWorkbook(arrayBuffer: ArrayBuffer, workbookName = "workbook.xlsx"): Promise<ParsedWorkbook> {
+  async function parseWorkbook(
+    arrayBuffer: ArrayBuffer,
+    workbookName = "workbook.xlsx",
+    options: ParseWorkbookOptions = {}
+  ): Promise<ParsedWorkbook> {
     const worksheetParseDeps = createWorksheetParseDeps();
     const formulaResolverDeps = createFormulaResolverDeps();
+    const parseShapes = options.includeShapeDetails !== false;
     return workbookLoaderHelper.parseWorkbook(arrayBuffer, workbookName, {
       unzipEntries: zipIoHelper.unzipEntries,
       parseSharedStrings: sharedStringsHelper.parseSharedStrings,
@@ -578,7 +587,10 @@
         sheetIndex: number,
         sharedStrings: SharedStringEntry[],
         cellStyles: CellStyleInfo[]
-      ) => worksheetParserHelper.parseWorksheet(files, name, sheetPath, sheetIndex, sharedStrings, cellStyles, worksheetParseDeps),
+      ) => worksheetParserHelper.parseWorksheet(files, name, sheetPath, sheetIndex, sharedStrings, cellStyles, {
+        ...worksheetParseDeps,
+        parseShapes
+      }),
       postProcessWorkbook: (workbook: ParsedWorkbook) => {
         formulaResolverHelper.resolveSimpleFormulaReferences(workbook, formulaResolverDeps);
       }

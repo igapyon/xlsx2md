@@ -53,11 +53,18 @@
     name: string;
     sheets: Array<{ name: string; index: number }>;
   };
+  type ParseWorkbookOptions = {
+    includeShapeDetails?: boolean;
+  };
 
   const moduleRegistry = getXlsx2mdModuleRegistry();
   const textEncoding = requireXlsx2mdTextEncoding();
   const xlsx2md = moduleRegistry.getModule<{
-    parseWorkbook: (arrayBuffer: ArrayBuffer, workbookName?: string) => Promise<ParsedWorkbook & { sheets: Array<Record<string, unknown>> }>;
+    parseWorkbook: (
+      arrayBuffer: ArrayBuffer,
+      workbookName?: string,
+      options?: ParseWorkbookOptions
+    ) => Promise<ParsedWorkbook & { sheets: Array<Record<string, unknown>> }>;
     convertWorkbookToMarkdownFiles: (workbook: ParsedWorkbook & { sheets: Array<Record<string, unknown>> }, options?: MarkdownOptions) => WorkbookFile[];
     encodeMarkdownText: (text: string, options?: MarkdownEncodingOptions) => Uint8Array;
     createSummaryText: (file: WorkbookFile) => string;
@@ -80,6 +87,9 @@
 
   let currentWorkbook: (ParsedWorkbook & { sheets: Array<Record<string, unknown>> }) | null = null;
   let currentFiles: WorkbookFile[] = [];
+  let currentWorkbookBytes: ArrayBuffer | null = null;
+  let currentWorkbookName = "";
+  let currentParsedIncludeShapeDetails: boolean | null = null;
 
   function getElement<T extends HTMLElement>(id: string): T {
     const element = document.getElementById(id);
@@ -459,10 +469,6 @@
     getElement<HTMLElement>("markdownOutput").textContent = markdown;
   }
 
-  function createMarkdownChunkLabel(fileName: string): string {
-    return String(fileName || "").replace(/\.md$/i, "");
-  }
-
   function clearError(): void {
     const errorAlert = getElement<HTMLElement>("errorAlert") as HTMLElement & { clear?: () => void };
     if (typeof errorAlert.clear === "function") {
@@ -512,9 +518,11 @@
       updatePreviewModeBanner(getSelectedOutputMode());
       return;
     }
-    const combinedMarkdown = currentFiles
-      .map((file) => `<!-- ${createMarkdownChunkLabel(file.fileName)} -->\n${file.markdown}`)
-      .join("\n\n");
+    if (!currentWorkbook) {
+      showError("Workbook context is missing.");
+      return;
+    }
+    const combinedMarkdown = xlsx2md.createCombinedMarkdownExportFile(currentWorkbook, currentFiles).content;
     const outputMode = currentFiles[0]?.summary.outputMode || "display";
     updatePreviewModeBanner(outputMode);
     setSummaryHtml(renderAnalysisSummary(currentFiles, currentWorkbook?.name || "workbook.xlsx"));
@@ -578,13 +586,38 @@
     }
   }
 
-  function convertCurrentWorkbook(showSuccessToast = true): void {
+  async function ensureWorkbookParsedForCurrentOptions(): Promise<boolean> {
+    if (!currentWorkbookBytes || !currentWorkbookName) {
+      return currentWorkbook !== null;
+    }
+    const includeShapeDetails = getOptions().includeShapeDetails;
+    if (currentWorkbook && currentParsedIncludeShapeDetails === includeShapeDetails) {
+      return true;
+    }
+    setLoading(true, "Analyzing xlsx");
+    try {
+      currentWorkbook = await xlsx2md.parseWorkbook(currentWorkbookBytes, currentWorkbookName, { includeShapeDetails });
+      currentParsedIncludeShapeDetails = includeShapeDetails;
+      return true;
+    } catch (error) {
+      showError(error instanceof Error ? error.message : "Failed to load the xlsx file.");
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function convertCurrentWorkbook(showSuccessToast = true): Promise<void> {
     clearError();
-    if (!currentWorkbook) {
+    if (!currentWorkbook && !currentWorkbookBytes) {
       showError("Load an xlsx file first.");
       return;
     }
     try {
+      const ready = await ensureWorkbookParsedForCurrentOptions();
+      if (!ready || !currentWorkbook) {
+        return;
+      }
       currentFiles = xlsx2md.convertWorkbookToMarkdownFiles(currentWorkbook, getOptions());
       renderCurrentSelection();
       if (showSuccessToast) {
@@ -600,13 +633,21 @@
     setLoading(true, "Loading xlsx");
     try {
       const arrayBuffer = await file.arrayBuffer();
-      currentWorkbook = await xlsx2md.parseWorkbook(arrayBuffer, file.name);
+      currentWorkbookBytes = arrayBuffer;
+      currentWorkbookName = file.name;
+      currentWorkbook = await xlsx2md.parseWorkbook(arrayBuffer, file.name, {
+        includeShapeDetails: getOptions().includeShapeDetails
+      });
+      currentParsedIncludeShapeDetails = getOptions().includeShapeDetails;
       currentFiles = [];
-      convertCurrentWorkbook(false);
+      await convertCurrentWorkbook(false);
       showToast("Loaded xlsx and generated Markdown.");
     } catch (error) {
       currentWorkbook = null;
       currentFiles = [];
+      currentWorkbookBytes = null;
+      currentWorkbookName = "";
+      currentParsedIncludeShapeDetails = null;
       setSummaryText("Failed to load the workbook.");
       setScoreSummaryHtml('<div class="md-summary-empty">No conversion yet.</div>');
       setFormulaSummaryHtml('<div class="md-summary-empty">No conversion yet.</div>');
@@ -630,7 +671,7 @@
 
   function bindActions(): void {
     getElement<HTMLButtonElement>("convertBtn").addEventListener("click", () => {
-      convertCurrentWorkbook(true);
+      void convertCurrentWorkbook(true);
     });
     getElement<HTMLButtonElement>("downloadBtn").addEventListener("click", () => {
       downloadCurrentMarkdown();

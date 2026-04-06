@@ -364,7 +364,9 @@
         const assetDeps = deps.buildAssetDeps();
         const images = deps.parseDrawingImages(files, sheetName, sheetPath, assetDeps);
         const charts = deps.parseDrawingCharts(files, sheetName, sheetPath, assetDeps);
-        const shapes = deps.parseDrawingShapes(files, sheetName, sheetPath, assetDeps);
+        const shapes = deps.parseShapes === false
+            ? []
+            : deps.parseDrawingShapes(files, sheetName, sheetPath, assetDeps);
         let maxRow = 0;
         let maxCol = 0;
         for (const cell of cells) {
