@@ -16,6 +16,13 @@ This project accepts bug reports, feature requests, documentation fixes, tests, 
 - `index.html` and `xlsx2md.html` are generated files.
 - Edit `index-src.html`, `xlsx2md-src.html`, and files under `src/` instead of editing generated output directly unless regeneration is intentionally part of the change.
 - Run relevant tests before submitting a pull request when possible.
+- When adding or replacing a third-party library, confirm the license and update `THIRD_PARTY_NOTICES.md` when the dependency is shipped, used in runtime/tooling, or otherwise important for downstream notice.
+- Browser UI and Node CLI share the same conversion core, but runtime plumbing is not identical.
+- In the browser, XML parsing uses the native `DOMParser`.
+- In the Node CLI, XML parsing uses `@xmldom/xmldom` instead of `jsdom` to keep the runtime lighter.
+- ZIP inflate first tries `DecompressionStream("deflate-raw")`. When that is unavailable in Node, the implementation falls back to `node:zlib.inflateRawSync`.
+- `includeShapeDetails` is not only a Markdown output switch. When it is `false`, shape parsing itself is skipped, while image and chart parsing still run.
+- There is a small CLI timing smoke test for regression detection, but it is intentionally loose and should not be treated as a precise benchmark.
 
 ## Pull Request Guidelines
 
@@ -65,6 +72,13 @@ Contributors may be acknowledged in project history, release notes, or other pro
 - `index.html` と `xlsx2md.html` は生成物です。
 - 生成物を直接編集するのではなく、通常は `index-src.html`、`xlsx2md-src.html`、`src/` 配下を編集してください。
 - Pull Request 前に、可能な範囲で関連テストを実行してください。
+- サードパーティライブラリを追加または差し替える場合は、ライセンスを確認し、配布物・runtime・tooling の観点で告知が必要なら `THIRD_PARTY_NOTICES.md` を更新してください。
+- ブラウザ UI と Node CLI は変換 core を共有していますが、runtime の足回りは同一ではありません。
+- ブラウザでは XML 解析にネイティブの `DOMParser` を使います。
+- Node CLI では `jsdom` ではなく `@xmldom/xmldom` を使って XML 解析を行い、runtime を軽く保っています。
+- ZIP 展開ではまず `DecompressionStream("deflate-raw")` を試し、Node で使えない場合は `node:zlib.inflateRawSync` へ fallback します。
+- `includeShapeDetails` は Markdown 出力だけの切り替えではありません。`false` の場合は shape 解析自体を省略し、image / chart 解析は継続します。
+- CLI には小さな実行時間 smoke test がありますが、厳密な benchmark ではなく、極端な退行検知が目的です。
 
 ## Pull Request のガイド
 

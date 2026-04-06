@@ -3,7 +3,13 @@ import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { DecompressionStream as NodeDecompressionStream } from "node:stream/web";
 
-import { JSDOM } from "jsdom";
+import {
+  DOMParser as XmldomParser,
+  XMLSerializer as XmldomSerializer,
+  Node as XmldomNode,
+  Document as XmldomDocument,
+  Element as XmldomElement
+} from "@xmldom/xmldom";
 
 const ROOT = process.cwd();
 const LOCAL_DATA_DIR = path.resolve(ROOT, "local-data");
@@ -12,11 +18,11 @@ const parserCode = readFileSync(path.resolve(ROOT, "src/js/formula/parser.js"), 
 const evaluatorCode = readFileSync(path.resolve(ROOT, "src/js/formula/evaluator.js"), "utf8");
 const coreCode = readFileSync(path.resolve(ROOT, "src/js/core.js"), "utf8");
 
-const dom = new JSDOM("<!doctype html><html><body></body></html>");
-globalThis.window = dom.window;
-globalThis.document = dom.window.document;
-globalThis.DOMParser = dom.window.DOMParser;
-globalThis.Node = dom.window.Node;
+globalThis.DOMParser = XmldomParser;
+globalThis.Node = XmldomNode;
+globalThis.Document = XmldomDocument;
+globalThis.Element = XmldomElement;
+globalThis.XMLSerializer = XmldomSerializer;
 globalThis.Blob = NodeBlob;
 globalThis.DecompressionStream = NodeDecompressionStream;
 

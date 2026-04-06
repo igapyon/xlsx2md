@@ -289,8 +289,7 @@ describe("xlsx2md core", () => {
       expect(workbook.name).toBe(fixtureName);
       expect(workbook.sheets.length).toBeGreaterThan(0);
       expect(files.length).toBe(workbook.sheets.length);
-      expect(files[0].markdown).toContain("## Source Information");
-      expect(files[0].markdown).toContain(`Workbook: ${fixtureName}`);
+      expect(files[0].markdown).toContain(`# Book: ${fixtureName}`);
     });
   }
 
@@ -379,11 +378,11 @@ describe("xlsx2md core", () => {
       "B26-F30",
       "B33-F46"
     ]);
-    expect(markdownFile.markdown).toContain("# xlsx2md-basic");
-    expect(markdownFile.markdown).toContain("Workbook: xlsx2md-basic-sample01.xlsx");
+    expect(markdownFile.markdown).toContain("## Sheet: xlsx2md-basic");
+    expect(markdownFile.markdown).toContain("# Book: xlsx2md-basic-sample01.xlsx");
     expect(markdownFile.markdown).toContain("通常のテキスト");
-    expect(markdownFile.markdown).toContain("### Table 003 (B26-F30)");
-    expect(markdownFile.markdown).toContain("### Table 004 (B33-F46)");
+    expect(markdownFile.markdown).toContain("### Table: 003 (B26-F30)");
+    expect(markdownFile.markdown).toContain("### Table: 004 (B33-F46)");
     expect(markdownFile.markdown).toContain("| 3 | 数値 | value2 | 1,024,768 | 数値 |");
     expect(markdownFile.markdown).toContain("| 3 | 登録日 | entrydate | 3月13日 | 何かの登録日 |");
     expect(markdownFile.markdown).toContain("| 4 | 更新日 | updatedate | 3月14日 | 何かの更新日 |");
@@ -440,8 +439,8 @@ describe("xlsx2md core", () => {
     expect(markdownFile.summary.tables).toBe(1);
     expect(markdownFile.summary.tableScores).toHaveLength(1);
     expect(markdownFile.summary.tableScores[0].range).toBe("A1-E13");
-    expect(markdownFile.markdown).toContain("# display-format");
-    expect(markdownFile.markdown).toContain("Workbook: display-format-sample01.xlsx");
+    expect(markdownFile.markdown).toContain("## Sheet: display-format");
+    expect(markdownFile.markdown).toContain("# Book: display-format-sample01.xlsx");
     expect(markdownFile.markdown).toContain("| 2 | 数値 | value2 | 1,024,768 | 数値 |");
     expect(markdownFile.markdown).toContain("| 3 | 通貨 | value3 | ¥1,024,768 | 通貨 |");
     expect(markdownFile.markdown).toContain("| 4 | 会計 | value4 | ¥ 1,024,768 | 会計 |");
@@ -548,8 +547,7 @@ describe("xlsx2md core", () => {
     expect(workbook.sheets[0].charts[0].series).toHaveLength(2);
     expect(workbook.sheets[0].charts[0].series[0].axis).toBe("primary");
     expect(markdownFile.summary.charts).toBe(1);
-    expect(markdownFile.markdown).toContain("## Charts");
-    expect(markdownFile.markdown).toContain("### Chart 001 (B18)");
+    expect(markdownFile.markdown).toContain("### Chart: 001 (B18)");
     expect(markdownFile.markdown).toContain("- Title: Sample Sales Chart");
     expect(markdownFile.markdown).toContain("- Type: Bar Chart");
     expect(markdownFile.markdown).toContain("  - Series A");
@@ -620,11 +618,11 @@ describe("xlsx2md core", () => {
       "A7-D11",
       "A14-E18"
     ]);
-    expect(markdownFile.markdown).toContain("# merge");
-    expect(markdownFile.markdown).toContain("Workbook: merge-pattern-sample01.xlsx");
-    expect(markdownFile.markdown).toContain("### Table 001 (A1-E4)");
-    expect(markdownFile.markdown).toContain("### Table 002 (A7-D11)");
-    expect(markdownFile.markdown).toContain("### Table 003 (A14-E18)");
+    expect(markdownFile.markdown).toContain("## Sheet: merge");
+    expect(markdownFile.markdown).toContain("# Book: merge-pattern-sample01.xlsx");
+    expect(markdownFile.markdown).toContain("### Table: 001 (A1-E4)");
+    expect(markdownFile.markdown).toContain("### Table: 002 (A7-D11)");
+    expect(markdownFile.markdown).toContain("### Table: 003 (A14-E18)");
     expect(markdownFile.markdown).toContain("| 1 | 横結合 | [MERGED←] | 横結合 | [MERGED←] |");
     expect(markdownFile.markdown).toContain("| 2 | [MERGED↑] | [MERGED↑] | [MERGED↑] |");
     expect(markdownFile.markdown).toContain("| 1 | 2x2結合 | [MERGED←] | 2x2結合 | [MERGED←] |");
@@ -673,9 +671,9 @@ describe("xlsx2md core", () => {
     expect(markdownFile.summary.images).toBe(0);
     expect(markdownFile.summary.formulaDiagnostics).toHaveLength(0);
     expect(markdownFile.summary.tableScores.map((detail) => detail.range)).toEqual(["A1-C4"]);
-    expect(markdownFile.markdown).toContain("# merge-multiline");
-    expect(markdownFile.markdown).toContain("Workbook: merge-multiline-sample01.xlsx");
-    expect(markdownFile.markdown).toContain("### Table 001 (A1-C4)");
+    expect(markdownFile.markdown).toContain("## Sheet: merge-multiline");
+    expect(markdownFile.markdown).toContain("# Book: merge-multiline-sample01.xlsx");
+    expect(markdownFile.markdown).toContain("### Table: 001 (A1-C4)");
     expect(markdownFile.markdown).toContain("| 1 | 1行目 2行目 | [MERGED←] |");
     expect(markdownFile.markdown).toContain("| 2 | [MERGED↑] | [MERGED↑] |");
     expect(markdownFile.markdown).toContain("※結合セル内の改行確認用");
@@ -734,8 +732,8 @@ describe("xlsx2md core", () => {
     expect(markdownFile.summary.formulaDiagnostics).toHaveLength(9);
     expect(markdownFile.summary.formulaDiagnostics.every((diagnostic) => diagnostic.source === "cached_value")).toBe(true);
     expect(markdownFile.summary.tableScores.map((detail) => detail.range)).toEqual(["A3-B13"]);
-    expect(markdownFile.markdown).toContain("# formula");
-    expect(markdownFile.markdown).toContain("Workbook: formula-basic-sample01.xlsx");
+    expect(markdownFile.markdown).toContain("## Sheet: formula");
+    expect(markdownFile.markdown).toContain("# Book: formula-basic-sample01.xlsx");
     expect(markdownFile.markdown).toContain("| ref | 10 |");
     expect(markdownFile.markdown).toContain("| arith | 15 |");
     expect(markdownFile.markdown).toContain("| if | OK |");
@@ -791,8 +789,8 @@ describe("xlsx2md core", () => {
     expect(markdownFile.summary.formulaDiagnostics).toHaveLength(2);
     expect(markdownFile.summary.formulaDiagnostics.every((diagnostic) => diagnostic.source === "cached_value")).toBe(true);
     expect(markdownFile.summary.tableScores).toHaveLength(0);
-    expect(markdownFile.markdown).toContain("# spill-sample");
-    expect(markdownFile.markdown).toContain("Workbook: formula-spill-sample01.xlsx");
+    expect(markdownFile.markdown).toContain("## Sheet: spill-sample");
+    expect(markdownFile.markdown).toContain("# Book: formula-spill-sample01.xlsx");
     expect(markdownFile.markdown).toContain("spill サンプル");
     expect(markdownFile.markdown).toContain("src1 spill\\_ref spill\\_sum");
     expect(markdownFile.markdown).toContain("1 1 6");
@@ -858,8 +856,8 @@ describe("xlsx2md core", () => {
     expect(sheet1File.summary.tableScores.map((detail) => detail.range)).toEqual(["A3-B5"]);
     expect(sheet1File.summary.formulaDiagnostics).toHaveLength(3);
     expect(sheet1File.summary.formulaDiagnostics.every((diagnostic) => diagnostic.source === "cached_value")).toBe(true);
-    expect(sheet1File.markdown).toContain("# Sheet1");
-    expect(sheet1File.markdown).toContain("Workbook: formula-crosssheet-sample01.xlsx");
+    expect(sheet1File.markdown).toContain("## Sheet: Sheet1");
+    expect(sheet1File.markdown).toContain("# Book: formula-crosssheet-sample01.xlsx");
     expect(sheet1File.markdown).toContain("| sheet2\\_ref | CrossValue |");
     expect(sheet1File.markdown).toContain("| jp\\_sheet\\_ref | 日本語参照値 |");
     expect(sheet1File.markdown).toContain("| sum\\_range | 10 |");
@@ -874,7 +872,7 @@ describe("xlsx2md core", () => {
     expect(sheet3File.fileName).toBe("formula-crosssheet-sample01_003_日本語シート.md");
     expect(sheet3File.summary.tables).toBe(0);
     expect(sheet3File.summary.tableScores).toHaveLength(0);
-    expect(sheet3File.markdown).toContain("# 日本語シート");
+    expect(sheet3File.markdown).toContain("## Sheet: 日本語シート");
     expect(sheet3File.markdown).toContain("日本語参照値");
   });
 
@@ -935,16 +933,15 @@ describe("xlsx2md core", () => {
     expect(markdownFile.summary.merges).toBe(0);
     expect(markdownFile.summary.images).toBe(2);
     expect(markdownFile.summary.tableScores.map((detail) => detail.range)).toEqual(["B3-F6"]);
-    expect(markdownFile.markdown).toContain("# image");
-    expect(markdownFile.markdown).toContain("Workbook: image-basic-sample01.xlsx");
+    expect(markdownFile.markdown).toContain("## Sheet: image");
+    expect(markdownFile.markdown).toContain("# Book: image-basic-sample01.xlsx");
     expect(markdownFile.markdown).toContain("| 項目1 | 項目2 | 項目3 | 項目4 | 項目5 |");
     expect(markdownFile.markdown).toContain("| B4 | C4 | 123,456 | 1,234.56 | 値1 |");
     expect(markdownFile.markdown).toContain("| B6 | C6 | 345,678 | 3,456.89 | 値3 |");
-    expect(markdownFile.markdown).toContain("## Images");
-    expect(markdownFile.markdown).toContain("### Image 001 (C8)");
+    expect(markdownFile.markdown).toContain("### Image: 001 (C8)");
     expect(markdownFile.markdown).toContain("- File: assets/image/image_001.png");
     expect(markdownFile.markdown).toContain("![image_001.png](assets/image/image_001.png)");
-    expect(markdownFile.markdown).toContain("### Image 002 (F8)");
+    expect(markdownFile.markdown).toContain("### Image: 002 (F8)");
     expect(markdownFile.markdown).toContain("- File: assets/image/image_002.png");
     expect(markdownFile.markdown).toContain("![image_002.png](assets/image/image_002.png)");
   });
@@ -1009,17 +1006,15 @@ describe("xlsx2md core", () => {
     expect(markdownFile.summary.images).toBe(1);
     expect(markdownFile.summary.charts).toBe(1);
     expect(markdownFile.summary.tableScores.map((detail) => detail.range)).toEqual(["B3-D6"]);
-    expect(markdownFile.markdown).toContain("# image");
-    expect(markdownFile.markdown).toContain("Workbook: image-basic-sample02.xlsx");
+    expect(markdownFile.markdown).toContain("## Sheet: image");
+    expect(markdownFile.markdown).toContain("# Book: image-basic-sample02.xlsx");
     expect(markdownFile.markdown).toContain("| 項目 | 値A | 値B |");
     expect(markdownFile.markdown).toContain("| 2024年 | 13,568 | 9,072 |");
-    expect(markdownFile.markdown).toContain("## Charts");
-    expect(markdownFile.markdown).toContain("### Chart 001 (B9)");
+    expect(markdownFile.markdown).toContain("### Chart: 001 (B9)");
     expect(markdownFile.markdown).toContain("- Title: このグラフのタイトル");
     expect(markdownFile.markdown).toContain("- Type: Line Chart");
     expect(markdownFile.markdown).toContain("    - values: image!$D$4:$D$6");
-    expect(markdownFile.markdown).toContain("## Images");
-    expect(markdownFile.markdown).toContain("### Image 001 (H3)");
+    expect(markdownFile.markdown).toContain("### Image: 001 (H3)");
     expect(markdownFile.markdown).toContain("- File: assets/image/image_001.png");
   });
 
@@ -1077,14 +1072,13 @@ describe("xlsx2md core", () => {
     expect(markdownFile.summary.images).toBe(0);
     expect(markdownFile.summary.charts).toBe(1);
     expect(markdownFile.summary.tableScores.map((detail) => detail.range)).toEqual(["B3-D7"]);
-    expect(markdownFile.markdown).toContain("# chart-basic");
-    expect(markdownFile.markdown).toContain("Workbook: chart-basic-sample01.xlsx");
+    expect(markdownFile.markdown).toContain("## Sheet: chart-basic");
+    expect(markdownFile.markdown).toContain("# Book: chart-basic-sample01.xlsx");
     expect(markdownFile.markdown).toContain("グラフ基本サンプル");
-    expect(markdownFile.markdown).toContain("### Table 001 (B3-D7)");
+    expect(markdownFile.markdown).toContain("### Table: 001 (B3-D7)");
     expect(markdownFile.markdown).toContain("| 項目 | 値A | 値B |");
     expect(markdownFile.markdown).toContain("| 2027年 | 28,053 | 32,012 |");
-    expect(markdownFile.markdown).toContain("## Charts");
-    expect(markdownFile.markdown).toContain("### Chart 001 (B10)");
+    expect(markdownFile.markdown).toContain("### Chart: 001 (B10)");
     expect(markdownFile.markdown).toContain("- Title: 棒グラフのグラフ");
     expect(markdownFile.markdown).toContain("- Type: Bar Chart");
     expect(markdownFile.markdown).toContain("    - categories: 'chart-basic'!$B$4:$B$7");
@@ -1151,12 +1145,11 @@ describe("xlsx2md core", () => {
     expect(markdownFile.summary.images).toBe(0);
     expect(markdownFile.summary.charts).toBe(1);
     expect(markdownFile.summary.tableScores.map((detail) => detail.range)).toEqual(["B3-E8"]);
-    expect(markdownFile.markdown).toContain("# chart-mixed");
-    expect(markdownFile.markdown).toContain("Workbook: chart-mixed-sample01.xlsx");
+    expect(markdownFile.markdown).toContain("## Sheet: chart-mixed");
+    expect(markdownFile.markdown).toContain("# Book: chart-mixed-sample01.xlsx");
     expect(markdownFile.markdown).toContain("| 項目 | 売上 | 割引額 | 利益率 |");
     expect(markdownFile.markdown).toContain("| 2028年 | 31,027 | 2,500 | 18% |");
-    expect(markdownFile.markdown).toContain("## Charts");
-    expect(markdownFile.markdown).toContain("### Chart 001 (B10)");
+    expect(markdownFile.markdown).toContain("### Chart: 001 (B10)");
     expect(markdownFile.markdown).toContain("- Title: 棒と折れ線");
     expect(markdownFile.markdown).toContain("- Type: Bar Chart + Line Chart (Combined)");
     expect(markdownFile.markdown).toContain("  - 利益率");
@@ -1251,17 +1244,16 @@ describe("xlsx2md core", () => {
     expect(markdownFile.summary.images).toBe(0);
     expect(markdownFile.summary.charts).toBe(0);
     expect(markdownFile.summary.tableScores.map((detail) => detail.range)).toEqual(["B3-E6"]);
-    expect(markdownFile.markdown).toContain("# shape-basic");
-    expect(markdownFile.markdown).toContain("Workbook: shape-basic-sample01.xlsx");
+    expect(markdownFile.markdown).toContain("## Sheet: shape-basic");
+    expect(markdownFile.markdown).toContain("# Book: shape-basic-sample01.xlsx");
     expect(markdownFile.markdown).toContain("図形サンプル");
-    expect(markdownFile.markdown).toContain("### Table 001 (B3-E6)");
+    expect(markdownFile.markdown).toContain("### Table: 001 (B3-E6)");
     expect(markdownFile.markdown).toContain("| 項目 | 値A | 値B | 値C |");
     expect(markdownFile.markdown).toContain("| 2026年 | 25,051 | 32,012 | 14,850 |");
-    expect(markdownFile.markdown).toContain("## Shape Blocks");
-    expect(markdownFile.markdown).toContain("### Shape Block 001 (");
+    expect(markdownFile.markdown).toContain("### Shape Block: 001 (");
     expect(markdownFile.markdown).toContain("- Shapes: Shape 001, Shape 002, Shape 003");
-    expect(markdownFile.markdown).toContain("## Shapes");
-    expect(markdownFile.markdown).toContain("### Shape 001 (H3)");
+    expect(markdownFile.markdown).not.toContain("### Shapes");
+    expect(markdownFile.markdown).toContain("#### Shape: 001 (H3)");
     expect(markdownFile.markdown).toContain("- `xdr:oneCellAnchor`");
     expect(markdownFile.markdown).toContain("    - `xdr:from`");
         expect(markdownFile.markdown).toContain("        - `xdr:col#text`: `7`");
@@ -1270,16 +1262,41 @@ describe("xlsx2md core", () => {
     expect(markdownFile.markdown).toContain("- `a:t#text`: `テキストボックスの例`");
     expect(markdownFile.markdown).toContain("- SVG: assets/shape-basic/shape_001.svg");
     expect(markdownFile.markdown).toContain("![shape_001.svg](assets/shape-basic/shape_001.svg)");
-    expect(markdownFile.markdown).toContain("### Shape 002 (H8)");
+    expect(markdownFile.markdown).toContain("#### Shape: 002 (H8)");
     expect(markdownFile.markdown).toContain("- `xdr:twoCellAnchor`");
     expect(markdownFile.markdown).toContain("    - `xdr:cxnSp`");
     expect(markdownFile.markdown).toContain("- `a:prstGeom@prst`: `straightConnector1`");
     expect(markdownFile.markdown).toContain("- `a:ext@cx`: `1308100`");
-    expect(markdownFile.markdown).toContain("### Shape 003 (K3)");
+    expect(markdownFile.markdown).toContain("#### Shape: 003 (K3)");
     expect(markdownFile.markdown).toContain("- `xdr:cNvPr@name`: `正方形/長方形 4`");
     expect(markdownFile.markdown).toContain("![shape_003.svg](assets/shape-basic/shape_003.svg)");
-    expect(markdownFile.markdown).not.toContain("## Images");
-    expect(markdownFile.markdown).not.toContain("## Charts");
+    expect(markdownFile.markdown).not.toContain("### Image:");
+    expect(markdownFile.markdown).not.toContain("### Chart:");
+  });
+
+  it("skips shape parsing when includeShapeDetails is disabled at parse time", async () => {
+    const api = bootCore();
+    const fixtureName = "shape-basic-sample01.xlsx";
+    const fixturePath = path.resolve(fixtureDir, "shape", fixtureName);
+    const fixtureBytes = readFileSync(fixturePath);
+    const arrayBuffer = fixtureBytes.buffer.slice(
+      fixtureBytes.byteOffset,
+      fixtureBytes.byteOffset + fixtureBytes.byteLength
+    );
+
+    const workbook = await api.parseWorkbook(arrayBuffer, fixtureName, { includeShapeDetails: false });
+    const sheet = workbook.sheets[0];
+    const files = api.convertWorkbookToMarkdownFiles(workbook, {
+      treatFirstRowAsHeader: true,
+      trimText: true,
+      removeEmptyRows: true,
+      removeEmptyColumns: true,
+      includeShapeDetails: false
+    });
+
+    expect(sheet.shapes).toEqual([]);
+    expect(files[0].markdown).not.toContain("### Shape Block:");
+    expect(files[0].markdown).not.toContain("#### Shape:");
   });
 
   it("exports shape SVG assets into the markdown+assets archive", async () => {
@@ -1310,7 +1327,7 @@ describe("xlsx2md core", () => {
     expect(extracted.has("output/assets/shape-basic/shape_003.svg")).toBe(true);
 
     const markdownText = new TextDecoder().decode(extracted.get("output/shape-basic-sample01.md"));
-    expect(markdownText).toContain("## Shapes");
+    expect(markdownText).toContain("#### Shape: 001 (H3)");
     expect(markdownText).toContain("![shape_001.svg](assets/shape-basic/shape_001.svg)");
 
     const shape1Svg = new TextDecoder().decode(extracted.get("output/assets/shape-basic/shape_001.svg"));
@@ -1420,28 +1437,27 @@ describe("xlsx2md core", () => {
     expect(markdownFile.summary.charts).toBe(0);
     expect(markdownFile.summary.formulaDiagnostics).toHaveLength(0);
     expect(markdownFile.summary.tableScores.map((detail) => detail.range)).toEqual(["B3-E6"]);
-    expect(markdownFile.markdown).toContain("# shape-flowchart");
-    expect(markdownFile.markdown).toContain("Workbook: shape-flowchart-sample01.xlsx");
+    expect(markdownFile.markdown).toContain("## Sheet: shape-flowchart");
+    expect(markdownFile.markdown).toContain("# Book: shape-flowchart-sample01.xlsx");
     expect(markdownFile.markdown).toContain("フローチャート図形サンプル");
-    expect(markdownFile.markdown).toContain("### Table 001 (B3-E6)");
-    expect(markdownFile.markdown).toContain("## Shape Blocks");
-    expect(markdownFile.markdown).toContain("### Shape Block 001 (H3-S7)");
+    expect(markdownFile.markdown).toContain("### Table: 001 (B3-E6)");
+    expect(markdownFile.markdown).toContain("### Shape Block: 001 (H3-S7)");
     expect(markdownFile.markdown).toContain("- Shapes: Shape 001, Shape 002, Shape 003, Shape 004, Shape 005, Shape 006, Shape 007");
-    expect(markdownFile.markdown).toContain("## Shapes");
-    expect(markdownFile.markdown).toContain("### Shape 001 (H3)");
+    expect(markdownFile.markdown).not.toContain("### Shapes");
+    expect(markdownFile.markdown).toContain("#### Shape: 001 (H3)");
     expect(markdownFile.markdown).toContain("- `a:prstGeom@prst`: `flowChartTerminator`");
     expect(markdownFile.markdown).toContain("- `a:t#text`: `開始`");
-    expect(markdownFile.markdown).toContain("### Shape 003 (N3)");
+    expect(markdownFile.markdown).toContain("#### Shape: 003 (N3)");
     expect(markdownFile.markdown).toContain("- `a:prstGeom@prst`: `flowChartDecision`");
     expect(markdownFile.markdown).toContain("- `a:t#text`: `条件判断`");
-    expect(markdownFile.markdown).toContain("### Shape 005 (I4)");
+    expect(markdownFile.markdown).toContain("#### Shape: 005 (I4)");
     expect(markdownFile.markdown).toContain("- `a:prstGeom@prst`: `straightConnector1`");
     expect(markdownFile.markdown).toContain("- `a:endCxn@id`: `6`");
     expect(markdownFile.markdown).toContain("![shape_005.svg](assets/shape-flowchart/shape_005.svg)");
     expect(markdownFile.markdown).toContain("![shape_006.svg](assets/shape-flowchart/shape_006.svg)");
     expect(markdownFile.markdown).toContain("![shape_007.svg](assets/shape-flowchart/shape_007.svg)");
-    expect(markdownFile.markdown).not.toContain("## Images");
-    expect(markdownFile.markdown).not.toContain("## Charts");
+    expect(markdownFile.markdown).not.toContain("### Image:");
+    expect(markdownFile.markdown).not.toContain("### Chart:");
   });
 
   it("exports flowchart connector SVG assets into the markdown+assets archive", async () => {
@@ -1473,7 +1489,7 @@ describe("xlsx2md core", () => {
     expect(extracted.has("output/assets/shape-flowchart/shape_001.svg")).toBe(false);
 
     const markdownText = new TextDecoder().decode(extracted.get("output/shape-flowchart-sample01.md"));
-    expect(markdownText).toContain("## Shapes");
+    expect(markdownText).toContain("#### Shape: 001 (H3)");
     expect(markdownText).toContain("![shape_005.svg](assets/shape-flowchart/shape_005.svg)");
 
     const shape5Svg = new TextDecoder().decode(extracted.get("output/assets/shape-flowchart/shape_005.svg"));
@@ -1578,27 +1594,26 @@ describe("xlsx2md core", () => {
     expect(markdownFile.summary.charts).toBe(0);
     expect(markdownFile.summary.formulaDiagnostics).toHaveLength(0);
     expect(markdownFile.summary.tableScores.map((detail) => detail.range)).toEqual(["B3-E6"]);
-    expect(markdownFile.markdown).toContain("# shape-block-arrow");
-    expect(markdownFile.markdown).toContain("Workbook: shape-block-arrow-sample01.xlsx");
+    expect(markdownFile.markdown).toContain("## Sheet: shape-block-arrow");
+    expect(markdownFile.markdown).toContain("# Book: shape-block-arrow-sample01.xlsx");
     expect(markdownFile.markdown).toContain("ブロック矢印サンプル");
-    expect(markdownFile.markdown).toContain("## Shape Blocks");
-    expect(markdownFile.markdown).toContain("### Shape Block 001 (H3-S14)");
+    expect(markdownFile.markdown).toContain("### Shape Block: 001 (H3-S14)");
     expect(markdownFile.markdown).toContain("- Shapes: Shape 001, Shape 002, Shape 003, Shape 004, Shape 005");
-    expect(markdownFile.markdown).toContain("## Shapes");
-    expect(markdownFile.markdown).toContain("### Shape 001 (H3)");
+    expect(markdownFile.markdown).not.toContain("### Shapes");
+    expect(markdownFile.markdown).toContain("#### Shape: 001 (H3)");
     expect(markdownFile.markdown).toContain("- `a:prstGeom@prst`: `rightArrow`");
     expect(markdownFile.markdown).toContain("- `a:t#text`: `右矢印`");
-    expect(markdownFile.markdown).toContain("### Shape 002 (K3)");
+    expect(markdownFile.markdown).toContain("#### Shape: 002 (K3)");
     expect(markdownFile.markdown).toContain("- `a:prstGeom@prst`: `leftRightArrow`");
-    expect(markdownFile.markdown).toContain("### Shape 003 (N3)");
+    expect(markdownFile.markdown).toContain("#### Shape: 003 (N3)");
     expect(markdownFile.markdown).toContain("- `a:prstGeom@prst`: `upArrow`");
-    expect(markdownFile.markdown).toContain("### Shape 004 (Q3)");
+    expect(markdownFile.markdown).toContain("#### Shape: 004 (Q3)");
     expect(markdownFile.markdown).toContain("- `a:prstGeom@prst`: `uturnArrow`");
-    expect(markdownFile.markdown).toContain("### Shape 005 (H8)");
+    expect(markdownFile.markdown).toContain("#### Shape: 005 (H8)");
     expect(markdownFile.markdown).toContain("- `a:prstGeom@prst`: `quadArrow`");
     expect(markdownFile.markdown).not.toContain("![shape_001.svg]");
-    expect(markdownFile.markdown).not.toContain("## Images");
-    expect(markdownFile.markdown).not.toContain("## Charts");
+    expect(markdownFile.markdown).not.toContain("### Image:");
+    expect(markdownFile.markdown).not.toContain("### Chart:");
   });
 
   it("exports only markdown for the block-arrow fixture archive when no SVG assets are generated", async () => {
@@ -1627,7 +1642,7 @@ describe("xlsx2md core", () => {
     expect(Array.from(extracted.keys())).toEqual(["output/shape-block-arrow-sample01.md"]);
 
     const markdownText = new TextDecoder().decode(extracted.get("output/shape-block-arrow-sample01.md"));
-    expect(markdownText).toContain("## Shapes");
+    expect(markdownText).toContain("#### Shape: 001 (H3)");
     expect(markdownText).toContain("- `a:prstGeom@prst`: `uturnArrow`");
     expect(markdownText).not.toContain("![shape_001.svg]");
   });
@@ -1716,28 +1731,27 @@ describe("xlsx2md core", () => {
     expect(markdownFile.summary.charts).toBe(0);
     expect(markdownFile.summary.formulaDiagnostics).toHaveLength(0);
     expect(markdownFile.summary.tableScores.map((detail) => detail.range)).toEqual(["B3-E6"]);
-    expect(markdownFile.markdown).toContain("# shape-callout");
-    expect(markdownFile.markdown).toContain("Workbook: shape-callout-sample01.xlsx");
+    expect(markdownFile.markdown).toContain("## Sheet: shape-callout");
+    expect(markdownFile.markdown).toContain("# Book: shape-callout-sample01.xlsx");
     expect(markdownFile.markdown).toContain("吹き出しサンプル");
-    expect(markdownFile.markdown).toContain("## Shape Blocks");
-    expect(markdownFile.markdown).toContain("### Shape Block 001 (H3-P12)");
+    expect(markdownFile.markdown).toContain("### Shape Block: 001 (H3-P12)");
     expect(markdownFile.markdown).toContain("- Shapes: Shape 001, Shape 002, Shape 003, Shape 004");
-    expect(markdownFile.markdown).toContain("## Shapes");
-    expect(markdownFile.markdown).toContain("### Shape 001 (H3)");
+    expect(markdownFile.markdown).not.toContain("### Shapes");
+    expect(markdownFile.markdown).toContain("#### Shape: 001 (H3)");
     expect(markdownFile.markdown).toContain("- `a:prstGeom@prst`: `wedgeRoundRectCallout`");
     expect(markdownFile.markdown).toContain("- `a:t#text`: `角四角`");
-    expect(markdownFile.markdown).toContain("### Shape 002 (K3)");
+    expect(markdownFile.markdown).toContain("#### Shape: 002 (K3)");
     expect(markdownFile.markdown).toContain("- `a:prstGeom@prst`: `wedgeEllipseCallout`");
     expect(markdownFile.markdown).toContain("- `a:t#text`: `楕円`");
-    expect(markdownFile.markdown).toContain("### Shape 003 (N3)");
+    expect(markdownFile.markdown).toContain("#### Shape: 003 (N3)");
     expect(markdownFile.markdown).toContain("- `a:prstGeom@prst`: `cloudCallout`");
     expect(markdownFile.markdown).toContain("- `a:t#text`: `雲`");
-    expect(markdownFile.markdown).toContain("### Shape 004 (H8)");
+    expect(markdownFile.markdown).toContain("#### Shape: 004 (H8)");
     expect(markdownFile.markdown).toContain("- `a:prstGeom@prst`: `accentBorderCallout1`");
     expect(markdownFile.markdown).toContain("- `a:t#text`: `注釈`");
     expect(markdownFile.markdown).not.toContain("![shape_001.svg]");
-    expect(markdownFile.markdown).not.toContain("## Images");
-    expect(markdownFile.markdown).not.toContain("## Charts");
+    expect(markdownFile.markdown).not.toContain("### Image:");
+    expect(markdownFile.markdown).not.toContain("### Chart:");
   });
 
   it("exports only markdown for the callout fixture archive when no SVG assets are generated", async () => {
@@ -1766,7 +1780,7 @@ describe("xlsx2md core", () => {
     expect(Array.from(extracted.keys())).toEqual(["output/shape-callout-sample01.md"]);
 
     const markdownText = new TextDecoder().decode(extracted.get("output/shape-callout-sample01.md"));
-    expect(markdownText).toContain("## Shapes");
+    expect(markdownText).toContain("#### Shape: 001 (H3)");
     expect(markdownText).toContain("- `a:prstGeom@prst`: `cloudCallout`");
     expect(markdownText).not.toContain("![shape_001.svg]");
   });
@@ -1818,8 +1832,8 @@ describe("xlsx2md core", () => {
     expect(markdownFile.summary.images).toBe(0);
     expect(markdownFile.summary.formulaDiagnostics).toHaveLength(9);
     expect(markdownFile.summary.tableScores.map((detail) => detail.range)).toEqual(["A1-B11"]);
-    expect(markdownFile.markdown).toContain("# formula");
-    expect(markdownFile.markdown).toContain("Workbook: formula-shared-sample01.xlsx");
+    expect(markdownFile.markdown).toContain("## Sheet: formula");
+    expect(markdownFile.markdown).toContain("# Book: formula-shared-sample01.xlsx");
     expect(markdownFile.markdown).toContain("| No | 連番 |");
     expect(markdownFile.markdown).toContain("| 1 | 1 |");
     expect(markdownFile.markdown).toContain("| 2 | 2 |");
@@ -1897,8 +1911,8 @@ describe("xlsx2md core", () => {
     expect(summaryFile.summary.tableScores.map((detail) => detail.range)).toEqual(["A3-B5"]);
     expect(summaryFile.summary.formulaDiagnostics).toHaveLength(2);
     expect(summaryFile.summary.formulaDiagnostics.every((diagnostic) => diagnostic.source === "cached_value")).toBe(true);
-    expect(summaryFile.markdown).toContain("# Summary");
-    expect(summaryFile.markdown).toContain("Workbook: named-range-sample01.xlsx");
+    expect(summaryFile.markdown).toContain("## Sheet: Summary");
+    expect(summaryFile.markdown).toContain("# Book: named-range-sample01.xlsx");
     expect(summaryFile.markdown).toContain("| BaseName元 | Base |");
     expect(summaryFile.markdown).toContain("| BaseRange1 | 10 |");
     expect(summaryFile.markdown).toContain("| BaseRange2 | 20 |");
@@ -1907,7 +1921,7 @@ describe("xlsx2md core", () => {
     expect(otherFile.summary.tables).toBe(0);
     expect(otherFile.summary.tableScores).toHaveLength(0);
     expect(otherFile.summary.formulaDiagnostics).toHaveLength(1);
-    expect(otherFile.markdown).toContain("# Other");
+    expect(otherFile.markdown).toContain("## Sheet: Other");
     expect(otherFile.markdown).toContain("LocalCross元");
     expect(otherFile.markdown).toContain("CrossRef");
   });
@@ -1957,14 +1971,14 @@ describe("xlsx2md core", () => {
     expect(markdownFile.summary.images).toBe(0);
     expect(markdownFile.summary.formulaDiagnostics).toHaveLength(2);
     expect(markdownFile.summary.tableScores.map((detail) => detail.range)).toEqual(["B8-F11"]);
-    expect(markdownFile.markdown).toContain("# narrative-vs-table");
-    expect(markdownFile.markdown).toContain("Workbook: narrative-vs-table-sample01.xlsx");
+    expect(markdownFile.markdown).toContain("## Sheet: narrative-vs-table");
+    expect(markdownFile.markdown).toContain("# Book: narrative-vs-table-sample01.xlsx");
     expect(markdownFile.markdown).toContain("地の文と表の判定");
     expect(markdownFile.markdown).toContain("この設計書は受注入力画面を説明する。");
     expect(markdownFile.markdown).toContain("外部システムとの連携条件を以下に示す。");
     expect(markdownFile.markdown).toContain("本文は罫線なしのままにする。");
     expect(markdownFile.markdown).toContain("項目一覧");
-    expect(markdownFile.markdown).toContain("### Table 001 (B8-F11)");
+    expect(markdownFile.markdown).toContain("### Table: 001 (B8-F11)");
     expect(markdownFile.markdown).toContain("| 項番 | 項目名称 | 物理名 | 初期値 | 備考 |");
     expect(markdownFile.markdown).toContain("| 1 | コード | code | 101 | 何かのコード |");
     expect(markdownFile.markdown).toContain("| 3 | 登録日 | entrydate | 3月13日 | 何かの登録日 |");
@@ -2004,11 +2018,11 @@ describe("xlsx2md core", () => {
     expect(markdownFile.summary.merges).toBe(0);
     expect(markdownFile.summary.images).toBe(0);
     expect(markdownFile.summary.tableScores).toHaveLength(0);
-    expect(markdownFile.markdown).toContain("# edge-empty");
-    expect(markdownFile.markdown).toContain("Workbook: edge-empty-sample01.xlsx");
+    expect(markdownFile.markdown).toContain("## Sheet: edge-empty");
+    expect(markdownFile.markdown).toContain("# Book: edge-empty-sample01.xlsx");
     expect(markdownFile.markdown).toContain("空系境界サンプル");
     expect(markdownFile.markdown).toContain("only-value");
-    expect(markdownFile.markdown).not.toContain("### Table");
+    expect(markdownFile.markdown).not.toContain("### Table:");
   });
 
   it("parses the edge-weird-sheetname fixture workbook with concrete sheet-name expectations", async () => {
@@ -2046,10 +2060,10 @@ describe("xlsx2md core", () => {
     expect(markdownFile.summary.merges).toBe(0);
     expect(markdownFile.summary.images).toBe(0);
     expect(markdownFile.summary.tableScores.map((detail) => detail.range)).toEqual(["A1-D4"]);
-    expect(markdownFile.markdown).toContain("# A B-東京&大阪.01");
-    expect(markdownFile.markdown).toContain("Workbook: edge-weird-sheetname-sample01.xlsx");
-    expect(markdownFile.markdown).toContain("Sheet: A B-東京&大阪.01");
-    expect(markdownFile.markdown).toContain("### Table 001 (A1-D4)");
+    expect(markdownFile.markdown).toContain("## Sheet: A B-東京&大阪.01");
+    expect(markdownFile.markdown).toContain("# Book: edge-weird-sheetname-sample01.xlsx");
+    expect(markdownFile.markdown).not.toContain("- Sheet: A B-東京&大阪.01");
+    expect(markdownFile.markdown).toContain("### Table: 001 (A1-D4)");
     expect(markdownFile.markdown).toContain("| 項番 | 名称 | 値 | 備考 |");
     expect(markdownFile.markdown).toContain("| 1 | コード | 101 | 何かのコード |");
     expect(markdownFile.markdown).toContain("| 3 | 登録日 | 3月13日 | 何かの登録日 |");
@@ -2097,13 +2111,13 @@ describe("xlsx2md core", () => {
       "B3-F7",
       "B9-F13"
     ]);
-    expect(markdownFile.markdown).toContain("# table-basic");
-    expect(markdownFile.markdown).toContain("Workbook: table-basic-sample01.xlsx");
+    expect(markdownFile.markdown).toContain("## Sheet: table-basic");
+    expect(markdownFile.markdown).toContain("# Book: table-basic-sample01.xlsx");
     expect(markdownFile.markdown).toContain("隣接するテーブルのテスト（縦に密接）");
     expect(markdownFile.markdown).toContain("隣接するテーブルその1");
     expect(markdownFile.markdown).toContain("隣接するテーブルその2");
-    expect(markdownFile.markdown).toContain("### Table 001 (B3-F7)");
-    expect(markdownFile.markdown).toContain("### Table 002 (B9-F13)");
+    expect(markdownFile.markdown).toContain("### Table: 001 (B3-F7)");
+    expect(markdownFile.markdown).toContain("### Table: 002 (B9-F13)");
     expect(markdownFile.markdown).toContain("| 1 | コード | code | 101 | 何かのコード |");
     expect(markdownFile.markdown).toContain("| 3 | 登録日 | createdAt | 3月15日 | 登録した日 |");
   });
@@ -2150,11 +2164,11 @@ describe("xlsx2md core", () => {
       "B3-F7",
       "H3-L7"
     ]);
-    expect(markdownFile.markdown).toContain("# table-basic");
-    expect(markdownFile.markdown).toContain("Workbook: table-basic-sample02.xlsx");
+    expect(markdownFile.markdown).toContain("## Sheet: table-basic");
+    expect(markdownFile.markdown).toContain("# Book: table-basic-sample02.xlsx");
     expect(markdownFile.markdown).toContain("隣接するテーブルのテスト（横に密接）");
-    expect(markdownFile.markdown).toContain("### Table 001 (B3-F7)");
-    expect(markdownFile.markdown).toContain("### Table 002 (H3-L7)");
+    expect(markdownFile.markdown).toContain("### Table: 001 (B3-F7)");
+    expect(markdownFile.markdown).toContain("### Table: 002 (H3-L7)");
     expect(markdownFile.markdown).toContain("| 1 | コード | code | 101 | 何かのコード |");
     expect(markdownFile.markdown).toContain("| 2 | 別名 | altname | Hanako | 何かの別名 |");
     expect(markdownFile.markdown).toContain("確認");
@@ -2205,14 +2219,14 @@ describe("xlsx2md core", () => {
       "B9-F13",
       "H9-L13"
     ]);
-    expect(markdownFile.markdown).toContain("# table-basic");
-    expect(markdownFile.markdown).toContain("Workbook: table-basic-sample03.xlsx");
-    expect(markdownFile.markdown).toContain("### Table 001 (B3-F7)");
-    expect(markdownFile.markdown).toContain("### Table 002 (H3-L7)");
-    expect(markdownFile.markdown).toContain("### Table 003 (B9-F13)");
-    expect(markdownFile.markdown).toContain("### Table 004 (H9-L13)");
-    expect(markdownFile.markdown).not.toContain("### Table 005");
-    expect(markdownFile.markdown).not.toContain("### Table 002 (B3-L13)");
+    expect(markdownFile.markdown).toContain("## Sheet: table-basic");
+    expect(markdownFile.markdown).toContain("# Book: table-basic-sample03.xlsx");
+    expect(markdownFile.markdown).toContain("### Table: 001 (B3-F7)");
+    expect(markdownFile.markdown).toContain("### Table: 002 (H3-L7)");
+    expect(markdownFile.markdown).toContain("### Table: 003 (B9-F13)");
+    expect(markdownFile.markdown).toContain("### Table: 004 (H9-L13)");
+    expect(markdownFile.markdown).not.toContain("### Table: 005");
+    expect(markdownFile.markdown).not.toContain("### Table: 002 (B3-L13)");
     expect(markdownFile.markdown).toContain("| 1 | コード | code | 301 | 何かのコード |");
     expect(markdownFile.markdown).toContain("| 2 | 別名 | altname | Sawada | 何かの別名 |");
   });
@@ -2255,10 +2269,10 @@ describe("xlsx2md core", () => {
     expect(markdownFile.summary.images).toBe(0);
     expect(markdownFile.summary.formulaDiagnostics).toHaveLength(3);
     expect(markdownFile.summary.tableScores.map((detail) => detail.range)).toEqual(["B3-T7"]);
-    expect(markdownFile.markdown).toContain("# table-basic");
-    expect(markdownFile.markdown).toContain("Workbook: table-basic-sample11.xlsx");
+    expect(markdownFile.markdown).toContain("## Sheet: table-basic");
+    expect(markdownFile.markdown).toContain("# Book: table-basic-sample11.xlsx");
     expect(markdownFile.markdown).toContain("方眼紙的様式のテスト");
-    expect(markdownFile.markdown).toContain("### Table 001 (B3-T7)");
+    expect(markdownFile.markdown).toContain("### Table: 001 (B3-T7)");
     expect(markdownFile.markdown).toContain("| 1 | コード | code | 101 | 何かのコード |");
     expect(markdownFile.markdown).toContain("| 4 | 更新日 | updatedate | 3月14日 | 何かの更新日 |");
   });
@@ -2304,9 +2318,9 @@ describe("xlsx2md core", () => {
       "B3-T7",
       "B10-T14"
     ]);
-    expect(markdownFile.markdown).toContain("Workbook: table-basic-sample12.xlsx");
-    expect(markdownFile.markdown).toContain("### Table 001 (B3-T7)");
-    expect(markdownFile.markdown).toContain("### Table 002 (B10-T14)");
+    expect(markdownFile.markdown).toContain("# Book: table-basic-sample12.xlsx");
+    expect(markdownFile.markdown).toContain("### Table: 001 (B3-T7)");
+    expect(markdownFile.markdown).toContain("### Table: 002 (B10-T14)");
     expect(markdownFile.markdown).toContain("方眼紙風のためにセル結合が多用されます");
     expect(markdownFile.markdown).toContain("テーブルその2");
   });
@@ -2354,11 +2368,11 @@ describe("xlsx2md core", () => {
       "B10-T14",
       "V10-AN14"
     ]);
-    expect(markdownFile.markdown).toContain("Workbook: table-basic-sample13.xlsx");
-    expect(markdownFile.markdown).toContain("### Table 001 (B3-T7)");
-    expect(markdownFile.markdown).toContain("### Table 002 (V3-AN7)");
-    expect(markdownFile.markdown).toContain("### Table 003 (B10-T14)");
-    expect(markdownFile.markdown).toContain("### Table 004 (V10-AN14)");
+    expect(markdownFile.markdown).toContain("# Book: table-basic-sample13.xlsx");
+    expect(markdownFile.markdown).toContain("### Table: 001 (B3-T7)");
+    expect(markdownFile.markdown).toContain("### Table: 002 (V3-AN7)");
+    expect(markdownFile.markdown).toContain("### Table: 003 (B10-T14)");
+    expect(markdownFile.markdown).toContain("### Table: 004 (V10-AN14)");
     expect(markdownFile.markdown).toContain("| 1 | コード | code | 401 | 何かのコード |");
     expect(markdownFile.markdown).toContain("| 2 | 名前 | name | Sabro | 何かの名前 |");
     expect(markdownFile.markdown).toContain("| 2 | 名前 | name | Jiro | 何かの名前 |");
@@ -2402,8 +2416,8 @@ describe("xlsx2md core", () => {
     expect(markdownFile.summary.images).toBe(0);
     expect(markdownFile.summary.formulaDiagnostics).toHaveLength(3);
     expect(markdownFile.summary.tableScores.map((detail) => detail.range)).toEqual(["B3-T7"]);
-    expect(markdownFile.markdown).toContain("Workbook: table-basic-sample14.xlsx");
-    expect(markdownFile.markdown).toContain("### Table 001 (B3-T7)");
+    expect(markdownFile.markdown).toContain("# Book: table-basic-sample14.xlsx");
+    expect(markdownFile.markdown).toContain("### Table: 001 (B3-T7)");
     expect(markdownFile.markdown).toContain("| 2 | 名前 | name | Taro | 何かの名前 |");
     expect(markdownFile.markdown).toContain("たまに結合漏れのセルがある場合");
   });
@@ -2445,8 +2459,8 @@ describe("xlsx2md core", () => {
     expect(markdownFile.summary.images).toBe(0);
     expect(markdownFile.summary.formulaDiagnostics).toHaveLength(3);
     expect(markdownFile.summary.tableScores.map((detail) => detail.range)).toEqual(["B3-T7"]);
-    expect(markdownFile.markdown).toContain("Workbook: table-basic-sample15.xlsx");
-    expect(markdownFile.markdown).toContain("### Table 001 (B3-T7)");
+    expect(markdownFile.markdown).toContain("# Book: table-basic-sample15.xlsx");
+    expect(markdownFile.markdown).toContain("### Table: 001 (B3-T7)");
     expect(markdownFile.markdown).toContain("| 3 | 登録日 | entrydate | 3月13日 | 登録および更新日 |");
     expect(markdownFile.markdown).toContain("| 4 | 更新日 | updatedate | 3月14日 | [MERGED↑] |");
     expect(markdownFile.markdown).toContain("※方眼紙＋結合＋さらに縦結合");
@@ -2488,8 +2502,8 @@ describe("xlsx2md core", () => {
     expect(markdownFile.summary.images).toBe(0);
     expect(markdownFile.summary.formulaDiagnostics).toHaveLength(3);
     expect(markdownFile.summary.tableScores.map((detail) => detail.range)).toEqual(["B3-T7"]);
-    expect(markdownFile.markdown).toContain("Workbook: table-basic-sample16.xlsx");
-    expect(markdownFile.markdown).toContain("### Table 001 (B3-T7)");
+    expect(markdownFile.markdown).toContain("# Book: table-basic-sample16.xlsx");
+    expect(markdownFile.markdown).toContain("### Table: 001 (B3-T7)");
     expect(markdownFile.markdown).toContain("| 項番 | 項目名称 | 物理名 | デフォルト値 | [MERGED←] | 備考 |");
     expect(markdownFile.markdown).toContain("| 2 | 名前 | name | Taro | Ito | 何かの名前 |");
     expect(markdownFile.markdown).toContain("たまに結合漏れのセルがあって、さらに複数文字が登場");
@@ -2536,10 +2550,10 @@ describe("xlsx2md core", () => {
       "B2-U6",
       "C8-V16"
     ]);
-    expect(markdownFile.markdown).toContain("Workbook: grid-layout-sample-01.xlsx");
+    expect(markdownFile.markdown).toContain("# Book: grid-layout-sample-01.xlsx");
     expect(markdownFile.markdown).toContain("方眼紙的様式の動作確認");
-    expect(markdownFile.markdown).toContain("### Table 001 (B2-U6)");
-    expect(markdownFile.markdown).toContain("### Table 002 (C8-V16)");
+    expect(markdownFile.markdown).toContain("### Table: 001 (B2-U6)");
+    expect(markdownFile.markdown).toContain("### Table: 002 (C8-V16)");
     expect(markdownFile.markdown).toContain("| 1 | 担当コード | tantocode | 101 | 担当コードの値 |");
     expect(markdownFile.markdown).toContain("| 2 | 担当者名 | tantoname | Taro | 担当の名前 |");
     expect(markdownFile.markdown).toContain("| 6 | 備考 | remarks | なし | 補足事項 |");
@@ -2588,8 +2602,8 @@ describe("xlsx2md core", () => {
     expect(balancedFile.summary.tables).toBe(1);
     expect(balancedFile.summary.tableDetectionMode).toBe("balanced");
     expect(balancedFile.summary.tableScores.map((detail) => detail.range)).toEqual(["A3-B4"]);
-    expect(balancedFile.markdown).toContain("Workbook: table-border-priority-sample01.xlsx");
-    expect(balancedFile.markdown).toContain("### Table 001 (A3-B4)");
+    expect(balancedFile.markdown).toContain("# Book: table-border-priority-sample01.xlsx");
+    expect(balancedFile.markdown).toContain("### Table: 001 (A3-B4)");
     expect(balancedFile.markdown).toContain("| 項目 | 値 |");
     expect(balancedFile.markdown).toContain("| A | 100 |");
 
@@ -2597,8 +2611,8 @@ describe("xlsx2md core", () => {
     expect(borderFile.summary.tables).toBe(0);
     expect(borderFile.summary.tableDetectionMode).toBe("border");
     expect(borderFile.summary.tableScores).toHaveLength(0);
-    expect(borderFile.markdown).toContain("Workbook: table-border-priority-sample01.xlsx");
-    expect(borderFile.markdown).not.toContain("### Table 001");
+    expect(borderFile.markdown).toContain("# Book: table-border-priority-sample01.xlsx");
+    expect(borderFile.markdown).not.toContain("### Table: 001");
     expect(borderFile.markdown).toContain("項目");
     expect(borderFile.markdown).toContain("100");
     expect(borderFile.markdown).toContain("※罫線優先モード確認用");
@@ -2780,8 +2794,8 @@ describe("xlsx2md core", () => {
     expect(files[0].fileName).toBe("sales_001_Summary.md");
     expect(rawFiles[0].fileName).toBe("sales_001_Summary_raw.md");
     expect(bothFiles[0].fileName).toBe("sales_001_Summary_both.md");
-    expect(files[0].markdown).toContain("# Summary");
-    expect(files[0].markdown).toContain("Workbook: sales.xlsx");
+    expect(files[0].markdown).toContain("## Sheet: Summary");
+    expect(files[0].markdown).toContain("# Book: sales.xlsx");
     expect(files[0].markdown).toContain("Overview text");
     expect(files[0].markdown).toContain("| Region | Sales | 100 |");
     expect(files[0].markdown).toContain("| East | West | 90 |");
@@ -2862,8 +2876,7 @@ describe("xlsx2md core", () => {
     expect(workbook.sheets[0].images[0].anchor).toBe("C2");
     expect(workbook.sheets[0].images[0].path).toBe("assets/Summary/image_001.png");
     expect(files[0].summary.images).toBe(1);
-    expect(files[0].markdown).toContain("## Images");
-    expect(files[0].markdown).toContain("### Image 001 (C2)");
+    expect(files[0].markdown).toContain("### Image: 001 (C2)");
     expect(files[0].markdown).toContain("![image_001.png](assets/Summary/image_001.png)");
 
     const archive = api.createWorkbookExportArchive(workbook, files);
@@ -2871,8 +2884,8 @@ describe("xlsx2md core", () => {
     expect(extracted.has("output/diagram.md")).toBe(true);
     expect(extracted.has("output/assets/Summary/image_001.png")).toBe(true);
     const markdownText = new TextDecoder().decode(extracted.get("output/diagram.md"));
-    expect(markdownText).toContain("<!-- diagram_001_Summary -->");
-    expect(markdownText).toContain("## Images");
+    expect(markdownText).toContain("# Book: diagram.xlsx");
+    expect(markdownText).toContain("### Image: 001 (C2)");
     expect(extracted.get("output/assets/Summary/image_001.png")).toBeDefined();
   });
 
@@ -3430,7 +3443,7 @@ describe("xlsx2md core", () => {
     });
 
     expect(markdownFile.summary.tableScores).toHaveLength(0);
-    expect(markdownFile.markdown).not.toContain("### Table 001");
+    expect(markdownFile.markdown).not.toContain("### Table: 001");
     expect(markdownFile.markdown).toContain("label1");
     expect(markdownFile.markdown).toContain("終了日時");
   });
@@ -3614,10 +3627,10 @@ describe("xlsx2md core", () => {
     });
 
     expect(markdownFiles[0].markdown).toContain("[Open](https://example.com/)");
-    expect(markdownFiles[0].markdown).toContain("[Jump](#link-book_002_Other_github) (Other!A1)");
+    expect(markdownFiles[0].markdown).toContain("[Jump](#other) (Other!A1)");
     expect(markdownFiles[0].markdown).not.toContain("<ins>Open</ins>");
     expect(markdownFiles[0].markdown).not.toContain("<ins>Jump</ins>");
-    expect(markdownFiles[1].markdown).toContain('<a id="link-book_002_Other_github"></a>');
+    expect(markdownFiles[1].markdown).toContain("## Sheet: Other");
   });
 
   it("preserves supported rich text as github-compatible markdown", async () => {

@@ -149,9 +149,20 @@
     const formattingMode = markdownFiles[0]?.summary.formattingMode || "plain";
     const suffix = `${outputMode === "display" ? "" : `_${outputMode}`}${formattingMode === "plain" ? "" : `_${formattingMode}`}`;
     const fileName = `${String(workbook.name || "workbook").replace(/\.xlsx$/i, "")}${suffix}.md`;
-    const content = markdownFiles
-      .map((markdownFile) => `<!-- ${markdownFile.fileName.replace(/\.md$/i, "")} -->\n${markdownFile.markdown}`)
-      .join("\n\n");
+    const bookHeading = `# Book: ${String(workbook.name || "workbook.xlsx")}`;
+    const content = [
+      bookHeading,
+      ...markdownFiles.map((markdownFile) => {
+        const lines = String(markdownFile.markdown || "").split("\n");
+        if (lines[0] === bookHeading) {
+          lines.shift();
+          while (lines[0] === "") {
+            lines.shift();
+          }
+        }
+        return lines.join("\n");
+      }).filter((markdown) => markdown.trim().length > 0)
+    ].join("\n\n");
     return { fileName, content };
   }
 

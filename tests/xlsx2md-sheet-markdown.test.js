@@ -146,10 +146,9 @@ describe("xlsx2md sheet markdown", () => {
     const result = api.convertSheetToMarkdown(workbook, sheet, {});
 
     expect(result.fileName).toBe("1_Sheet1.md");
-    expect(result.markdown).toContain("# Sheet1");
-    expect(result.markdown).toContain("Workbook: book.xlsx");
+    expect(result.markdown).toContain("# Book: book.xlsx");
+    expect(result.markdown).toContain("## Sheet: Sheet1");
     expect(result.summary.narrativeBlocks).toBe(1);
-    expect(result.markdown).toContain('<a id="1_Sheet1"></a>');
   });
 
   it("normalizes cell line breaks into spaces in plain mode", () => {
@@ -237,10 +236,44 @@ describe("xlsx2md sheet markdown", () => {
     const enabled = api.convertSheetToMarkdown(workbook, sheet, {});
     const disabled = api.convertSheetToMarkdown(workbook, sheet, { includeShapeDetails: false });
 
-    expect(enabled.markdown).toContain("## Shape Blocks");
-    expect(enabled.markdown).toContain("## Shapes");
-    expect(disabled.markdown).not.toContain("## Shape Blocks");
-    expect(disabled.markdown).not.toContain("## Shapes");
+    expect(enabled.markdown).toContain("### Shape Block: 001 (3:2-4:3)");
+    expect(enabled.markdown).toContain("#### Shape: 001 (B3)");
+    expect(disabled.markdown).not.toContain("### Shape Block:");
+    expect(disabled.markdown).not.toContain("#### Shape:");
+  });
+
+  it("keeps a blank line between shape items when svg output is present", () => {
+    const module = bootSheetMarkdown();
+    const api = module.createSheetMarkdownApi(createDeps({
+      extractShapeBlocks: () => [],
+      renderHierarchicalRawEntries: () => ["- kind: rect"]
+    }));
+    const workbook = { name: "book.xlsx", sheets: [] };
+    const sheet = {
+      name: "Sheet1",
+      index: 1,
+      cells: [],
+      merges: [],
+      images: [],
+      charts: [],
+      shapes: [{
+        anchor: "H3",
+        rawEntries: [{ key: "kind", value: "rect" }],
+        svgFilename: "shape_001.svg",
+        svgPath: "assets/Sheet1/shape_001.svg",
+        svgData: new Uint8Array([1])
+      }, {
+        anchor: "K3",
+        rawEntries: [{ key: "kind", value: "rect" }],
+        svgFilename: "shape_002.svg",
+        svgPath: "assets/Sheet1/shape_002.svg",
+        svgData: new Uint8Array([2])
+      }]
+    };
+
+    const result = api.convertSheetToMarkdown(workbook, sheet, {});
+
+    expect(result.markdown).toContain("![shape_001.svg](assets/Sheet1/shape_001.svg)\n\n#### Shape: 002 (K3)");
   });
 
   it("keeps line-start markdown markers literal in narrative output", () => {
@@ -577,7 +610,7 @@ describe("xlsx2md sheet markdown", () => {
     const result = api.convertSheetToMarkdown(workbook, sheet, { formattingMode: "github" });
 
     expect(result.markdown).toContain("[Open](https://example.com/)");
-    expect(result.markdown).toContain("[Jump](#2_Other Sheet_github) (Other Sheet!C3)");
+    expect(result.markdown).toContain("[Jump](#other-sheet) (Other Sheet!C3)");
   });
 
   it("suppresses underline markup for hyperlink cells in github mode", () => {

@@ -192,7 +192,7 @@ describe("xlsx2md markdown export", () => {
       "output/sample.md",
       "output/shapes/shape_001.svg"
     ]);
-    expect(new TextDecoder().decode(extracted.get("output/sample.md"))).toContain("<!-- sample_001_Sheet1 -->");
+    expect(new TextDecoder().decode(extracted.get("output/sample.md"))).toContain("# Sheet1");
     expect(extracted.get("output/images/pic.png")).toEqual(new Uint8Array([1, 2, 3]));
     expect(extracted.get("output/shapes/shape_001.svg")).toEqual(new Uint8Array([4, 5]));
   });
@@ -224,7 +224,54 @@ describe("xlsx2md markdown export", () => {
     );
 
     expect(payload.mimeType).toBe("text/markdown;charset=utf-16be");
-    expect(Array.from(payload.data.slice(0, 4))).toEqual([0xfe, 0xff, 0x00, 0x3c]);
+    expect(Array.from(payload.data.slice(0, 4))).toEqual([0xfe, 0xff, 0x00, 0x23]);
+  });
+
+  it("writes the book heading only once in combined markdown", () => {
+    const api = bootMarkdownExport();
+    const payload = api.createCombinedMarkdownExportFile(
+      { name: "sales.xlsx", sheets: [{ images: [], shapes: [] }, { images: [], shapes: [] }] },
+      [{
+        fileName: "sales_001_Summary.md",
+        sheetName: "Summary",
+        markdown: "# Book: sales.xlsx\n\n## Sheet: Summary\n\nSummary body",
+        summary: {
+          outputMode: "display",
+          formattingMode: "plain",
+          tableDetectionMode: "balanced",
+          sections: 1,
+          tables: 0,
+          narrativeBlocks: 1,
+          merges: 0,
+          images: 0,
+          charts: 0,
+          cells: 1,
+          tableScores: [],
+          formulaDiagnostics: []
+        }
+      }, {
+        fileName: "sales_002_Other.md",
+        sheetName: "Other",
+        markdown: "# Book: sales.xlsx\n\n## Sheet: Other\n\nOther body",
+        summary: {
+          outputMode: "display",
+          formattingMode: "plain",
+          tableDetectionMode: "balanced",
+          sections: 1,
+          tables: 0,
+          narrativeBlocks: 1,
+          merges: 0,
+          images: 0,
+          charts: 0,
+          cells: 1,
+          tableScores: [],
+          formulaDiagnostics: []
+        }
+      }]
+    );
+
+    expect(payload.content).toBe("# Book: sales.xlsx\n\n## Sheet: Summary\n\nSummary body\n\n## Sheet: Other\n\nOther body");
+    expect(payload.content.match(/^# Book: /gm)).toHaveLength(1);
   });
 
   it("uses formatting mode suffixes in combined export file names", () => {
@@ -234,7 +281,7 @@ describe("xlsx2md markdown export", () => {
       [{
         fileName: "sample_001_Sheet1_github.md",
         sheetName: "Sheet1",
-        markdown: "# Sheet1",
+        markdown: "# Book: sample.xlsx\n\n## Sheet: Sheet1",
         summary: {
           outputMode: "display",
           formattingMode: "github",
@@ -253,5 +300,6 @@ describe("xlsx2md markdown export", () => {
     );
 
     expect(payload.fileName).toBe("sample_github.md");
+    expect(payload.content).toBe("# Book: sample.xlsx\n\n## Sheet: Sheet1");
   });
 });

@@ -4181,6 +4181,10 @@ if (!customElements.get("lht-page-menu")) {
     const moduleRegistry = getXlsx2mdModuleRegistry();
     const textDecoder = new TextDecoder("utf-8");
     const textEncoder = new TextEncoder();
+    const nodeRequire = (() => {
+        const candidate = globalThis.__xlsx2mdNodeRequire;
+        return typeof candidate === "function" ? candidate : null;
+    })();
     const crcTable = buildCrc32Table();
     const fixedZipEntryTimestamp = toDosDateTime(2025, 1, 1, 0, 0, 0);
     const utf8FileNameFlag = 0x0800;
@@ -4225,9 +4229,19 @@ if (!customElements.get("lht-page-menu")) {
     }
     async function inflateRaw(data) {
         if (typeof DecompressionStream === "function") {
-            const stream = new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
-            const buffer = await new Response(stream).arrayBuffer();
-            return new Uint8Array(buffer);
+            try {
+                const stream = new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+                const buffer = await new Response(stream).arrayBuffer();
+                return new Uint8Array(buffer);
+            }
+            catch (_error) {
+                // Fall through to the Node zlib path when the runtime exposes
+                // DecompressionStream but lacks "deflate-raw" support.
+            }
+        }
+        if (nodeRequire) {
+            const zlib = nodeRequire("node:zlib");
+            return Uint8Array.from(zlib.inflateRawSync(data));
         }
         throw new Error("This environment does not support ZIP deflate decompression.");
     }
@@ -5523,9 +5537,20 @@ if (!customElements.get("lht-page-menu")) {
         const formattingMode = ((_b = markdownFiles[0]) === null || _b === void 0 ? void 0 : _b.summary.formattingMode) || "plain";
         const suffix = `${outputMode === "display" ? "" : `_${outputMode}`}${formattingMode === "plain" ? "" : `_${formattingMode}`}`;
         const fileName = `${String(workbook.name || "workbook").replace(/\.xlsx$/i, "")}${suffix}.md`;
-        const content = markdownFiles
-            .map((markdownFile) => `<!-- ${markdownFile.fileName.replace(/\.md$/i, "")} -->\n${markdownFile.markdown}`)
-            .join("\n\n");
+        const bookHeading = `# Book: ${String(workbook.name || "workbook.xlsx")}`;
+        const content = [
+            bookHeading,
+            ...markdownFiles.map((markdownFile) => {
+                const lines = String(markdownFile.markdown || "").split("\n");
+                if (lines[0] === bookHeading) {
+                    lines.shift();
+                    while (lines[0] === "") {
+                        lines.shift();
+                    }
+                }
+                return lines.join("\n");
+            }).filter((markdown) => markdown.trim().length > 0)
+        ].join("\n\n");
         return { fileName, content };
     }
     function encodeMarkdownText(text, options = {}) {
@@ -5605,8 +5630,13 @@ if (!customElements.get("lht-page-menu")) {
             }
             return map;
         }
-        function createSheetAnchorId(workbookName, sheetIndex, sheetName, options = {}) {
-            return deps.createOutputFileName(workbookName, sheetIndex, sheetName, options.outputMode || "display", options.formattingMode || "plain").replace(/\.md$/i, "");
+        function createHeadingFragment(text) {
+            return String(text || "")
+                .trim()
+                .toLowerCase()
+                .replace(/<[^>]+>/g, "")
+                .replace(/[^\p{L}\p{N}\s_-]+/gu, "")
+                .replace(/\s+/g, "-");
         }
         function parseInternalHyperlinkLocation(location, currentSheetName) {
             const normalized = String(location || "").trim().replace(/^#/, "");
@@ -5641,7 +5671,7 @@ if (!customElements.get("lht-page-menu")) {
             if (!targetSheet || !workbook) {
                 return traceText ? `${label} (${traceText})` : label;
             }
-            const href = `#${createSheetAnchorId(workbook.name, targetSheet.index, targetSheet.name, options)}`;
+            const href = `#${createHeadingFragment(targetSheet.name)}`;
             return traceText && traceText !== targetSheet.name
                 ? `[${label}](${href}) (${traceText})`
                 : `[${label}](${href})`;
@@ -5862,7 +5892,6 @@ if (!customElements.get("lht-page-menu")) {
                 });
             }
             const fileName = deps.createOutputFileName(workbook.name, sheet.index, sheet.name, options.outputMode || "display", options.formattingMode || "plain");
-            const sheetAnchorId = createSheetAnchorId(workbook.name, sheet.index, sheet.name, options);
             let tableCounter = 1;
             for (const table of tables) {
                 const rows = deps.matrixFromCandidate(sheet, table, options, buildCellMap, (cell, tableOptions) => formatCellForMarkdown(cell, tableOptions, workbook, sheet));
@@ -5872,7 +5901,7 @@ if (!customElements.get("lht-page-menu")) {
                 sections.push({
                     sortRow: table.startRow,
                     sortCol: table.startCol,
-                    markdown: `### Table ${String(tableCounter).padStart(3, "0")} (${deps.formatRange(table.startRow, table.startCol, table.endRow, table.endCol)})\n\n${tableMarkdown}\n`,
+                    markdown: `### Table: ${String(tableCounter).padStart(3, "0")} (${deps.formatRange(table.startRow, table.startCol, table.endRow, table.endCol)})\n\n${tableMarkdown}\n`,
                     kind: "table"
                 });
                 tableCounter += 1;
@@ -5902,24 +5931,20 @@ if (!customElements.get("lht-page-menu")) {
             const imageSection = sheet.images.length > 0
                 ? [
                     "",
-                    "## Images",
-                    "",
                     ...sheet.images.map((image, index) => [
-                        `### Image ${String(index + 1).padStart(3, "0")} (${image.anchor})`,
+                        `### Image: ${String(index + 1).padStart(3, "0")} (${image.anchor})`,
                         `- File: ${image.path}`,
                         "",
                         `![${image.filename}](${image.path})`
                     ].join("\n"))
-                ].join("\n")
+                ].join("\n\n")
                 : "";
             const chartSection = charts.length > 0
                 ? [
                     "",
-                    "## Charts",
-                    "",
                     ...charts.map((chart, index) => {
                         const lines = [
-                            `### Chart ${String(index + 1).padStart(3, "0")} (${chart.anchor})`,
+                            `### Chart: ${String(index + 1).padStart(3, "0")} (${chart.anchor})`,
                             `- Title: ${chart.title || "(none)"}`,
                             `- Type: ${chart.chartType}`
                         ];
@@ -5937,46 +5962,70 @@ if (!customElements.get("lht-page-menu")) {
                         }
                         return lines.join("\n");
                     })
-                ].join("\n")
+                ].join("\n\n")
                 : "";
             const includeShapeDetails = options.includeShapeDetails !== false;
             const shapeSection = includeShapeDetails && shapes.length > 0
                 ? [
                     "",
-                    "## Shape Blocks",
-                    "",
-                    ...shapeBlocks.map((block, blockIndex) => [
-                        `### Shape Block ${String(blockIndex + 1).padStart(3, "0")} (${deps.formatRange(block.startRow, block.startCol, block.endRow, block.endCol)})`,
-                        `- Shapes: ${block.shapeIndexes.map((shapeIndex) => `Shape ${String(shapeIndex + 1).padStart(3, "0")}`).join(", ")}`,
-                        `- anchorRange: ${deps.colToLetters(block.startCol)}${block.startRow}-${deps.colToLetters(block.endCol)}${block.endRow}`
-                    ].join("\n")),
-                    "",
-                    "## Shapes",
-                    "",
-                    ...shapes.map((shape, index) => {
-                        const lines = [
-                            `### Shape ${String(index + 1).padStart(3, "0")} (${shape.anchor})`,
-                            ...deps.renderHierarchicalRawEntries(shape.rawEntries)
-                        ];
-                        if (shape.svgPath) {
-                            lines.push(`- SVG: ${shape.svgPath}`);
-                            lines.push("");
-                            lines.push(`![${shape.svgFilename || `shape_${String(index + 1).padStart(3, "0")}.svg`}](${shape.svgPath})`);
+                    ...shapeBlocks.map((block, blockIndex) => {
+                        const shapeDetails = block.shapeIndexes
+                            .map((shapeIndex) => {
+                            const shape = shapes[shapeIndex];
+                            if (!shape)
+                                return "";
+                            const lines = [
+                                `#### Shape: ${String(shapeIndex + 1).padStart(3, "0")} (${shape.anchor})`,
+                                ...deps.renderHierarchicalRawEntries(shape.rawEntries)
+                            ];
+                            if (shape.svgPath) {
+                                lines.push(`- SVG: ${shape.svgPath}`);
+                                lines.push("");
+                                lines.push(`![${shape.svgFilename || `shape_${String(shapeIndex + 1).padStart(3, "0")}.svg`}](${shape.svgPath})`);
+                            }
+                            return lines.join("\n");
+                        })
+                            .filter(Boolean)
+                            .join("\n\n");
+                        return [
+                            `### Shape Block: ${String(blockIndex + 1).padStart(3, "0")} (${deps.formatRange(block.startRow, block.startCol, block.endRow, block.endCol)})`,
+                            `- Shapes: ${block.shapeIndexes.map((shapeIndex) => `Shape ${String(shapeIndex + 1).padStart(3, "0")}`).join(", ")}`,
+                            `- anchorRange: ${deps.colToLetters(block.startCol)}${block.startRow}-${deps.colToLetters(block.endCol)}${block.endRow}`,
+                            ...(shapeDetails ? ["", shapeDetails] : [])
+                        ].join("\n");
+                    }),
+                    ...(() => {
+                        const grouped = new Set(shapeBlocks.flatMap((block) => block.shapeIndexes));
+                        const ungrouped = shapes
+                            .map((shape, index) => ({ shape, index }))
+                            .filter(({ index }) => !grouped.has(index));
+                        if (ungrouped.length === 0) {
+                            return [];
                         }
-                        return lines.join("\n");
-                    })
-                ].join("\n")
+                        return [
+                            "",
+                            "### Ungrouped Shapes",
+                            "",
+                            ...ungrouped.map(({ shape, index }) => {
+                                const lines = [
+                                    `#### Shape: ${String(index + 1).padStart(3, "0")} (${shape.anchor})`,
+                                    ...deps.renderHierarchicalRawEntries(shape.rawEntries)
+                                ];
+                                if (shape.svgPath) {
+                                    lines.push(`- SVG: ${shape.svgPath}`);
+                                    lines.push("");
+                                    lines.push(`![${shape.svgFilename || `shape_${String(index + 1).padStart(3, "0")}.svg`}](${shape.svgPath})`);
+                                }
+                                return lines.join("\n");
+                            })
+                        ];
+                    })()
+                ].join("\n\n")
                 : "";
             const markdown = [
-                `<a id="${sheetAnchorId}"></a>`,
+                `# Book: ${workbook.name}`,
                 "",
-                `# ${sheet.name}`,
-                "",
-                "## Source Information",
-                `- Workbook: ${workbook.name}`,
-                `- Sheet: ${sheet.name}`,
-                "",
-                "## Body",
+                `## Sheet: ${sheet.name}`,
                 "",
                 body || "_No extractable body content was found._",
                 chartSection,
@@ -7824,7 +7873,9 @@ if (!customElements.get("lht-page-menu")) {
         const assetDeps = deps.buildAssetDeps();
         const images = deps.parseDrawingImages(files, sheetName, sheetPath, assetDeps);
         const charts = deps.parseDrawingCharts(files, sheetName, sheetPath, assetDeps);
-        const shapes = deps.parseDrawingShapes(files, sheetName, sheetPath, assetDeps);
+        const shapes = deps.parseShapes === false
+            ? []
+            : deps.parseDrawingShapes(files, sheetName, sheetPath, assetDeps);
         let maxRow = 0;
         let maxCol = 0;
         for (const cell of cells) {
@@ -11834,9 +11885,10 @@ if (!customElements.get("lht-page-menu")) {
             }
         };
     }
-    async function parseWorkbook(arrayBuffer, workbookName = "workbook.xlsx") {
+    async function parseWorkbook(arrayBuffer, workbookName = "workbook.xlsx", options = {}) {
         const worksheetParseDeps = createWorksheetParseDeps();
         const formulaResolverDeps = createFormulaResolverDeps();
+        const parseShapes = options.includeShapeDetails !== false;
         return workbookLoaderHelper.parseWorkbook(arrayBuffer, workbookName, {
             unzipEntries: zipIoHelper.unzipEntries,
             parseSharedStrings: sharedStringsHelper.parseSharedStrings,
@@ -11845,7 +11897,10 @@ if (!customElements.get("lht-page-menu")) {
             xmlToDocument,
             decodeXmlText,
             getTextContent,
-            parseWorksheet: (files, name, sheetPath, sheetIndex, sharedStrings, cellStyles) => worksheetParserHelper.parseWorksheet(files, name, sheetPath, sheetIndex, sharedStrings, cellStyles, worksheetParseDeps),
+            parseWorksheet: (files, name, sheetPath, sheetIndex, sharedStrings, cellStyles) => worksheetParserHelper.parseWorksheet(files, name, sheetPath, sheetIndex, sharedStrings, cellStyles, {
+                ...worksheetParseDeps,
+                parseShapes
+            }),
             postProcessWorkbook: (workbook) => {
                 formulaResolverHelper.resolveSimpleFormulaReferences(workbook, formulaResolverDeps);
             }
@@ -11889,6 +11944,9 @@ if (!customElements.get("lht-page-menu")) {
     }
     let currentWorkbook = null;
     let currentFiles = [];
+    let currentWorkbookBytes = null;
+    let currentWorkbookName = "";
+    let currentParsedIncludeShapeDetails = null;
     function getElement(id) {
         const element = document.getElementById(id);
         if (!element) {
@@ -12227,9 +12285,6 @@ if (!customElements.get("lht-page-menu")) {
         }
         getElement("markdownOutput").textContent = markdown;
     }
-    function createMarkdownChunkLabel(fileName) {
-        return String(fileName || "").replace(/\.md$/i, "");
-    }
     function clearError() {
         const errorAlert = getElement("errorAlert");
         if (typeof errorAlert.clear === "function") {
@@ -12281,9 +12336,11 @@ if (!customElements.get("lht-page-menu")) {
             updatePreviewModeBanner(getSelectedOutputMode());
             return;
         }
-        const combinedMarkdown = currentFiles
-            .map((file) => `<!-- ${createMarkdownChunkLabel(file.fileName)} -->\n${file.markdown}`)
-            .join("\n\n");
+        if (!currentWorkbook) {
+            showError("Workbook context is missing.");
+            return;
+        }
+        const combinedMarkdown = xlsx2md.createCombinedMarkdownExportFile(currentWorkbook, currentFiles).content;
         const outputMode = ((_a = currentFiles[0]) === null || _a === void 0 ? void 0 : _a.summary.outputMode) || "display";
         updatePreviewModeBanner(outputMode);
         setSummaryHtml(renderAnalysisSummary(currentFiles, (currentWorkbook === null || currentWorkbook === void 0 ? void 0 : currentWorkbook.name) || "workbook.xlsx"));
@@ -12348,13 +12405,39 @@ if (!customElements.get("lht-page-menu")) {
             showError(error instanceof Error ? error.message : "Failed to save ZIP archive.");
         }
     }
-    function convertCurrentWorkbook(showSuccessToast = true) {
+    async function ensureWorkbookParsedForCurrentOptions() {
+        if (!currentWorkbookBytes || !currentWorkbookName) {
+            return currentWorkbook !== null;
+        }
+        const includeShapeDetails = getOptions().includeShapeDetails;
+        if (currentWorkbook && currentParsedIncludeShapeDetails === includeShapeDetails) {
+            return true;
+        }
+        setLoading(true, "Analyzing xlsx");
+        try {
+            currentWorkbook = await xlsx2md.parseWorkbook(currentWorkbookBytes, currentWorkbookName, { includeShapeDetails });
+            currentParsedIncludeShapeDetails = includeShapeDetails;
+            return true;
+        }
+        catch (error) {
+            showError(error instanceof Error ? error.message : "Failed to load the xlsx file.");
+            return false;
+        }
+        finally {
+            setLoading(false);
+        }
+    }
+    async function convertCurrentWorkbook(showSuccessToast = true) {
         clearError();
-        if (!currentWorkbook) {
+        if (!currentWorkbook && !currentWorkbookBytes) {
             showError("Load an xlsx file first.");
             return;
         }
         try {
+            const ready = await ensureWorkbookParsedForCurrentOptions();
+            if (!ready || !currentWorkbook) {
+                return;
+            }
             currentFiles = xlsx2md.convertWorkbookToMarkdownFiles(currentWorkbook, getOptions());
             renderCurrentSelection();
             if (showSuccessToast) {
@@ -12370,14 +12453,22 @@ if (!customElements.get("lht-page-menu")) {
         setLoading(true, "Loading xlsx");
         try {
             const arrayBuffer = await file.arrayBuffer();
-            currentWorkbook = await xlsx2md.parseWorkbook(arrayBuffer, file.name);
+            currentWorkbookBytes = arrayBuffer;
+            currentWorkbookName = file.name;
+            currentWorkbook = await xlsx2md.parseWorkbook(arrayBuffer, file.name, {
+                includeShapeDetails: getOptions().includeShapeDetails
+            });
+            currentParsedIncludeShapeDetails = getOptions().includeShapeDetails;
             currentFiles = [];
-            convertCurrentWorkbook(false);
+            await convertCurrentWorkbook(false);
             showToast("Loaded xlsx and generated Markdown.");
         }
         catch (error) {
             currentWorkbook = null;
             currentFiles = [];
+            currentWorkbookBytes = null;
+            currentWorkbookName = "";
+            currentParsedIncludeShapeDetails = null;
             setSummaryText("Failed to load the workbook.");
             setScoreSummaryHtml('<div class="md-summary-empty">No conversion yet.</div>');
             setFormulaSummaryHtml('<div class="md-summary-empty">No conversion yet.</div>');
@@ -12402,7 +12493,7 @@ if (!customElements.get("lht-page-menu")) {
     }
     function bindActions() {
         getElement("convertBtn").addEventListener("click", () => {
-            convertCurrentWorkbook(true);
+            void convertCurrentWorkbook(true);
         });
         getElement("downloadBtn").addEventListener("click", () => {
             downloadCurrentMarkdown();
