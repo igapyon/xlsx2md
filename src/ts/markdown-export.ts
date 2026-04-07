@@ -117,8 +117,9 @@
   ): string {
     const bookBase = sanitizeFileNameSegment(workbookName.replace(/\.xlsx$/i, ""), "workbook");
     const safeSheetName = sanitizeFileNameSegment(sheetName, `Sheet${sheetIndex}`);
-    const suffix = `${outputMode === "display" ? "" : `_${outputMode}`}${formattingMode === "plain" ? "" : `_${formattingMode}`}`;
-    return `${bookBase}_${String(sheetIndex).padStart(3, "0")}_${safeSheetName}${suffix}.md`;
+    void outputMode;
+    void formattingMode;
+    return `${bookBase}_${String(sheetIndex).padStart(3, "0")}_${safeSheetName}.md`;
   }
 
   function createSummaryText(markdownFile: MarkdownFile): string {
@@ -145,10 +146,7 @@
   }
 
   function createCombinedMarkdownExportFile(workbook: WorkbookLike, markdownFiles: MarkdownFile[]): { fileName: string; content: string } {
-    const outputMode = markdownFiles[0]?.summary.outputMode || "display";
-    const formattingMode = markdownFiles[0]?.summary.formattingMode || "plain";
-    const suffix = `${outputMode === "display" ? "" : `_${outputMode}`}${formattingMode === "plain" ? "" : `_${formattingMode}`}`;
-    const fileName = `${String(workbook.name || "workbook").replace(/\.xlsx$/i, "")}${suffix}.md`;
+    const fileName = `${String(workbook.name || "workbook").replace(/\.xlsx$/i, "")}.md`;
     const bookHeading = `# Book: ${String(workbook.name || "workbook.xlsx")}`;
     const content = [
       bookHeading,

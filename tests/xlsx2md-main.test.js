@@ -2792,8 +2792,8 @@ describe("xlsx2md core", () => {
     expect(workbook.sheets[0].name).toBe("Summary");
     expect(files).toHaveLength(1);
     expect(files[0].fileName).toBe("sales_001_Summary.md");
-    expect(rawFiles[0].fileName).toBe("sales_001_Summary_raw.md");
-    expect(bothFiles[0].fileName).toBe("sales_001_Summary_both.md");
+    expect(rawFiles[0].fileName).toBe("sales_001_Summary.md");
+    expect(bothFiles[0].fileName).toBe("sales_001_Summary.md");
     expect(files[0].markdown).toContain("## Sheet: Summary");
     expect(files[0].markdown).toContain("# Book: sales.xlsx");
     expect(files[0].markdown).toContain("Overview text");

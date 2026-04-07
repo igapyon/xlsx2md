@@ -447,21 +447,17 @@
         }
     }
     function downloadExportZip() {
-        var _a, _b;
         try {
             if (!currentWorkbook || currentFiles.length === 0) {
                 showError("Generate Markdown first.");
                 return;
             }
             const zipBytes = xlsx2md.createWorkbookExportArchive(currentWorkbook, currentFiles, getEncodingOptions());
-            const outputMode = ((_a = currentFiles[0]) === null || _a === void 0 ? void 0 : _a.summary.outputMode) || "display";
-            const formattingMode = ((_b = currentFiles[0]) === null || _b === void 0 ? void 0 : _b.summary.formattingMode) || "plain";
-            const suffix = `${outputMode === "display" ? "" : `_${outputMode}`}${formattingMode === "plain" ? "" : `_${formattingMode}`}`;
             const blob = new Blob([zipBytes], { type: "application/zip" });
             const objectUrl = URL.createObjectURL(blob);
             const link = document.createElement("a");
             link.href = objectUrl;
-            link.download = `${currentWorkbook.name.replace(/\.xlsx$/i, "")}_xlsx2md_export${suffix}.zip`;
+            link.download = `${currentWorkbook.name.replace(/\.xlsx$/i, "")}.zip`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
