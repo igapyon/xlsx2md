@@ -91,15 +91,18 @@
 
 - `sales.xlsx`
 
-出力:
+シート単位 Markdown の内部的な出力名の例:
 
 - `sales_001_Summary.md`
 - `sales_002_Detail.md`
 
-`raw` / `both` モード時の出力例:
+連結 Markdown の既定保存名の例:
 
-- `sales_001_Summary_raw.md`
-- `sales_001_Summary_both.md`
+- `sales.md`
+
+ZIP の既定保存名の例:
+
+- `sales.zip`
 
 ### 4.3 出力ディレクトリ構成
 
@@ -121,14 +124,38 @@ output/
 
 ### 4.4 ファイル命名
 
-- Markdown ファイル名には Workbook 名、シート順、シート名を利用する
+- ファイル名は「既定保存名」と「内部的な sheet 単位名」を分けて整理する
+- 既定保存名は、UI と CLI をまたいで安定したパスとして扱いやすいことを優先する
+- `outputMode` や `formattingMode` の違いは、原則として既定保存名へ焼き込まない
+- mode 差分は Markdown 本文、summary、CLI 引数、画面設定で識別できればよい
+
+既定保存名:
+
+- 連結 Markdown の既定保存名は `<workbook>.md` とする
+- ZIP の既定保存名は `<workbook>.zip` とする
+- `display` / `raw` / `both` および `plain` / `github` の違いによって `_raw` / `_both` / `_github` などの suffix は付けない
+- ブラウザ UI の保存では、この既定保存名を用いる
+- CLI でも `--out` 未指定時の Markdown 保存名には、この既定保存名を用いてよい
+
+明示指定時の扱い:
+
+- CLI で `--out <file>` が指定された場合は、そのパスを優先する
+- CLI で `--zip <file>` が指定された場合は、そのパスを優先する
+- 明示指定された出力パスに対して、mode 名 suffix を自動付与しない
+
+内部的な sheet 単位名:
+
+- sheet 単位 Markdown には Workbook 名、シート順、シート名を利用してよい
 - シート順は Workbook 内の物理順序に従う
-- シート名にファイル名として不適切な文字が含まれる場合はサニタイズする
+- 形式は `<workbook>_<sheetIndex3桁>_<sheet>.md` を基本としてよい
+- これは主に内部管理、summary、将来の分割出力拡張、テスト上の識別子として利用してよい
+- 内部的な sheet 単位名にも、原則として mode suffix は付けない方針とする
+
+サニタイズ:
+
+- Workbook 名や sheet 名にファイル名として不適切な文字が含まれる場合はサニタイズする
 - サニタイズ時は、ファイルシステム上で不安定な記号、空白、連続区切りを整理して保存名へ反映してよい
 - 例: シート名 `A B-東京&大阪.01` は、保存名で `A_B-東京_大阪.01` のように変換してよい
-- 出力モードが `display` 以外の場合、Markdown 保存名には `_raw` または `_both` のサフィックスを付与してよい
-- 全シート連結保存や ZIP 保存でも、`display` 以外のモードでは同様にモード名サフィックスを付与してよい
-- 連結 Markdown 保存名は `workbook.md` を基本とし、モード付きでは `workbook_raw.md` や `workbook_both.md` としてよい
 
 ### 4.5 Markdown 出力エンコーディング
 

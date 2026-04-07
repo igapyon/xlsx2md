@@ -568,14 +568,11 @@
         return;
       }
       const zipBytes = xlsx2md.createWorkbookExportArchive(currentWorkbook, currentFiles, getEncodingOptions());
-      const outputMode = currentFiles[0]?.summary.outputMode || "display";
-      const formattingMode = currentFiles[0]?.summary.formattingMode || "plain";
-      const suffix = `${outputMode === "display" ? "" : `_${outputMode}`}${formattingMode === "plain" ? "" : `_${formattingMode}`}`;
       const blob = new Blob([zipBytes], { type: "application/zip" });
       const objectUrl = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = objectUrl;
-      link.download = `${currentWorkbook.name.replace(/\.xlsx$/i, "")}_xlsx2md_export${suffix}.zip`;
+      link.download = `${currentWorkbook.name.replace(/\.xlsx$/i, "")}.zip`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
