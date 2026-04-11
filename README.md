@@ -65,6 +65,8 @@
 4. Optionally choose output encoding and BOM settings
 5. Save the result as Markdown or ZIP
 
+Default save names are `workbook.md` for Markdown and `workbook.zip` for ZIP, based on the input workbook file name.
+
 ### Node CLI
 
 You can also run the conversion in batch mode from Node.js.
@@ -254,6 +256,8 @@ The generated Markdown can then be previewed as a readable document.
 3. 読み込み後、自動で全シートの Markdown が生成される
 4. 必要に応じて出力エンコーディングと BOM を選ぶ
 5. Markdown または ZIP を保存する
+
+既定の保存名は、入力 Workbook のファイル名をもとにした `workbook.md` と `workbook.zip` です。
 
 ### Node CLI
 

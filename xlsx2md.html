@@ -5506,8 +5506,9 @@ if (!customElements.get("lht-page-menu")) {
     function createOutputFileName(workbookName, sheetIndex, sheetName, outputMode = "display", formattingMode = "plain") {
         const bookBase = sanitizeFileNameSegment(workbookName.replace(/\.xlsx$/i, ""), "workbook");
         const safeSheetName = sanitizeFileNameSegment(sheetName, `Sheet${sheetIndex}`);
-        const suffix = `${outputMode === "display" ? "" : `_${outputMode}`}${formattingMode === "plain" ? "" : `_${formattingMode}`}`;
-        return `${bookBase}_${String(sheetIndex).padStart(3, "0")}_${safeSheetName}${suffix}.md`;
+        void outputMode;
+        void formattingMode;
+        return `${bookBase}_${String(sheetIndex).padStart(3, "0")}_${safeSheetName}.md`;
     }
     function createSummaryText(markdownFile) {
         const resolvedCount = markdownFile.summary.formulaDiagnostics.filter((item) => item.status === "resolved").length;
@@ -5532,11 +5533,7 @@ if (!customElements.get("lht-page-menu")) {
         ].join("\n");
     }
     function createCombinedMarkdownExportFile(workbook, markdownFiles) {
-        var _a, _b;
-        const outputMode = ((_a = markdownFiles[0]) === null || _a === void 0 ? void 0 : _a.summary.outputMode) || "display";
-        const formattingMode = ((_b = markdownFiles[0]) === null || _b === void 0 ? void 0 : _b.summary.formattingMode) || "plain";
-        const suffix = `${outputMode === "display" ? "" : `_${outputMode}`}${formattingMode === "plain" ? "" : `_${formattingMode}`}`;
-        const fileName = `${String(workbook.name || "workbook").replace(/\.xlsx$/i, "")}${suffix}.md`;
+        const fileName = `${String(workbook.name || "workbook").replace(/\.xlsx$/i, "")}.md`;
         const bookHeading = `# Book: ${String(workbook.name || "workbook.xlsx")}`;
         const content = [
             bookHeading,
@@ -12380,21 +12377,17 @@ if (!customElements.get("lht-page-menu")) {
         }
     }
     function downloadExportZip() {
-        var _a, _b;
         try {
             if (!currentWorkbook || currentFiles.length === 0) {
                 showError("Generate Markdown first.");
                 return;
             }
             const zipBytes = xlsx2md.createWorkbookExportArchive(currentWorkbook, currentFiles, getEncodingOptions());
-            const outputMode = ((_a = currentFiles[0]) === null || _a === void 0 ? void 0 : _a.summary.outputMode) || "display";
-            const formattingMode = ((_b = currentFiles[0]) === null || _b === void 0 ? void 0 : _b.summary.formattingMode) || "plain";
-            const suffix = `${outputMode === "display" ? "" : `_${outputMode}`}${formattingMode === "plain" ? "" : `_${formattingMode}`}`;
             const blob = new Blob([zipBytes], { type: "application/zip" });
             const objectUrl = URL.createObjectURL(blob);
             const link = document.createElement("a");
             link.href = objectUrl;
-            link.download = `${currentWorkbook.name.replace(/\.xlsx$/i, "")}_xlsx2md_export${suffix}.zip`;
+            link.download = `${currentWorkbook.name.replace(/\.xlsx$/i, "")}.zip`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);

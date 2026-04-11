@@ -105,14 +105,14 @@ describe("xlsx2md markdown export", () => {
     expect(api.escapeMarkdownCell("a\tb | c")).toBe("a b \\| c");
   });
 
-  it("creates sanitized output file names with mode suffixes", () => {
+  it("creates sanitized output file names without mode suffixes", () => {
     const api = bootMarkdownExport();
 
     expect(api.createOutputFileName("book name.xlsx", 2, "A/B:東京", "both")).toBe(
-      "book_name_002_A_B_東京_both.md"
+      "book_name_002_A_B_東京.md"
     );
     expect(api.createOutputFileName("book name.xlsx", 2, "A/B:東京", "display", "github")).toBe(
-      "book_name_002_A_B_東京_github.md"
+      "book_name_002_A_B_東京.md"
     );
   });
 
@@ -274,12 +274,12 @@ describe("xlsx2md markdown export", () => {
     expect(payload.content.match(/^# Book: /gm)).toHaveLength(1);
   });
 
-  it("uses formatting mode suffixes in combined export file names", () => {
+  it("keeps combined export file names stable across modes", () => {
     const api = bootMarkdownExport();
     const payload = api.createCombinedMarkdownExportFile(
       { name: "sample.xlsx", sheets: [{ images: [], shapes: [] }] },
       [{
-        fileName: "sample_001_Sheet1_github.md",
+        fileName: "sample_001_Sheet1.md",
         sheetName: "Sheet1",
         markdown: "# Book: sample.xlsx\n\n## Sheet: Sheet1",
         summary: {
@@ -299,7 +299,7 @@ describe("xlsx2md markdown export", () => {
       }]
     );
 
-    expect(payload.fileName).toBe("sample_github.md");
+    expect(payload.fileName).toBe("sample.md");
     expect(payload.content).toBe("# Book: sample.xlsx\n\n## Sheet: Sheet1");
   });
 });
