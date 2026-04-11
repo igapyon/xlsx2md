@@ -2,6 +2,10 @@
 
 ![Mikuku's xlsx2md OGP](docs/screenshots/xlsx2md-ogp.png)
 
+> Notice
+> This app has been renamed to `miku-xlsx2md`, and the repository has moved to <https://github.com/igapyon/miku-xlsx2md>.
+> Please refer to the moved repository in principle.
+
 ## What is this?
 
 `Mikuku's xlsx2md` is a single-file web app that reads Excel (`.xlsx`) files locally and extracts prose, tables, and images as Markdown.
