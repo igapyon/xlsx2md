@@ -1,5 +1,9 @@
 # xlsx2md Implementation Specification
 
+> Note
+> This app has been renamed to `miku-xlsx2md`, and the repository has moved to <https://github.com/igapyon/miku-xlsx2md>.
+> In principle, refer to the moved repository.
+
 ## 1. 文書の位置づけ
 
 この文書は、`xlsx2md` の現行実装が実際にどのように動作するかを整理するための実装仕様書である。

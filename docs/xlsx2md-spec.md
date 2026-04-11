@@ -1,5 +1,9 @@
 # xlsx2md 仕様
 
+> 補足
+> このアプリは `miku-xlsx2md` に名称変更され、リポジトリは <https://github.com/igapyon/miku-xlsx2md> に移動した。
+> 原則として、参照先は移転先リポジトリとする。
+
 ## 1. 文書概要
 
 `xlsx2md` は、Excel 形式の設計書ファイル (`.xlsx`) を解析し、シート単位の Markdown 文書へ変換するツールである。

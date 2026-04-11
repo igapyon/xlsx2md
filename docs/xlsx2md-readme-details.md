@@ -1,5 +1,9 @@
 # xlsx2md README 詳細
 
+> 補足
+> このアプリは `miku-xlsx2md` に名称変更され、リポジトリは <https://github.com/igapyon/miku-xlsx2md> に移動した。
+> 原則として、参照先は移転先リポジトリとする。
+
 文書の役割は段階的に分かれています。
 
 - `README.md`
